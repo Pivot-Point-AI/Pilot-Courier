@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, ArrowRight, Loader2, Calculator } from 'lucide-react';
+import { shipmentApi } from '@/lib/api';
 
 export default function QuoteForm() {
   const router = useRouter();
@@ -39,6 +40,18 @@ export default function QuoteForm() {
     }
     setLoading(true);
     try {
+      const res = await shipmentApi.getRates({
+        originPostal: form.originPostal,
+        destinationPostal: form.destinationPostal,
+        weight: parseFloat(form.weight),
+        weightUnit: form.weightUnit as 'kg' | 'lbs',
+        length: parseFloat(form.length),
+        width: parseFloat(form.width),
+        height: parseFloat(form.height),
+        shipmentType: form.shipmentType as 'domestic' | 'international',
+      });
+      sessionStorage.setItem('pc_rates', JSON.stringify(res.data.rates));
+      sessionStorage.setItem('pc_quote_form', JSON.stringify(form));
       router.push('/quote/results');
     } catch {
       alert('Failed to fetch rates. Please try again.');

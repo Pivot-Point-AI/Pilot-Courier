@@ -8,7 +8,6 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-// Attach auth token from localStorage
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('pc_token');
@@ -17,7 +16,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 - clear token
 api.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -29,15 +27,28 @@ api.interceptors.response.use(
   }
 );
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────────────────────
 export const authApi = {
   register: (data: { firstName: string; lastName: string; email: string; phone: string; password: string }) =>
     api.post('/auth/register', data),
-  login: (data: { email: string; password: string }) =>
-    api.post('/auth/login', data),
+  login: (data: { email: string; password: string }) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
   updateProfile: (data: any) => api.patch('/auth/profile', data),
+  updateFullProfile: (data: any) => api.patch('/auth/profile/full', data),
+  // Addresses
   addAddress: (data: any) => api.post('/auth/addresses', data),
+  deleteAddress: (addressId: string) => api.delete(`/auth/addresses/${addressId}`),
+  // Packages
+  getPackages: () => api.get('/auth/packages'),
+  addPackage: (data: any) => api.post('/auth/packages', data),
+  deletePackage: (packageId: string) => api.delete(`/auth/packages/${packageId}`),
+  // Products
+  getProducts: () => api.get('/auth/products'),
+  addProduct: (data: any) => api.post('/auth/products', data),
+  deleteProduct: (productId: string) => api.delete(`/auth/products/${productId}`),
+  // Tickets
+  getTickets: () => api.get('/auth/tickets'),
+  createTicket: (data: any) => api.post('/auth/tickets', data),
 };
 
 // ── Shipments ─────────────────────────────────────────────────────────────────
@@ -48,16 +59,15 @@ export const shipmentApi = {
     api.post(`/shipments/${id}/confirm-payment`, data),
   track: (trackingNumber: string) => api.get(`/shipments/track/${trackingNumber}`),
   cancel: (id: string, reason: string) => api.post(`/shipments/${id}/cancel`, { reason }),
-  getMyShipments: (params?: { page?: number; limit?: number; status?: string }) =>
+  getMyShipments: (params?: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string }) =>
     api.get('/shipments/my', { params }),
+  downloadLabel: (id: string) => api.get(`/shipments/${id}/label`),
 };
 
 // ── Payments ──────────────────────────────────────────────────────────────────
 export const paymentApi = {
-  createStripeIntent: (shipmentId: string) =>
-    api.post('/payments/stripe/intent', { shipmentId }),
-  createPayPalOrder: (shipmentId: string) =>
-    api.post('/payments/paypal/order', { shipmentId }),
+  createStripeIntent: (shipmentId: string) => api.post('/payments/stripe/intent', { shipmentId }),
+  createPayPalOrder: (shipmentId: string) => api.post('/payments/paypal/order', { shipmentId }),
   capturePayPalOrder: (orderId: string, shipmentId: string) =>
     api.post('/payments/paypal/capture', { orderId, shipmentId }),
 };
@@ -83,6 +93,8 @@ export interface QuoteFormData {
   destinationProvince?: string;
   originCountry?: string;
   destinationCountry?: string;
+  originResidential?: boolean;
+  destinationResidential?: boolean;
   weight: number;
   weightUnit?: 'kg' | 'lbs';
   length: number;
@@ -90,6 +102,9 @@ export interface QuoteFormData {
   height: number;
   dimensionUnit?: 'cm' | 'in';
   shipmentType?: 'domestic' | 'international';
+  description?: string;
+  insuranceAmount?: number;
+  specialHandling?: boolean;
 }
 
 export interface Rate {
@@ -110,10 +125,12 @@ export interface Address {
   name: string;
   company?: string;
   street: string;
+  street2?: string;
   city: string;
   province: string;
   postalCode: string;
   country: string;
   phone: string;
   email?: string;
+  isResidential?: boolean;
 }

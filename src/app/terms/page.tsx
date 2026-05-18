@@ -2,68 +2,148 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Terms of Use' };
+export const metadata: Metadata = { title: 'Terms & Conditions — Pilot Courier Canada' };
+
+const sections = [
+  {
+    n: 1,
+    title: 'Carrier Terms & Conditions',
+    body: 'All shipments processed through Pilot Courier Canada are subjected and conditions of the assigned Customer terms and conditions prior. Customs are reviewed to the relevant panicies prior to booking.',
+    highlight: null,
+  },
+  {
+    n: 2,
+    title: 'Delivery Timeframes',
+    body: 'We operate on a "day-deffinity" or time-definite policy delivery timeframe where an ',
+    highlight: 'force delivery conditions',
+    bodyAfter: ' depends on the services level and vary vary factors beyond controll, but not still unformed coditons, processing, cerner delays, sesional ronir or other unforewwers. Pilot Courier Canada assumes for delays arising from each factors.',
+  },
+  {
+    n: 3,
+    title: 'Packaging & Labeling Responsibility',
+    body: 'The shipper is enably responsible for ensuring that all shipments accurately that sillments accuratuly labeled and adequately packaged for oanrirements and applicable packaging. Pilot Courier Canada hart lable for damage or damage or resulting from improper packaging or leatting.',
+    highlight: null,
+  },
+  {
+    n: 4,
+    title: 'Right to Refuse Service',
+    body: 'Pilot Courier Canada ceevres the right to refoerse, or cancel at at adequately and mmivirize an arts its discretion, including to limited silgments, pobrichted, or hazardous tems, in any circumconce devament to warrant refarant.',
+    highlight: null,
+  },
+  {
+    n: 5,
+    title: 'Payment Terms',
+    body: 'Unless offiesse communicated in writing by ourice, ',
+    highlight: 'full payment',
+    bodyAfter: ' hor the processing of the team. Pilot Courier Canada aaserves are resert to hold owners pending recept of any payment.',
+  },
+  {
+    n: 6,
+    title: 'Customs Duties & Import',
+    body: 'Customs durtiers, tastes, import ports, or relatived relaivament charget charges imperce e.cam as as the sole rresonsability of the consigner. Applicable Counter Canada Canada does not assrum an charger libility of your circumstances.',
+    highlight: null,
+  },
+  {
+    n: 7,
+    title: 'Weight Discrepancies & Carrier Charges',
+    body: 'Any additional charges arians from weight reported by the carrier, any additional are iuested by the carrier, or any other shipment related orsinges asssing, remain responsibility of the slreper acnersions in this regard, verified poot of settlement will be required the matter formally on our end.',
+    highlight: null,
+  },
+  {
+    n: 8,
+    title: 'Contact & Support',
+    body: 'By mmwiesing PilotCourier f Cannrier Canada.\n\nFor Inquiries, concerns, or assistance, contact our team at ',
+    highlight: 'support@pilotcourier.com',
+    isEmail: true,
+    bodyAfter: '',
+  },
+];
+
+// Topographic lines SVG background
+function TopoBackground() {
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 900 800"
+      preserveAspectRatio="xMidYMid slice"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {Array.from({ length: 14 }, (_, i) => (
+        <path
+          key={i}
+          d={`M-100,${60 + i * 55} C150,${20 + i * 55} 300,${100 + i * 55} 500,${50 + i * 55} S750,${10 + i * 55} 1000,${60 + i * 55} S1150,${100 + i * 55} 1300,${50 + i * 55}`}
+          fill="none"
+          stroke="#d97706"
+          strokeWidth="1"
+          opacity={0.12}
+        />
+      ))}
+      {/* Right side curves */}
+      {Array.from({ length: 8 }, (_, i) => (
+        <path
+          key={`r${i}`}
+          d={`M700,${-50 + i * 80} C750,${10 + i * 80} 800,${-20 + i * 80} 900,${30 + i * 80}`}
+          fill="none"
+          stroke="#d97706"
+          strokeWidth="1"
+          opacity={0.1}
+        />
+      ))}
+    </svg>
+  );
+}
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: '#fdf6ee' }}>
       <Navbar />
-      <div className="bg-hero-gradient pt-28 pb-16 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="font-display font-800 text-4xl text-white">Terms of Use</h1>
-          <p className="text-white/60 mt-2 text-sm">Last updated: January 1, 2024</p>
+
+      {/* Header */}
+      <div className="bg-hero-gradient pt-28 pb-14 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <span className="text-brand-orange text-xs font-bold tracking-widest uppercase mb-3 block">LEGAL</span>
+          <h1 className="font-display font-800 text-4xl text-white">Terms & Conditions</h1>
+          <p className="text-white/60 mt-2 text-sm">Pilot Courier Canada</p>
+          <p className="text-white/70 text-sm leading-relaxed mt-4 max-w-lg mx-auto">
+            By accessing or using Pilot Courier Canada&apos;s services, you acknowledge
+            that you have read, understand, and agree to be bowed by the following
+            terms and conditions.
+          </p>
         </div>
       </div>
-      <div className="max-w-3xl mx-auto px-4 py-16">
-        <div className="prose prose-gray max-w-none space-y-8">
-          {[
-            {
-              title: '1. Acceptance of Terms',
-              content: 'By accessing or using the Pilot Courier platform ("Service"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the Service.'
-            },
-            {
-              title: '2. Services Description',
-              content: 'Pilot Courier is a courier aggregator platform that enables users to compare shipping rates, book shipments, generate labels, and track packages across multiple carrier partners including UPS, FedEx, DHL, and Purolator.'
-            },
-            {
-              title: '3. Cancellation & Refund Policy',
-              content: 'A full refund will apply if the shipment is cancelled on the same day it was created and the shipping documents have not been used. After a lapse of 24 hours or once the shipment has been picked up or dropped off, a written request to support@pilotcourier.com will be required to process a refund. If a shipment is cancelled upon or after arrival of the driver for pickup, a $25.00 CAD fee will be deducted to cover transportation expenses.'
-            },
-            {
-              title: '4. User Responsibilities',
-              content: 'Users are responsible for providing accurate shipment information including addresses, weights, and dimensions. Inaccurate information may result in additional charges from carriers. Users must comply with all applicable laws regarding prohibited and restricted items.'
-            },
-            {
-              title: '5. Payment Terms',
-              content: 'All payments are processed securely via our payment partners (Stripe, PayPal). Pilot Courier does not store your payment card information. Prices are displayed in Canadian Dollars (CAD) unless otherwise indicated.'
-            },
-            {
-              title: '6. Liability',
-              content: 'Pilot Courier acts as an intermediary between users and carriers. We are not liable for carrier delays, lost shipments, or damages beyond the declared value. Claims must be submitted within 30 days of the expected delivery date.'
-            },
-            {
-              title: '7. Privacy',
-              content: 'Your use of the Service is also governed by our Privacy Policy. By using the Service, you consent to the collection and use of your information as outlined in the Privacy Policy.'
-            },
-            {
-              title: '8. Modifications',
-              content: 'Pilot Courier reserves the right to modify these Terms at any time. Changes will be effective upon posting to the website. Continued use of the Service constitutes acceptance of modified terms.'
-            },
-          ].map(({ title, content }) => (
-            <div key={title}>
-              <h2 className="font-display font-700 text-xl text-brand-navy mb-3">{title}</h2>
-              <p className="text-gray-600 leading-relaxed">{content}</p>
+
+      {/* 2-column cards grid */}
+      <div className="relative overflow-hidden px-4 pb-20 pt-4" style={{ backgroundColor: '#fdf6ee' }}>
+        <TopoBackground />
+        <div className="relative max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {sections.map(({ n, title, body, highlight, isEmail, bodyAfter }) => (
+            <div
+              key={n}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-orange-100/60"
+            >
+              {/* Number + Title */}
+              <h2 className="font-display font-700 text-brand-navy text-base mb-3">
+                {n}. {title}
+              </h2>
+
+              {/* Body */}
+              <p className="text-gray-500 text-xs leading-relaxed">
+                {body}
+                {highlight && !isEmail && (
+                  <span className="text-brand-orange underline cursor-pointer">{highlight}</span>
+                )}
+                {highlight && isEmail && (
+                  <a href={`mailto:${highlight}`} className="text-brand-orange underline">
+                    {highlight}
+                  </a>
+                )}
+                {bodyAfter && bodyAfter}
+              </p>
             </div>
           ))}
-
-          <div className="border-t border-gray-100 pt-6">
-            <p className="text-gray-500 text-sm">
-              Questions about these Terms? Contact us at{' '}
-              <a href="mailto:legal@pilotcourier.com" className="text-brand-orange hover:underline">legal@pilotcourier.com</a>.
-            </p>
-          </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );

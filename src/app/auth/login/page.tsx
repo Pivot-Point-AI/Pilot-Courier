@@ -1,13 +1,14 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { Package, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isLoading } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
@@ -17,7 +18,9 @@ export default function LoginPage() {
     try {
       await login(form.email, form.password);
       toast.success('Welcome back!');
-      router.push('/');
+      const next = searchParams.get('next') || sessionStorage.getItem('pc_redirect_after_login') || '/';
+      sessionStorage.removeItem('pc_redirect_after_login');
+      router.push(next);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Login failed. Please check your credentials.');
     }
@@ -79,7 +82,13 @@ export default function LoginPage() {
 
           <div className="mb-8">
             <h1 className="font-display font-800 text-2xl text-brand-navy mb-1">Welcome back</h1>
-            <p className="text-gray-500 text-sm">Sign in to your account to continue.</p>
+            {searchParams.get('next') === '/booking' ? (
+              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+                Please sign in to complete your booking.
+              </p>
+            ) : (
+              <p className="text-gray-500 text-sm">Sign in to your account to continue.</p>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -119,7 +128,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
               Don't have an account?{' '}
-              <Link href="/auth/register" className="text-brand-orange font-semibold hover:underline">
+              <Link href={`/auth/register${searchParams.get('next') ? `?next=${searchParams.get('next')}` : ''}`} className="text-brand-orange font-semibold hover:underline">
                 Create one free
               </Link>
             </p>

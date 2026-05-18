@@ -1,13 +1,14 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { Package, Eye, EyeOff, Loader2, ArrowRight, ExternalLink } from 'lucide-react';
+import { Package, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, isLoading } = useAuthStore();
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', password: '', confirmPassword: '',
@@ -33,7 +34,9 @@ export default function RegisterPage() {
     try {
       await register({ firstName: form.firstName, lastName: form.lastName, email: form.email, phone: form.phone, password: form.password });
       toast.success('Account created! Welcome to Pilot Courier.');
-      router.push('/');
+      const next = searchParams.get('next') || sessionStorage.getItem('pc_redirect_after_login') || '/';
+      sessionStorage.removeItem('pc_redirect_after_login');
+      router.push(next);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Registration failed. Please try again.');
     }
@@ -73,17 +76,6 @@ export default function RegisterPage() {
             <p className="text-gray-500 text-sm">Free forever. No credit card required.</p>
           </div>
 
-          {/* NetParcel Sign-up note */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-6 flex items-start gap-2">
-            <Package className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-blue-700">
-              Pilot Courier uses NetParcel for carrier integrations. You may also{' '}
-              <a href="https://ship.netparcel.com/sign-up.action" target="_blank" rel="noopener noreferrer" className="font-semibold underline inline-flex items-center gap-0.5">
-                register on NetParcel <ExternalLink className="w-3 h-3" />
-              </a>{' '}
-              directly for additional features.
-            </p>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -136,7 +128,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
               Already have an account?{' '}
-              <Link href="/auth/login" className="text-brand-orange font-semibold hover:underline">Sign in</Link>
+              <Link href={`/auth/login${searchParams.get('next') ? `?next=${searchParams.get('next')}` : ''}`} className="text-brand-orange font-semibold hover:underline">Sign in</Link>
             </p>
           </div>
         </div>
