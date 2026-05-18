@@ -237,7 +237,16 @@ function PublicNavbar() {
 }
 
 // ── Main export: auto-switches based on auth ──────────────────────────────────
+// Uses a mounted guard so server and client render the same thing initially,
+// avoiding the React hydration mismatch caused by localStorage-dependent auth state.
 export default function Navbar() {
+  const [mounted, setMounted] = useState(false);
   const { isAuthenticated } = useAuthStore();
+
+  useEffect(() => { setMounted(true); }, []);
+
+  // Before mount, always render the public nav (matches server render)
+  if (!mounted) return <PublicNavbar />;
+
   return isAuthenticated ? <AuthNavbar /> : <PublicNavbar />;
 }
