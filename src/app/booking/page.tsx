@@ -13,7 +13,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pilot-courier-ackend.vercel.app/api';
 
 // ─── Country list ─────────────────────────────────────────────────────────────
 const ALL_COUNTRIES = [
