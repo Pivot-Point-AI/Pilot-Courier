@@ -1,13 +1,267 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { shipmentApi } from '@/lib/api';
+import { shipmentApi, paymentApi } from '@/lib/api';
 import type { Rate, Address } from '@/lib/api';
-import { Loader2, CheckCircle2, ArrowLeftRight, Plus, Copy, Trash2, Download, ArrowRight } from 'lucide-react';
+import { Loader2, CheckCircle2, ArrowLeftRight, Plus, Copy, Trash2, Download, ArrowRight, ChevronDown, Search, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/lib/store';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// ─── Country list ─────────────────────────────────────────────────────────────
+const ALL_COUNTRIES = [
+  { code: 'AF', name: 'Afghanistan' }, { code: 'AL', name: 'Albania' },
+  { code: 'DZ', name: 'Algeria' }, { code: 'AD', name: 'Andorra' },
+  { code: 'AO', name: 'Angola' }, { code: 'AG', name: 'Antigua and Barbuda' },
+  { code: 'AR', name: 'Argentina' }, { code: 'AM', name: 'Armenia' },
+  { code: 'AU', name: 'Australia' }, { code: 'AT', name: 'Austria' },
+  { code: 'AZ', name: 'Azerbaijan' }, { code: 'BS', name: 'Bahamas' },
+  { code: 'BH', name: 'Bahrain' }, { code: 'BD', name: 'Bangladesh' },
+  { code: 'BB', name: 'Barbados' }, { code: 'BY', name: 'Belarus' },
+  { code: 'BE', name: 'Belgium' }, { code: 'BZ', name: 'Belize' },
+  { code: 'BJ', name: 'Benin' }, { code: 'BT', name: 'Bhutan' },
+  { code: 'BO', name: 'Bolivia' }, { code: 'BA', name: 'Bosnia and Herzegovina' },
+  { code: 'BW', name: 'Botswana' }, { code: 'BR', name: 'Brazil' },
+  { code: 'BN', name: 'Brunei' }, { code: 'BG', name: 'Bulgaria' },
+  { code: 'BF', name: 'Burkina Faso' }, { code: 'BI', name: 'Burundi' },
+  { code: 'CV', name: 'Cabo Verde' }, { code: 'KH', name: 'Cambodia' },
+  { code: 'CM', name: 'Cameroon' }, { code: 'CA', name: 'Canada' },
+  { code: 'CF', name: 'Central African Republic' }, { code: 'TD', name: 'Chad' },
+  { code: 'CL', name: 'Chile' }, { code: 'CN', name: 'China' },
+  { code: 'CO', name: 'Colombia' }, { code: 'KM', name: 'Comoros' },
+  { code: 'CG', name: 'Congo' }, { code: 'CD', name: 'Congo (DRC)' },
+  { code: 'CR', name: 'Costa Rica' }, { code: 'HR', name: 'Croatia' },
+  { code: 'CU', name: 'Cuba' }, { code: 'CY', name: 'Cyprus' },
+  { code: 'CZ', name: 'Czech Republic' }, { code: 'DK', name: 'Denmark' },
+  { code: 'DJ', name: 'Djibouti' }, { code: 'DM', name: 'Dominica' },
+  { code: 'DO', name: 'Dominican Republic' }, { code: 'EC', name: 'Ecuador' },
+  { code: 'EG', name: 'Egypt' }, { code: 'SV', name: 'El Salvador' },
+  { code: 'GQ', name: 'Equatorial Guinea' }, { code: 'ER', name: 'Eritrea' },
+  { code: 'EE', name: 'Estonia' }, { code: 'SZ', name: 'Eswatini' },
+  { code: 'ET', name: 'Ethiopia' }, { code: 'FJ', name: 'Fiji' },
+  { code: 'FI', name: 'Finland' }, { code: 'FR', name: 'France' },
+  { code: 'GA', name: 'Gabon' }, { code: 'GM', name: 'Gambia' },
+  { code: 'GE', name: 'Georgia' }, { code: 'DE', name: 'Germany' },
+  { code: 'GH', name: 'Ghana' }, { code: 'GR', name: 'Greece' },
+  { code: 'GD', name: 'Grenada' }, { code: 'GT', name: 'Guatemala' },
+  { code: 'GN', name: 'Guinea' }, { code: 'GW', name: 'Guinea-Bissau' },
+  { code: 'GY', name: 'Guyana' }, { code: 'HT', name: 'Haiti' },
+  { code: 'HN', name: 'Honduras' }, { code: 'HK', name: 'Hong Kong' },
+  { code: 'HU', name: 'Hungary' }, { code: 'IS', name: 'Iceland' },
+  { code: 'IN', name: 'India' }, { code: 'ID', name: 'Indonesia' },
+  { code: 'IR', name: 'Iran' }, { code: 'IQ', name: 'Iraq' },
+  { code: 'IE', name: 'Ireland' }, { code: 'IL', name: 'Israel' },
+  { code: 'IT', name: 'Italy' }, { code: 'JM', name: 'Jamaica' },
+  { code: 'JP', name: 'Japan' }, { code: 'JO', name: 'Jordan' },
+  { code: 'KZ', name: 'Kazakhstan' }, { code: 'KE', name: 'Kenya' },
+  { code: 'KI', name: 'Kiribati' }, { code: 'KW', name: 'Kuwait' },
+  { code: 'KG', name: 'Kyrgyzstan' }, { code: 'LA', name: 'Laos' },
+  { code: 'LV', name: 'Latvia' }, { code: 'LB', name: 'Lebanon' },
+  { code: 'LS', name: 'Lesotho' }, { code: 'LR', name: 'Liberia' },
+  { code: 'LY', name: 'Libya' }, { code: 'LI', name: 'Liechtenstein' },
+  { code: 'LT', name: 'Lithuania' }, { code: 'LU', name: 'Luxembourg' },
+  { code: 'MG', name: 'Madagascar' }, { code: 'MW', name: 'Malawi' },
+  { code: 'MY', name: 'Malaysia' }, { code: 'MV', name: 'Maldives' },
+  { code: 'ML', name: 'Mali' }, { code: 'MT', name: 'Malta' },
+  { code: 'MH', name: 'Marshall Islands' }, { code: 'MR', name: 'Mauritania' },
+  { code: 'MU', name: 'Mauritius' }, { code: 'MX', name: 'Mexico' },
+  { code: 'FM', name: 'Micronesia' }, { code: 'MD', name: 'Moldova' },
+  { code: 'MC', name: 'Monaco' }, { code: 'MN', name: 'Mongolia' },
+  { code: 'ME', name: 'Montenegro' }, { code: 'MA', name: 'Morocco' },
+  { code: 'MZ', name: 'Mozambique' }, { code: 'MM', name: 'Myanmar' },
+  { code: 'NA', name: 'Namibia' }, { code: 'NR', name: 'Nauru' },
+  { code: 'NP', name: 'Nepal' }, { code: 'NL', name: 'Netherlands' },
+  { code: 'NZ', name: 'New Zealand' }, { code: 'NI', name: 'Nicaragua' },
+  { code: 'NE', name: 'Niger' }, { code: 'NG', name: 'Nigeria' },
+  { code: 'NO', name: 'Norway' }, { code: 'OM', name: 'Oman' },
+  { code: 'PK', name: 'Pakistan' }, { code: 'PW', name: 'Palau' },
+  { code: 'PA', name: 'Panama' }, { code: 'PG', name: 'Papua New Guinea' },
+  { code: 'PY', name: 'Paraguay' }, { code: 'PE', name: 'Peru' },
+  { code: 'PH', name: 'Philippines' }, { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' }, { code: 'QA', name: 'Qatar' },
+  { code: 'RO', name: 'Romania' }, { code: 'RU', name: 'Russia' },
+  { code: 'RW', name: 'Rwanda' }, { code: 'KN', name: 'Saint Kitts and Nevis' },
+  { code: 'LC', name: 'Saint Lucia' }, { code: 'VC', name: 'Saint Vincent and the Grenadines' },
+  { code: 'WS', name: 'Samoa' }, { code: 'SM', name: 'San Marino' },
+  { code: 'ST', name: 'Sao Tome and Principe' }, { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'SN', name: 'Senegal' }, { code: 'RS', name: 'Serbia' },
+  { code: 'SC', name: 'Seychelles' }, { code: 'SL', name: 'Sierra Leone' },
+  { code: 'SG', name: 'Singapore' }, { code: 'SK', name: 'Slovakia' },
+  { code: 'SI', name: 'Slovenia' }, { code: 'SB', name: 'Solomon Islands' },
+  { code: 'SO', name: 'Somalia' }, { code: 'ZA', name: 'South Africa' },
+  { code: 'SS', name: 'South Sudan' }, { code: 'ES', name: 'Spain' },
+  { code: 'LK', name: 'Sri Lanka' }, { code: 'SD', name: 'Sudan' },
+  { code: 'SR', name: 'Suriname' }, { code: 'SE', name: 'Sweden' },
+  { code: 'CH', name: 'Switzerland' }, { code: 'SY', name: 'Syria' },
+  { code: 'TW', name: 'Taiwan' }, { code: 'TJ', name: 'Tajikistan' },
+  { code: 'TZ', name: 'Tanzania' }, { code: 'TH', name: 'Thailand' },
+  { code: 'TL', name: 'Timor-Leste' }, { code: 'TG', name: 'Togo' },
+  { code: 'TO', name: 'Tonga' }, { code: 'TT', name: 'Trinidad and Tobago' },
+  { code: 'TN', name: 'Tunisia' }, { code: 'TR', name: 'Turkey' },
+  { code: 'TM', name: 'Turkmenistan' }, { code: 'TV', name: 'Tuvalu' },
+  { code: 'UG', name: 'Uganda' }, { code: 'UA', name: 'Ukraine' },
+  { code: 'AE', name: 'United Arab Emirates' }, { code: 'GB', name: 'United Kingdom' },
+  { code: 'US', name: 'United States' }, { code: 'UY', name: 'Uruguay' },
+  { code: 'UZ', name: 'Uzbekistan' }, { code: 'VU', name: 'Vanuatu' },
+  { code: 'VE', name: 'Venezuela' }, { code: 'VN', name: 'Vietnam' },
+  { code: 'YE', name: 'Yemen' }, { code: 'ZM', name: 'Zambia' },
+  { code: 'ZW', name: 'Zimbabwe' },
+];
+
+async function fetchProvinces(country: string): Promise<{ label: string; value: string }[]> {
+  try {
+    const r = await fetch(`${API_URL}/geo/provinces?country=${country}`);
+    const data = await r.json();
+    return Array.isArray(data) ? data : [];
+  } catch { return []; }
+}
+
+function CountrySelect({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const selected = ALL_COUNTRIES.find(c => c.code === value);
+  const filtered = ALL_COUNTRIES.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase())
+  );
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  useEffect(() => { if (open) { setSearch(''); setTimeout(() => searchRef.current?.focus(), 50); } }, [open]);
+  return (
+    <div className="relative" ref={ref}>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white hover:border-brand-navy focus:outline-none focus:border-brand-navy transition-colors">
+        <span className={selected ? 'text-gray-800' : 'text-gray-300'}>{selected ? selected.name : 'Select country'}</span>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+          <div className="p-2 border-b border-gray-100">
+            <div className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1.5">
+              <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+              <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search country..." className="bg-transparent text-sm w-full focus:outline-none text-gray-700 placeholder-gray-400" />
+            </div>
+          </div>
+          <ul className="max-h-52 overflow-y-auto py-1">
+            {filtered.length === 0
+              ? <li className="px-3 py-2 text-sm text-gray-400 text-center">No results</li>
+              : filtered.map(c => (
+                <li key={c.code} onMouseDown={() => { onChange(c.code); setOpen(false); }}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${c.code === value ? 'bg-brand-navy text-white' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  <span className="font-mono text-xs opacity-60 w-6">{c.code}</span>
+                  <span>{c.name}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProvinceSelect({ value, onChange, options }: {
+  value: string; onChange: (val: string) => void; options: { label: string; value: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const selected = options.find(o => o.value === value);
+  const filtered = options.filter(o =>
+    o.label.toLowerCase().includes(search.toLowerCase()) || o.value.toLowerCase().includes(search.toLowerCase())
+  );
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  useEffect(() => { if (open) { setSearch(''); setTimeout(() => searchRef.current?.focus(), 50); } }, [open]);
+  if (options.length === 0) {
+    return <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder="Province / State"
+      className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm text-gray-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/20 bg-white placeholder:text-gray-300" />;
+  }
+  return (
+    <div className="relative" ref={ref}>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white hover:border-brand-navy focus:outline-none focus:border-brand-navy transition-colors">
+        <span className={selected ? 'text-gray-800' : 'text-gray-300'}>{selected ? selected.label : 'Select province / state'}</span>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+          <div className="p-2 border-b border-gray-100">
+            <div className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1.5">
+              <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+              <input ref={searchRef} type="text" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search..." className="bg-transparent text-sm w-full focus:outline-none text-gray-700 placeholder-gray-400" />
+            </div>
+          </div>
+          <ul className="max-h-52 overflow-y-auto py-1">
+            {filtered.length === 0
+              ? <li className="px-3 py-2 text-sm text-gray-400 text-center">No results</li>
+              : filtered.map(o => (
+                <li key={o.value} onMouseDown={() => { onChange(o.value); setOpen(false); }}
+                  className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${o.value === value ? 'bg-brand-navy text-white' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  <span className="font-mono text-xs opacity-60 w-6">{o.value}</span>
+                  <span>{o.label}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CityInput({ value, onChange, country }: { value: string; onChange: (val: string) => void; country: string }) {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSugg, setShowSugg] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setShowSugg(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+  const handleInput = async (val: string) => {
+    onChange(val);
+    if (val.length < 2) { setShowSugg(false); return; }
+    try {
+      const r = await fetch(`${API_URL}/geo/cities?country=${country}&q=${encodeURIComponent(val)}`);
+      const data = await r.json();
+      const cities: string[] = Array.isArray(data) ? data.map((d: any) => typeof d === 'string' ? d : d.label || d) : [];
+      setSuggestions(cities.slice(0, 8));
+      setShowSugg(cities.length > 0);
+    } catch { setShowSugg(false); }
+  };
+  return (
+    <div className="relative" ref={ref}>
+      <input type="text" value={value} onChange={e => handleInput(e.target.value)}
+        onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+        placeholder="City" autoComplete="off"
+        className="w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm text-gray-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/20 bg-white placeholder:text-gray-300" />
+      {showSugg && (
+        <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 py-1 max-h-48 overflow-y-auto">
+          {suggestions.map(city => (
+            <li key={city} onMouseDown={() => { onChange(city); setShowSugg(false); }}
+              className="px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">{city}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const inp = 'w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm text-gray-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/20 bg-white placeholder:text-gray-300';
@@ -32,17 +286,16 @@ const mkPkg = (): PkgRow => ({
 
 const EMPTY: Address = {
   name: '', company: '', street: '', street2: '',
-  city: '', province: '', postalCode: '', country: 'CA',
+  city: '', province: '', postalCode: '', country: '',
   phone: '', email: '', isResidential: false,
 };
 
-const PROVINCES = ['AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT'];
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINS = ['00', '15', '30', '45'];
 const PICKUP_LOCS = ['Front Door','Back Door','Side Door','Reception','Mailroom'];
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
-const STEPS = ['SHIPMENT DETAILS', 'GET QUOTE', 'REVIEW & PAYMENT', 'VIEW & PRINT LABEL'];
+const STEPS = ['SHIPMENT DETAILS', 'GET QUOTE', 'REVIEW', 'PAYMENT', 'VIEW & PRINT LABEL'];
 
 function StepBar({ current }: { current: number }) {
   return (
@@ -77,6 +330,32 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
 }) {
   const dot = color === 'red' ? 'bg-brand-orange' : 'bg-brand-navy';
   const hdr = color === 'red' ? 'text-brand-orange' : 'text-brand-navy';
+  const [provinces, setProvinces] = useState<{ label: string; value: string }[]>([]);
+  const [postalLoading, setPostalLoading] = useState(false);
+
+  useEffect(() => {
+    if (address.country) fetchProvinces(address.country).then(setProvinces);
+    onChange('province', '');
+    onChange('city', '');
+  }, [address.country]);
+
+  useEffect(() => {
+    const postal = address.postalCode?.trim();
+    const country = address.country?.trim();
+    if (!country || !postal || postal.replace(/\s/g, '').length < 5) return;
+    const t = setTimeout(async () => {
+      setPostalLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/geo/postal?country=${encodeURIComponent(country)}&postal=${encodeURIComponent(postal)}`);
+        const data = await res.json();
+        if (data?.city) onChange('city', data.city);
+        if (data?.province) onChange('province', data.province);
+      } catch {}
+      setPostalLoading(false);
+    }, 600);
+    return () => clearTimeout(t);
+  }, [address.postalCode, address.country]);
+
   return (
     <div className="flex-1 min-w-0 border border-gray-200 rounded-lg overflow-hidden">
       <div className={`flex items-center gap-2 px-4 py-2.5 bg-gray-50 border-b border-gray-200 ${hdr} font-semibold text-sm`}>
@@ -100,27 +379,31 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
           <label className={lbl}>Address Line 2</label>
           <input className={inp} value={address.street2 || ''} onChange={e => onChange('street2', e.target.value)} placeholder="Suite / Unit / Apt" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={lbl}>City {req}</label>
-            <input className={inp} value={address.city} onChange={e => onChange('city', e.target.value)} placeholder="City" required />
-          </div>
-          <div>
-            <label className={lbl}>Province / State</label>
-            <select className={inp} value={address.province} onChange={e => onChange('province', e.target.value)}>
-              <option value="">Select</option>
-              {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+        <div>
+          <label className={lbl}>Country {req}</label>
+          <CountrySelect value={address.country || ''} onChange={v => onChange('country', v)} />
+        </div>
+        <div>
+          <label className={lbl}>Zip / Postal code</label>
+          <div className="relative">
+            <input
+              className={`${inp} ${!address.country ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+              value={address.postalCode}
+              onChange={e => onChange('postalCode', e.target.value)}
+              placeholder={address.country ? 'Postal code' : 'Select country first'}
+              disabled={!address.country}
+            />
+            {postalLoading && <Loader2 className="absolute right-2.5 top-2 w-3.5 h-3.5 text-gray-400 animate-spin" />}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className={lbl}>Zip / Postal code</label>
-            <input className={inp} value={address.postalCode} onChange={e => onChange('postalCode', e.target.value)} placeholder="Postal code" />
+            <label className={lbl}>City {req}</label>
+            <CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} />
           </div>
           <div>
-            <label className={lbl}>Country</label>
-            <input className={inp} value={address.country} onChange={e => onChange('country', e.target.value)} placeholder="CA" />
+            <label className={lbl}>Province / State</label>
+            <ProvinceSelect value={address.province} onChange={v => onChange('province', v)} options={provinces} />
           </div>
         </div>
         <div>
@@ -187,6 +470,61 @@ function RateCard({ rate, selected, onSelect }: { rate: Rate; selected: boolean;
   );
 }
 
+// ─── Stripe Payment Form ──────────────────────────────────────────────────────
+function StripePaymentForm({ amount, currency, onSuccess, onBack }: {
+  amount: number; currency: string;
+  onSuccess: (transactionId: string) => void;
+  onBack: () => void;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [paying, setPaying] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setPaying(true);
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+    });
+    setPaying(false);
+    if (error) {
+      toast.error(error.message || 'Payment failed. Please try again.');
+    } else if (paymentIntent?.status === 'succeeded') {
+      onSuccess(paymentIntent.id);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-700 text-sm">Payment Details</h3>
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+            <Lock className="w-3 h-3" /> Secured by Stripe
+          </div>
+        </div>
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between">
+          <span className="text-sm text-gray-600">Total Charge</span>
+          <span className="font-bold text-brand-navy text-lg">${amount.toFixed(2)} <span className="text-xs font-normal text-gray-400">{currency}</span></span>
+        </div>
+        <PaymentElement />
+      </div>
+      <div className="flex items-center justify-between">
+        <button type="button" onClick={onBack}
+          className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
+          ← Back
+        </button>
+        <button type="submit" disabled={!stripe || paying}
+          className="px-8 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-60">
+          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><Lock className="w-4 h-4" /> Pay ${amount.toFixed(2)} {currency}</>}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function BookingPage() {
   const router = useRouter();
@@ -227,6 +565,7 @@ export default function BookingPage() {
   const [createdId, setCreatedId] = useState('');
   const [createdNumber, setCreatedNumber] = useState('');
   const [labelBase64, setLabelBase64] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
 
   useEffect(() => {
@@ -400,7 +739,10 @@ export default function BookingPage() {
 
       setCreatedId(bookData.shipmentId);
       setCreatedNumber(bookData.shipmentNumber);
-      setStep(2);
+      // Fetch Stripe payment intent
+      const { data: intentData } = await paymentApi.createStripeIntent(bookData.shipmentId);
+      setClientSecret(intentData.clientSecret);
+      setStep(3);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Booking failed. Please try again.');
     } finally {
@@ -408,20 +750,20 @@ export default function BookingPage() {
     }
   };
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = async (transactionId: string) => {
     if (!createdId) return;
     setBookLoading(true);
     try {
       const { data } = await shipmentApi.confirmPayment(createdId, {
         method: 'stripe',
-        transactionId: `MANUAL-${Date.now()}`,
+        transactionId,
       });
       if (data.shipment?.labelBase64) setLabelBase64(data.shipment.labelBase64);
       if (data.shipment?.trackingNumber) setTrackingNumber(data.shipment.trackingNumber);
-      setStep(3);
-      toast.success('Shipment created! Label is ready.');
+      setStep(4);
+      toast.success('Payment successful! Label is ready.');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Payment confirmation failed.');
+      toast.error(err?.response?.data?.message || 'Failed to generate label.');
     } finally {
       setBookLoading(false);
     }
@@ -826,16 +1168,32 @@ export default function BookingPage() {
                   disabled={bookLoading}
                   className="px-6 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-60"
                 >
-                  {bookLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>Confirm & Generate Label <ArrowRight className="w-4 h-4" /></>}
+                  {bookLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>Proceed to Payment <ArrowRight className="w-4 h-4" /></>}
                 </button>
               </div>
-
-              {/* NOTE: In production, replace handleBook + handleConfirmPayment with actual Stripe/PayPal flow */}
             </div>
           )}
 
-          {/* ── STEP 3: VIEW & PRINT LABEL ───────────────────────────────── */}
-          {step === 3 && (
+          {/* ── STEP 3: PAYMENT ──────────────────────────────────────────── */}
+          {step === 3 && clientSecret && (
+            <div className="max-w-xl mx-auto space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-700">Complete Payment</h2>
+                <p className="text-sm text-gray-400">Order: <span className="font-mono font-semibold text-brand-navy">{createdNumber}</span></p>
+              </div>
+              <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                <StripePaymentForm
+                  amount={selectedRate?.totalCharge || 0}
+                  currency={selectedRate?.currency || 'CAD'}
+                  onSuccess={handleConfirmPayment}
+                  onBack={() => setStep(2)}
+                />
+              </Elements>
+            </div>
+          )}
+
+          {/* ── STEP 4: VIEW & PRINT LABEL ───────────────────────────────── */}
+          {step === 4 && (
             <div className="max-w-2xl mx-auto space-y-4">
               <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -853,10 +1211,7 @@ export default function BookingPage() {
                       <Download className="w-4 h-4" /> Download Label (PDF)
                     </button>
                   ) : (
-                    <button onClick={handleConfirmPayment} disabled={bookLoading} className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all disabled:opacity-60">
-                      {bookLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                      {bookLoading ? 'Generating Label...' : 'Generate & Download Label'}
-                    </button>
+                    <p className="text-sm text-gray-400">Label is being generated…</p>
                   )}
                   {trackingNumber && (
                     <a href={`/track?number=${trackingNumber}`} className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded border border-gray-300 text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all">
@@ -866,7 +1221,7 @@ export default function BookingPage() {
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100 flex gap-3 justify-center">
-                  <button onClick={() => { setStep(0); setCreatedId(''); setCreatedNumber(''); setTrackingNumber(''); setLabelBase64(''); setRates([]); setSelectedRate(null); setPackages([mkPkg()]); }} className="text-sm text-brand-orange hover:underline">
+                  <button onClick={() => { setStep(0); setCreatedId(''); setCreatedNumber(''); setTrackingNumber(''); setLabelBase64(''); setClientSecret(''); setRates([]); setSelectedRate(null); setPackages([mkPkg()]); }} className="text-sm text-brand-orange hover:underline">
                     + New Shipment
                   </button>
                   <span className="text-gray-300">·</span>
