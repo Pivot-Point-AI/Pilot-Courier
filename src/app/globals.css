@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --navy: #0c2461;
+    --navy-mid: #1e3a8a;
+    --orange: #f97316;
+    --orange-dark: #ea6c10;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans text-gray-900 bg-white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    @apply font-sans;
+  }
+
+  * {
+    @apply border-gray-200;
+  }
+}
+
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-orange text-white font-semibold rounded-lg
+      hover:bg-brand-orange-dark active:scale-95 transition-all duration-200 shadow-orange hover:shadow-orange-lg
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-brand-navy font-semibold rounded-lg
+      border-2 border-brand-navy hover:bg-brand-navy hover:text-white active:scale-95 transition-all duration-200
+      disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline-white {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent text-white font-semibold rounded-lg
+      border-2 border-white hover:bg-white hover:text-brand-navy active:scale-95 transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-brand-navy font-medium rounded-lg
+      hover:bg-navy-50 transition-colors duration-200;
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-gray-100 transition-shadow duration-300;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-card-hover cursor-pointer;
+  }
+
+  /* ── Form Elements ── */
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 bg-white
+      focus:outline-none focus:ring-2 focus:ring-brand-orange focus:border-transparent
+      placeholder:text-gray-400 text-sm transition-all duration-200
+      disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed;
+  }
+
+  .input-label {
+    @apply block text-sm font-semibold text-gray-700 mb-1.5;
+  }
+
+  .select-field {
+    @apply input-field appearance-none pr-10 bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+  }
+
+  /* ── Section Layouts ── */
+  .section {
+    @apply py-20 px-4;
+  }
+
+  .container-lg {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .container-md {
+    @apply max-w-5xl mx-auto;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .badge-success {
+    @apply badge bg-green-100 text-green-800;
+  }
+
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-800;
+  }
+
+  .badge-error {
+    @apply badge bg-red-100 text-red-800;
+  }
+
+  .badge-info {
+    @apply badge bg-blue-100 text-blue-800;
+  }
+
+  .badge-navy {
+    @apply badge bg-navy-950/10 text-navy-950;
+  }
+
+  .badge-orange {
+    @apply badge bg-orange-100 text-orange-700;
+  }
+
+  /* ── Step Circles ── */
+  .step-circle {
+    @apply flex-shrink-0 w-10 h-10 rounded-full bg-brand-orange text-white font-bold text-lg
+      flex items-center justify-center shadow-orange;
+  }
+
+  /* ── Carrier Logos ── */
+  .carrier-logo {
+    @apply h-8 object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100;
+  }
+
+  /* ── Rate Cards ── */
+  .rate-card {
+    @apply card p-5 border-2 cursor-pointer transition-all duration-200 relative;
+  }
+
+  .rate-card-selected {
+    @apply border-brand-orange shadow-orange;
+  }
+
+  .rate-card-unselected {
+    @apply border-transparent hover:border-gray-200;
+  }
+
+  /* ── Status Colors ── */
+  .status-quote { @apply badge bg-gray-100 text-gray-600; }
+  .status-pending_payment { @apply badge bg-yellow-100 text-yellow-700; }
+  .status-paid { @apply badge bg-blue-100 text-blue-700; }
+  .status-label_generated { @apply badge bg-indigo-100 text-indigo-700; }
+  .status-pickup_scheduled { @apply badge bg-purple-100 text-purple-700; }
+  .status-in_transit { @apply badge bg-cyan-100 text-cyan-700; }
+  .status-out_for_delivery { @apply badge bg-orange-100 text-orange-700; }
+  .status-delivered { @apply badge bg-green-100 text-green-700; }
+  .status-cancelled { @apply badge bg-red-100 text-red-700; }
+  .status-refunded { @apply badge bg-pink-100 text-pink-700; }
+
+  /* ── Animations ── */
+  .animate-delay-100 { animation-delay: 0.1s; }
+  .animate-delay-200 { animation-delay: 0.2s; }
+  .animate-delay-300 { animation-delay: 0.3s; }
+  .animate-delay-400 { animation-delay: 0.4s; }
+  .animate-delay-500 { animation-delay: 0.5s; }
+
+  .animate-on-load {
+    @apply opacity-0 animate-fade-up;
+    animation-fill-mode: forwards;
+  }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Print (for labels) ── */
+@media print {
+  body * { visibility: hidden; }
+  #label-print, #label-print * { visibility: visible; }
+  #label-print { position: fixed; top: 0; left: 0; }
+}
