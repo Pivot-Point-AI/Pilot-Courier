@@ -28,6 +28,7 @@ const howItWorks = [
   },
 ];
 
+
 const HowItWorksSection = () => {
   return (
     <section className="py-12 md:py-12 bg-gray-50">
