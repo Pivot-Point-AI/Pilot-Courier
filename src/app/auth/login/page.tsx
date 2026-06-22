@@ -3,7 +3,8 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
-import { Package, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function LoginForm() {
@@ -31,12 +32,9 @@ function LoginForm() {
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-hero-gradient flex-col justify-between p-12">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-brand-orange rounded-lg flex items-center justify-center">
-            <Package className="w-5 h-5 text-white" />
+          <div className="bg-white rounded-xl p-2 shadow-md">
+            <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-10 w-auto block" />
           </div>
-          <span className="font-display font-800 text-xl text-white tracking-tight">
-            PILOT <span className="text-brand-orange">COURIER</span>
-          </span>
         </Link>
 
         <div>
@@ -73,10 +71,7 @@ function LoginForm() {
           {/* Mobile Logo */}
           <div className="lg:hidden flex justify-center mb-8">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-brand-orange rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-display font-800 text-xl text-brand-navy">PILOT <span className="text-brand-orange">COURIER</span></span>
+              <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
             </Link>
           </div>
 
@@ -104,7 +99,12 @@ function LoginForm() {
               />
             </div>
             <div>
-              <label className="input-label">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="input-label">Password</label>
+                <Link href="/auth/forgot-password" className="text-xs font-semibold text-brand-orange hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}

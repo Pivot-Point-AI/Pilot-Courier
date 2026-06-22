@@ -201,7 +201,7 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
   const ref = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const selected = options.find(o => o.value === value);
+  const selected = options.find(o => o.value.toLowerCase() === value.toLowerCase() || o.label.toLowerCase() === value.toLowerCase());
   const filtered = options.filter(o =>
     o.label.toLowerCase().includes(search.toLowerCase()) ||
     o.value.toLowerCase().includes(search.toLowerCase())
@@ -238,8 +238,8 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between border border-gray-300 rounded px-3 py-2 text-sm bg-white hover:border-[#1B2B6B] focus:outline-none focus:border-[#1B2B6B] transition-colors"
       >
-        <span className={selected ? 'text-gray-800' : 'text-gray-400'}>
-          {selected ? selected.label : placeholder}
+        <span className={selected || value ? 'text-gray-800' : 'text-gray-400'}>
+          {selected ? selected.label : value || placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -266,7 +266,7 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
                 key={o.value}
                 onMouseDown={() => { onChange(o.value); setOpen(false); }}
                 className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${
-                  o.value === value ? 'bg-[#1B2B6B] text-white' : 'text-gray-700 hover:bg-gray-50'
+                  o.value.toLowerCase() === value.toLowerCase() ? 'bg-[#1B2B6B] text-white' : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <span className="font-mono text-xs opacity-60 w-6">{o.value}</span>
@@ -365,7 +365,7 @@ interface PackageRow {
 }
 const newPkg = (): PackageRow => ({
   id: Math.random().toString(36).slice(2),
-  length: '', width: '', height: '', weight: '',
+  length: '1', width: '1', height: '1', weight: '1',
   insuranceAmount: '0.00', specialHandling: false, description: '',
 });
 
@@ -398,13 +398,40 @@ export default function QuotePage() {
   const [postalLookingUp, setPostalLookingUp] = useState<'origin' | 'destination' | null>(null);
 
   useEffect(() => {
-    fetchProvinces(form.originCountry).then(setOriginProvinces);
-    setForm(p => ({ ...p, originProvince: '', originCity: '' }));
+    const stored = sessionStorage.getItem('pc_quote_form');
+    if (!stored) return;
+    try {
+      const { packages: storedPackages, packagingType: storedPackagingType, ...storedForm } = JSON.parse(stored);
+      setForm(p => ({ ...p, ...storedForm }));
+      if (storedPackages?.length) {
+        setPackages(storedPackages);
+      } else if (storedForm.length || storedForm.width || storedForm.height || storedForm.weight) {
+        // Flat rate-request shape (e.g. resumed from a saved quote) — rebuild a single package row
+        setPackages([{
+          id: Math.random().toString(36).slice(2),
+          length: String(storedForm.length ?? '1'),
+          width: String(storedForm.width ?? '1'),
+          height: String(storedForm.height ?? '1'),
+          weight: String(storedForm.weight ?? '1'),
+          insuranceAmount: String(storedForm.insuranceAmount ?? '0.00'),
+          specialHandling: !!storedForm.specialHandling,
+          description: storedForm.description || '',
+        }]);
+      }
+      if (storedPackagingType) setPackagingType(storedPackagingType);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchProvinces(form.originCountry).then(list => { if (!cancelled) setOriginProvinces(list); });
+    return () => { cancelled = true; };
   }, [form.originCountry]);
 
   useEffect(() => {
-    fetchProvinces(form.destinationCountry).then(setDestProvinces);
-    setForm(p => ({ ...p, destinationProvince: '', destinationCity: '' }));
+    let cancelled = false;
+    fetchProvinces(form.destinationCountry).then(list => { if (!cancelled) setDestProvinces(list); });
+    return () => { cancelled = true; };
   }, [form.destinationCountry]);
 
   const setField = (field: string, value: any) => setForm(p => ({ ...p, [field]: value }));
@@ -440,6 +467,9 @@ export default function QuotePage() {
     if (!form.originCity) {
       toast.error('Please enter the origin city.'); return;
     }
+    if (!form.originProvince) {
+      toast.error('Please select the origin province / state.'); return;
+    }
     setLoading(true);
     try {
       const { data } = await shipmentApi.getRates({
@@ -454,6 +484,7 @@ export default function QuotePage() {
         dimensionUnit: form.dimensionUnit, description: first.description || 'Package',
         insuranceAmount: parseFloat(first.insuranceAmount) || 0,
         specialHandling: first.specialHandling, packagingType,
+        quoteType: 'quick',
       } as any);
       sessionStorage.setItem('pc_rates', JSON.stringify(data.rates));
       sessionStorage.setItem('pc_quote_form', JSON.stringify({ ...form, packages, packagingType }));
@@ -501,13 +532,13 @@ export default function QuotePage() {
                   </label>
                 </div>
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Country</label>
-                    <CountrySelect value={form.originCountry} onChange={v => setForm(p => ({ ...p, originCountry: v }))} />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
+                    <div className="flex-1"><CountrySelect value={form.originCountry} onChange={v => setForm(p => ({ ...p, originCountry: v, originProvince: '', originCity: '' }))} /></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Zip / Postal Code <span className="text-[#FF6B00]">*</span></label>
-                    <div className="relative">
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code <span className="text-[#FF6B00]">*</span></label>
+                    <div className="relative flex-1">
                       <input type="text" value={form.originPostal}
                         onChange={e => handlePostalChange('origin', form.originCountry, e.target.value)}
                         placeholder="e.g. L1Z 0R6"
@@ -516,17 +547,19 @@ export default function QuotePage() {
                       {postalLookingUp === 'origin' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">City <span className="text-[#FF6B00]">*</span></label>
-                    <CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">City <span className="text-[#FF6B00]">*</span></label>
+                    <div className="flex-1"><CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required /></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Province / State <span className="text-[#FF6B00]">*</span></label>
-                    <ProvinceSelect
-                      value={form.originProvince}
-                      onChange={v => setField('originProvince', v)}
-                      options={originProvinces}
-                    />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Province / State <span className="text-[#FF6B00]">*</span></label>
+                    <div className="flex-1">
+                      <ProvinceSelect
+                        value={form.originProvince}
+                        onChange={v => setField('originProvince', v)}
+                        options={originProvinces}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -547,13 +580,13 @@ export default function QuotePage() {
                   </label>
                 </div>
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Country</label>
-                    <CountrySelect value={form.destinationCountry} onChange={v => setForm(p => ({ ...p, destinationCountry: v }))} />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
+                    <div className="flex-1"><CountrySelect value={form.destinationCountry} onChange={v => setForm(p => ({ ...p, destinationCountry: v, destinationProvince: '', destinationCity: '' }))} /></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Zip / Postal Code</label>
-                    <div className="relative">
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code</label>
+                    <div className="relative flex-1">
                       <input type="text" value={form.destinationPostal}
                         onChange={e => handlePostalChange('destination', form.destinationCountry, e.target.value)}
                         placeholder="e.g. V6B 1A1 (optional)"
@@ -561,17 +594,19 @@ export default function QuotePage() {
                       {postalLookingUp === 'destination' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">City</label>
-                    <CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">City</label>
+                    <div className="flex-1"><CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} /></div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">Province / State</label>
-                    <ProvinceSelect
-                      value={form.destinationProvince}
-                      onChange={v => setField('destinationProvince', v)}
-                      options={destProvinces}
-                    />
+                  <div className="flex items-center gap-3">
+                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Province / State</label>
+                    <div className="flex-1">
+                      <ProvinceSelect
+                        value={form.destinationProvince}
+                        onChange={v => setField('destinationProvince', v)}
+                        options={destProvinces}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -580,7 +615,7 @@ export default function QuotePage() {
 
           {/* ── Package Details ── */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#FF6B00]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -588,7 +623,7 @@ export default function QuotePage() {
                 </svg>
                 <span className="font-bold text-[#1B2B6B] text-sm">Package Details</span>
               </div>
-              <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-gray-500 font-medium">Packaging Type</label>
                   <select value={packagingType} onChange={e => setPackagingType(e.target.value)}
@@ -611,35 +646,41 @@ export default function QuotePage() {
                   </select>
                 </div>
               </div>
+              <div />
             </div>
 
             <div className="px-6 py-4 overflow-x-auto">
               {/* Header */}
-              <div className="grid gap-2 mb-2 min-w-[700px]"
-                style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 6rem 1fr auto' }}>
+              <div className="grid gap-2 mb-2 min-w-[800px]"
+                style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
                 <span className="text-xs font-semibold text-gray-400 text-center">#</span>
-                <span className="text-xs font-semibold text-gray-500">L ({form.dimensionUnit})</span>
-                <span className="text-xs font-semibold text-gray-500">W ({form.dimensionUnit})</span>
-                <span className="text-xs font-semibold text-gray-500">H ({form.dimensionUnit})</span>
-                <span className="text-xs font-semibold text-gray-500">Weight ({form.weightUnit})</span>
-                <span className="text-xs font-semibold text-gray-500">Insurance ($)</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">L ({form.dimensionUnit})</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">W ({form.dimensionUnit})</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">H ({form.dimensionUnit})</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">Weight ({form.weightUnit})</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">Vol. Weight ({form.weightUnit})</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">Insurance ($)</span>
                 <span className="text-xs font-semibold text-gray-500 text-center">Sp. Handling</span>
-                <span className="text-xs font-semibold text-gray-500">Description</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">Description</span>
                 <span />
               </div>
 
-              <div className="space-y-2 min-w-[700px]">
-                {packages.map((pkg, idx) => (
+              <div className="space-y-2 min-w-[800px]">
+                {packages.map((pkg, idx) => {
+                  const divisor = form.dimensionUnit === 'cm' ? 5000 : 166;
+                  const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+                  return (
                   <div key={pkg.id} className="grid gap-2 items-center bg-gray-50 rounded-lg px-2 py-2.5 border border-gray-100"
-                    style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 6rem 1fr auto' }}>
+                    style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
                     <span className="text-xs font-bold text-gray-400 text-center">{idx + 1}</span>
                     {(['length','width','height','weight'] as const).map(f => (
                       <input key={f} type="number" value={pkg[f]}
                         onChange={e => updatePkg(pkg.id, f, e.target.value)}
-                        placeholder={f[0].toUpperCase()} min="0.1" step="0.1"
+                        placeholder={f[0].toUpperCase()} min="1" step="0.1"
                         required={idx === 0}
                         className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
                     ))}
+                    <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>
                     <input type="number" value={pkg.insuranceAmount}
                       onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
                       placeholder="0.00" min="0" step="0.01"
@@ -671,7 +712,8 @@ export default function QuotePage() {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

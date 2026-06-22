@@ -129,7 +129,7 @@ export default function QuoteResultsPage() {
                     {showDetails ? 'Hide Details' : 'Show Details'}
                   </button>
                   <button
-                    onClick={() => router.back()}
+                    onClick={() => router.push('/quote')}
                     className="px-4 py-1.5 text-xs font-medium border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
                   >
                     Edit

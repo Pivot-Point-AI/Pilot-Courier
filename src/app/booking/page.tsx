@@ -178,7 +178,7 @@ function ProvinceSelect({ value, onChange, options }: {
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const selected = options.find(o => o.value === value);
+  const selected = options.find(o => o.value.toLowerCase() === value.toLowerCase() || o.label.toLowerCase() === value.toLowerCase());
   const filtered = options.filter(o =>
     o.label.toLowerCase().includes(search.toLowerCase()) || o.value.toLowerCase().includes(search.toLowerCase())
   );
@@ -196,7 +196,7 @@ function ProvinceSelect({ value, onChange, options }: {
     <div className="relative" ref={ref}>
       <button type="button" onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white hover:border-brand-navy focus:outline-none focus:border-brand-navy transition-colors">
-        <span className={selected ? 'text-gray-800' : 'text-gray-300'}>{selected ? selected.label : 'Select province / state'}</span>
+        <span className={selected || value ? 'text-gray-800' : 'text-gray-300'}>{selected ? selected.label : value || 'Select province / state'}</span>
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
@@ -213,7 +213,7 @@ function ProvinceSelect({ value, onChange, options }: {
               ? <li className="px-3 py-2 text-sm text-gray-400 text-center">No results</li>
               : filtered.map(o => (
                 <li key={o.value} onMouseDown={() => { onChange(o.value); setOpen(false); }}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${o.value === value ? 'bg-brand-navy text-white' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${o.value.toLowerCase() === value.toLowerCase() ? 'bg-brand-navy text-white' : 'text-gray-700 hover:bg-gray-50'}`}>
                   <span className="font-mono text-xs opacity-60 w-6">{o.value}</span>
                   <span>{o.label}</span>
                 </li>
@@ -266,6 +266,7 @@ function CityInput({ value, onChange, country }: { value: string; onChange: (val
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const inp = 'w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm text-gray-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/20 bg-white placeholder:text-gray-300';
 const lbl = 'block text-xs text-gray-500 mb-0.5';
+const lblRow = 'w-32 flex-shrink-0 text-xs text-gray-500';
 const req = <span className="text-red-500">*</span>;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -280,7 +281,7 @@ interface PkgRow {
 
 const mkPkg = (): PkgRow => ({
   id: Math.random().toString(36).slice(2),
-  length: '', width: '', height: '', weight: '',
+  length: '1', width: '1', height: '1', weight: '1',
   insuranceAmount: '0.00', specialHandling: false, description: '',
 });
 
@@ -334,9 +335,10 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
   const [postalLoading, setPostalLoading] = useState(false);
 
   useEffect(() => {
-    if (address.country) fetchProvinces(address.country).then(setProvinces);
-    onChange('province', '');
-    onChange('city', '');
+    let cancelled = false;
+    if (address.country) fetchProvinces(address.country).then(list => { if (!cancelled) setProvinces(list); });
+    else setProvinces([]);
+    return () => { cancelled = true; };
   }, [address.country]);
 
   useEffect(() => {
@@ -367,25 +369,25 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
           <input type="checkbox" checked={!!address.isResidential} onChange={e => onChange('isResidential', e.target.checked)} className="accent-brand-navy" />
           Residential
         </label>
-        <div>
-          <label className={lbl}>Company / Person {req}</label>
-          <input className={inp} value={address.company || ''} onChange={e => onChange('company', e.target.value)} placeholder="Company or person name" />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Company / Person {req}</label>
+          <input className={`${inp} flex-1`} value={address.company || ''} onChange={e => onChange('company', e.target.value)} placeholder="Company or person name" />
         </div>
-        <div>
-          <label className={lbl}>Address Line 1 {req}</label>
-          <input className={inp} value={address.street} onChange={e => onChange('street', e.target.value)} placeholder="Street address" required />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Address Line 1 {req}</label>
+          <input className={`${inp} flex-1`} value={address.street} onChange={e => onChange('street', e.target.value)} placeholder="Street address" required />
         </div>
-        <div>
-          <label className={lbl}>Address Line 2</label>
-          <input className={inp} value={address.street2 || ''} onChange={e => onChange('street2', e.target.value)} placeholder="Suite / Unit / Apt" />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Address Line 2</label>
+          <input className={`${inp} flex-1`} value={address.street2 || ''} onChange={e => onChange('street2', e.target.value)} placeholder="Suite / Unit / Apt" />
         </div>
-        <div>
-          <label className={lbl}>Country {req}</label>
-          <CountrySelect value={address.country || ''} onChange={v => onChange('country', v)} />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Country {req}</label>
+          <div className="flex-1"><CountrySelect value={address.country || ''} onChange={v => { onChange('country', v); onChange('province', ''); onChange('city', ''); }} /></div>
         </div>
-        <div>
-          <label className={lbl}>Zip / Postal code</label>
-          <div className="relative">
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Zip / Postal code</label>
+          <div className="relative flex-1">
             <input
               className={`${inp} ${!address.country ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               value={address.postalCode}
@@ -396,33 +398,29 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
             {postalLoading && <Loader2 className="absolute right-2.5 top-2 w-3.5 h-3.5 text-gray-400 animate-spin" />}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={lbl}>City {req}</label>
-            <CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} />
-          </div>
-          <div>
-            <label className={lbl}>Province / State</label>
-            <ProvinceSelect value={address.province} onChange={v => onChange('province', v)} options={provinces} />
-          </div>
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>City {req}</label>
+          <div className="flex-1"><CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} /></div>
         </div>
-        <div>
-          <label className={lbl}>Attention {req}</label>
-          <input className={inp} value={address.name} onChange={e => onChange('name', e.target.value)} placeholder="Contact name" required />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Province / State</label>
+          <div className="flex-1"><ProvinceSelect value={address.province} onChange={v => onChange('province', v)} options={provinces} /></div>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className={lbl}>Phone {req}</label>
-            <input className={inp} type="tel" value={address.phone} onChange={e => onChange('phone', e.target.value)} placeholder="+1 416 555 0100" required />
-          </div>
-          <div>
-            <label className={lbl}>Email {req}</label>
-            <input className={inp} type="email" value={address.email || ''} onChange={e => onChange('email', e.target.value)} placeholder="email@example.com" />
-          </div>
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Attention {req}</label>
+          <input className={`${inp} flex-1`} value={address.name} onChange={e => onChange('name', e.target.value)} placeholder="Contact name" required />
         </div>
-        <div>
-          <label className={lbl}>Instruction</label>
-          <input className={inp} placeholder="Delivery instructions (optional)" />
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Phone {req}</label>
+          <input className={`${inp} flex-1`} type="tel" value={address.phone} onChange={e => onChange('phone', e.target.value)} placeholder="+1 416 555 0100" required />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Email {req}</label>
+          <input className={`${inp} flex-1`} type="email" value={address.email || ''} onChange={e => onChange('email', e.target.value)} placeholder="email@example.com" />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className={lblRow}>Instruction</label>
+          <input className={`${inp} flex-1`} placeholder="Delivery instructions (optional)" />
         </div>
         <div className="flex flex-col gap-1.5 pt-1">
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
@@ -560,6 +558,16 @@ export default function BookingPage() {
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
+  // Keep selectedRate in sync with the current rates array (by serviceCode) so a stale
+  // object from an earlier fetch/resume never shows a different price than the rates list.
+  useEffect(() => {
+    if (!rates.length) return;
+    setSelectedRate(prev => {
+      const match = prev && rates.find(r => r.serviceCode === prev.serviceCode);
+      return match || rates.find(r => r.isCheapest) || rates[0];
+    });
+  }, [rates]);
+
   // Booking result
   const [bookLoading, setBookLoading] = useState(false);
   const [createdId, setCreatedId] = useState('');
@@ -575,9 +583,10 @@ export default function BookingPage() {
       return;
     }
 
-    // Pre-fill from quote form if coming from quick quote
+    // Pre-fill from quote form if coming from quick quote or a resumed saved quote
     const savedForm = sessionStorage.getItem('pc_quote_form');
     const savedRate = sessionStorage.getItem('pc_selected_rate');
+    const savedRates = sessionStorage.getItem('pc_booking_rates');
 
     if (savedForm) {
       const f = JSON.parse(savedForm);
@@ -586,7 +595,14 @@ export default function BookingPage() {
         postalCode: f.originPostal || '',
         city: f.originCity || '',
         province: f.originProvince || '',
+        country: f.originCountry || prev.country || 'CA',
         isResidential: f.originResidential || false,
+        name: f.originName || prev.name,
+        company: f.originCompany || prev.company,
+        street: f.originStreet || prev.street,
+        street2: f.originStreet2 || prev.street2,
+        phone: f.originPhone || prev.phone,
+        email: f.originEmail || prev.email,
       }));
       setRecipient(prev => ({
         ...prev,
@@ -595,6 +611,12 @@ export default function BookingPage() {
         province: f.destinationProvince || '',
         country: f.destinationCountry || 'CA',
         isResidential: f.destinationResidential || false,
+        name: f.destinationName || prev.name,
+        company: f.destinationCompany || prev.company,
+        street: f.destinationStreet || prev.street,
+        street2: f.destinationStreet2 || prev.street2,
+        phone: f.destinationPhone || prev.phone,
+        email: f.destinationEmail || prev.email,
       }));
       if (f.weightUnit) setWeightUnit(f.weightUnit);
       if (f.dimensionUnit) setDimUnit(f.dimensionUnit);
@@ -605,7 +627,28 @@ export default function BookingPage() {
           weight: String(p.weight || ''), insuranceAmount: String(p.insuranceAmount || '0.00'),
           specialHandling: p.specialHandling || false, description: p.description || '',
         })));
+      } else if (f.length || f.width || f.height || f.weight) {
+        // Flat rate-request shape (e.g. resumed from a saved quote) — rebuild a single package row
+        setPackages([{
+          id: Math.random().toString(36).slice(2),
+          length: String(f.length ?? '1'), width: String(f.width ?? '1'), height: String(f.height ?? '1'),
+          weight: String(f.weight ?? '1'), insuranceAmount: String(f.insuranceAmount ?? '0.00'),
+          specialHandling: !!f.specialHandling, description: f.description || '',
+        }]);
       }
+    }
+
+    // Resumed detailed quote — skip straight to the rates step with the previously fetched rates
+    if (savedRates) {
+      try {
+        const parsedRates = JSON.parse(savedRates);
+        if (parsedRates?.length) {
+          setRates(parsedRates);
+          setSelectedRate(parsedRates.find((r: Rate) => r.isCheapest) || parsedRates[0]);
+          setStep(1);
+        }
+      } catch {}
+      sessionStorage.removeItem('pc_booking_rates');
     }
 
     // Pre-fill user's shipper address if available
@@ -672,11 +715,23 @@ export default function BookingPage() {
         originProvince: shipper.province,
         originCountry: shipper.country,
         originResidential: shipper.isResidential,
+        originName: shipper.name,
+        originCompany: shipper.company,
+        originStreet: shipper.street,
+        originStreet2: shipper.street2,
+        originPhone: shipper.phone,
+        originEmail: shipper.email,
         destinationPostal: recipient.postalCode,
         destinationCity: recipient.city,
         destinationProvince: recipient.province,
         destinationCountry: recipient.country,
         destinationResidential: recipient.isResidential,
+        destinationName: recipient.name,
+        destinationCompany: recipient.company,
+        destinationStreet: recipient.street,
+        destinationStreet2: recipient.street2,
+        destinationPhone: recipient.phone,
+        destinationEmail: recipient.email,
         weight: parseFloat(first.weight),
         weightUnit,
         length: parseFloat(first.length),
@@ -686,6 +741,11 @@ export default function BookingPage() {
         description: first.description || 'Package',
         insuranceAmount: parseFloat(first.insuranceAmount) || 0,
         specialHandling: first.specialHandling,
+        packages: packages.map(p => ({
+          length: p.length, width: p.width, height: p.height, weight: p.weight,
+          insuranceAmount: p.insuranceAmount, specialHandling: p.specialHandling, description: p.description,
+        })),
+        quoteType: 'detailed',
       } as any);
       setRates(data.rates || []);
       if (data.rates?.length) setSelectedRate(data.rates.find((r: Rate) => r.isCheapest) || data.rates[0]);
@@ -855,12 +915,13 @@ export default function BookingPage() {
                   </div>
 
                   {/* Table header */}
-                  <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-2 px-2">
+                  <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-2 px-2">
                     <span className="text-xs text-gray-400 w-6" />
                     <span className="text-xs text-gray-400">Dimensions L × W × H ({dimUnit})</span>
                     <span className="text-xs text-gray-400" />
                     <span className="text-xs text-gray-400" />
                     <span className="text-xs text-gray-400">Weight ({weightUnit})</span>
+                    <span className="text-xs text-gray-400">Vol. Weight ({weightUnit})</span>
                     <span className="text-xs text-gray-400">Insurance Val ($)</span>
                     <span className="text-xs text-gray-400">Special Handling</span>
                     <span className="text-xs text-gray-400">Description</span>
@@ -869,13 +930,17 @@ export default function BookingPage() {
 
                   {/* Package rows */}
                   <div className="space-y-2">
-                    {packages.map((pkg, idx) => (
-                      <div key={pkg.id} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center">
+                    {packages.map((pkg, idx) => {
+                      const divisor = dimUnit === 'cm' ? 5000 : 166;
+                      const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+                      return (
+                      <div key={pkg.id} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center">
                         <span className="text-xs text-gray-400 font-mono w-6">{String(idx + 1).padStart(2, '0')}.</span>
-                        <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} placeholder="L" min="0.1" step="0.1" className={`${inp} text-center`} />
-                        <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} placeholder="W" min="0.1" step="0.1" className={`${inp} text-center`} />
-                        <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} placeholder="H" min="0.1" step="0.1" className={`${inp} text-center`} />
-                        <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} placeholder="1" min="0.01" step="0.01" className={`${inp} text-center`} required={idx === 0} />
+                        <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} placeholder="L" min="1" step="0.1" className={`${inp} text-center`} />
+                        <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} placeholder="W" min="1" step="0.1" className={`${inp} text-center`} />
+                        <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} placeholder="H" min="1" step="0.1" className={`${inp} text-center`} />
+                        <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} placeholder="1" min="1" step="0.1" className={`${inp} text-center`} required={idx === 0} />
+                        <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>
                         <input type="number" value={pkg.insuranceAmount} onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)} placeholder="0.00" min="0" step="0.01" className={`${inp} text-center`} />
                         <select value={pkg.specialHandling ? 'yes' : 'no'} onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'yes')} className={inp}>
                           <option value="no">No</option>
@@ -899,7 +964,8 @@ export default function BookingPage() {
                           )}
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>

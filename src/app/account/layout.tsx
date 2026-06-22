@@ -14,6 +14,7 @@ const SUB_TABS = [
   { href: '/account/carriers',  label: 'Carriers' },
   { href: '/account/products',  label: 'Products' },
   { href: '/account/packages',  label: 'Packages' },
+  { href: '/account/quotes',    label: 'Saved Quotes' },
   { href: '/account/tickets',   label: 'Tickets' },
 ];
 

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const footerLinks = {
   company: [
@@ -48,13 +49,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1 pr-0 lg:pr-4">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <svg width="28" height="21" viewBox="0 0 38 30" fill="none">
-                <path d="M1 15L37 3L30 15L37 27L1 15Z" fill="#1B2B6B"/>
-                <path d="M1 15L37 3L24 15L37 27L1 15Z" fill="#FF6B00"/>
-              </svg>
-              <span className="font-extrabold text-base text-gray-900">
-                PILOT <span className="text-orange-500">COURIER</span>
-              </span>
+              <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
             </Link>
             <p className="text-sm text-gray-500 leading-snug mb-1 max-w-[200px]">
               Canadian courier aggregator. Up to 70% off standard rates.

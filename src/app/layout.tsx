@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     locale: 'en_CA',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/images/logo.png',
   },
 };
 

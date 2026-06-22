@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@amcharts/amcharts4-geodata": "^4.1.31",
+    "@amcharts/amcharts5": "^5.19.1",
     "@headlessui/react": "^2.1.1",
     "@heroicons/react": "^2.1.4",
     "@hookform/resolvers": "^3.6.0",

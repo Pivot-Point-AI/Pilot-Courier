@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { CreditCard, Clock1, BanknoteIcon } from 'lucide-react';
 import QuoteForm from '@/components/sections/QuoteForm';
+import Globe from '@/components/sections/Globe';
+import OrbitPlane from '@/components/sections/OrbitPlane';
 
 const trustBadges = [
   { icon: BanknoteIcon, title: 'Lowest Rates', sub: 'Compare & Save' },
@@ -20,7 +22,7 @@ const carriers = [
 export default function HeroSection() {
   return (
     <>
-      <section className="relative overflow-hidden bg-gray-50 pt-20 pb-6 md:py-16 lg:py-32 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
+      <section className="relative overflow-hidden bg-gray-50 pt-20 pb-6 md:py-24 lg:py-40 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-scene2.png"
@@ -29,6 +31,13 @@ export default function HeroSection() {
             className="object-cover object-[75%_center] md:object-center"
             priority
           />
+        </div>
+
+        {/* Rotating globe motif with an orbiting plane, a subtle accent clear of the background artwork */}
+        <div className="hidden md:block absolute z-[1] top-[10%] right-[3%] w-[200px] h-[200px] lg:w-[260px] lg:h-[260px]">
+          <Globe className="absolute inset-0 pointer-events-none opacity-80 drop-shadow-[0_0_30px_rgba(23,62,115,0.5)]" />
+          <OrbitPlane size={340} className="lg:hidden" />
+          <OrbitPlane size={420} className="hidden lg:block" />
         </div>
 
         {/* Mobile-only white fade so text stays readable over the image */}
@@ -53,13 +62,13 @@ export default function HeroSection() {
                   </div>
                   <div>
                     <p className="font-bold text-[#1B2B6B] text-xs sm:text-sm leading-none">{title}</p>
-                    <p className="text-gray-600 text-[10px] sm:text-xs mt-0.5">{sub}</p>
+                    {/* <p className="text-gray-600 text-[10px] sm:text-xs mt-0.5">{sub}</p> */}
                   </div>
                 </div>
               ))}
             </div>
-            <div className="max-w-5xl w-full">
-              <QuoteForm />
+            <div className="max-w-5xl w-full py-24">
+              {/* <QuoteForm /> */}
             </div>
           </div>
         </div>

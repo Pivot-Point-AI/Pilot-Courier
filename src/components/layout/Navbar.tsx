@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Bell } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 
@@ -73,14 +74,7 @@ function AuthNavbar() {
       {/* Top strip: logo + welcome */}
       <div className="flex items-center justify-between px-6 py-2 border-b border-gray-100 bg-white">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <svg width="32" height="26" viewBox="0 0 38 30" fill="none">
-            <path d="M1 15L37 3L30 15L37 27L1 15Z" fill="#1B2B6B"/>
-            <path d="M1 15L37 3L24 15L37 27L1 15Z" fill="#FF6B00"/>
-          </svg>
-          <span className="font-extrabold text-sm tracking-tight">
-            <span className="text-[#1B2B6B]">PILOT </span>
-            <span className="text-[#FF6B00]">COURIER</span>
-          </span>
+          <Image src="/images/logo.png" alt="Pilot Courier" width={64} height={64} className="h-16 w-auto" priority />
         </Link>
 
         <div className="flex items-center gap-3">
@@ -158,6 +152,9 @@ function PublicNavbar() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
+        { href: '/quote', label: 'Get a Quote' },
+        { href: '/booking', label: 'Start Shipping' },
+
     { href: '/about', label: 'About Us' },
     { href: '/how-it-works', label: 'How It Works' },
     { href: '/track', label: 'Track' },
@@ -167,17 +164,10 @@ function PublicNavbar() {
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-200 border-b border-gray-100 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <svg width="36" height="28" viewBox="0 0 38 30" fill="none">
-              <path d="M1 15L37 3L30 15L37 27L1 15Z" fill="#1B2B6B"/>
-              <path d="M1 15L37 3L24 15L37 27L1 15Z" fill="#FF6B00"/>
-            </svg>
-            <span className="font-extrabold text-[15px] tracking-tight">
-              <span className="text-[#1B2B6B]">PILOT </span>
-              <span className="text-[#FF6B00]">COURIER</span>
-            </span>
+            <Image src="/images/logo.png" alt="Pilot Courier" width={72} height={72} className="h-[72px] w-auto" priority />
           </Link>
 
           {/* Desktop links */}

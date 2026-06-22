@@ -32,6 +32,8 @@ export const authApi = {
   register: (data: { firstName: string; lastName: string; email: string; phone: string; password: string }) =>
     api.post('/auth/register', data),
   login: (data: { email: string; password: string }) => api.post('/auth/login', data),
+  forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) => api.post('/auth/reset-password', { token, password }),
   getMe: () => api.get('/auth/me'),
   updateProfile: (data: any) => api.patch('/auth/profile', data),
   updateFullProfile: (data: any) => api.patch('/auth/profile/full', data),
@@ -49,6 +51,9 @@ export const authApi = {
   // Tickets
   getTickets: () => api.get('/auth/tickets'),
   createTicket: (data: any) => api.post('/auth/tickets', data),
+  // Saved Quotes
+  getSavedQuotes: (params?: { page?: number; limit?: number }) => api.get('/auth/quotes', { params }),
+  deleteSavedQuote: (quoteId: string) => api.delete(`/auth/quotes/${quoteId}`),
 };
 
 // ── Shipments ─────────────────────────────────────────────────────────────────
@@ -95,6 +100,18 @@ export interface QuoteFormData {
   destinationCountry?: string;
   originResidential?: boolean;
   destinationResidential?: boolean;
+  originName?: string;
+  originCompany?: string;
+  originStreet?: string;
+  originStreet2?: string;
+  originPhone?: string;
+  originEmail?: string;
+  destinationName?: string;
+  destinationCompany?: string;
+  destinationStreet?: string;
+  destinationStreet2?: string;
+  destinationPhone?: string;
+  destinationEmail?: string;
   weight: number;
   weightUnit?: 'kg' | 'lbs';
   length: number;
@@ -105,6 +122,7 @@ export interface QuoteFormData {
   description?: string;
   insuranceAmount?: number;
   specialHandling?: boolean;
+  quoteType?: 'quick' | 'detailed';
 }
 
 export interface Rate {
