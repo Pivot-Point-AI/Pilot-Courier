@@ -22,6 +22,7 @@ const carriers = [
 export default function HeroSection() {
   return (
     <>
+    
       <section className="relative overflow-hidden bg-gray-50 mt-16 pt-20 pb-6 md:py-30 lg:py-40 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
         <div className="absolute inset-0 z-0 ">
           <Image
