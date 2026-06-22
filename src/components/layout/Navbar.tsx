@@ -70,11 +70,11 @@ function AuthNavbar() {
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header className="bg-white border-b-2 border-[#1B2B6B]/10 sticky top-0 z-50 shadow-md">
       {/* Top strip: logo + welcome */}
       <div className="flex items-center justify-between px-6 py-2 border-b border-gray-100 bg-white">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <Image src="/images/logo.png" alt="Pilot Courier" width={64} height={64} className="h-16 w-auto" priority />
+          <Image src="/images/logo.png" alt="Pilot Courier" width={115} height={132} className="h-[78px] w-auto" priority />
         </Link>
 
         <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ function AuthNavbar() {
           <Link
             key={href}
             href={href}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 text-xs font-semibold tracking-wide border-b-2 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-2 text-base font-semibold tracking-wide border-b-2 transition-all ${
               active
                 ? 'border-[#00529B] text-[#00529B]'
                 : 'border-transparent text-gray-500 hover:text-[#00529B] hover:border-gray-300'
@@ -162,19 +162,19 @@ function PublicNavbar() {
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-200 border-b border-gray-100 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-white transition-shadow duration-200 border-b-2 border-[#1B2B6B]/10 ${scrolled ? 'shadow-lg' : 'shadow-md'}`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <Image src="/images/logo.png" alt="Pilot Courier" width={72} height={72} className="h-[72px] w-auto" priority />
+            <Image src="/images/logo.png" alt="Pilot Courier" width={115} height={132} className="h-[88px] w-auto" priority />
           </Link>
 
           {/* Desktop links */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map(link => (
               <Link key={link.href} href={link.href}
-                className={`px-3.5 py-2 rounded-lg text-[13.5px] font-semibold transition-colors ${
+                className={`px-3.5 py-2 rounded-lg text-[17px] font-semibold transition-colors ${
                   pathname === link.href ? 'text-[#FF6B00]' : 'text-gray-700 hover:text-[#1B2B6B] hover:bg-gray-50'
                 }`}>
                 {link.label}
@@ -184,10 +184,10 @@ function PublicNavbar() {
 
           {/* Auth buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/auth/login" className="text-[13.5px] font-semibold text-gray-600 hover:text-[#1B2B6B] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Link href="/auth/login" className="text-[17px] font-semibold text-gray-600 hover:text-[#1B2B6B] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
               Sign In
             </Link>
-            <Link href="/quote" className="inline-flex items-center gap-2 bg-[#FF6B00] hover:bg-[#e55f00] text-white text-[13px] font-bold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+            <Link href="/quote" className="inline-flex items-center gap-2 bg-[#FF6B00] hover:bg-[#e55f00] text-white text-[16px] font-bold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
               Get a Quote
             </Link>
           </div>

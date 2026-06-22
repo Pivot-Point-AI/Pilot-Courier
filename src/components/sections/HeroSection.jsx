@@ -22,10 +22,10 @@ const carriers = [
 export default function HeroSection() {
   return (
     <>
-      <section className="relative overflow-hidden bg-gray-50 pt-20 pb-6 md:py-24 lg:py-40 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
-        <div className="absolute inset-0 z-0">
+      <section className="relative overflow-hidden bg-gray-50 mt-16 pt-20 pb-6 md:py-30 lg:py-40 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
+        <div className="absolute inset-0 z-0 ">
           <Image
-            src="/images/hero-scene2.png"
+            src="/images/hero-scene2.webp"
             alt="Shipping background"
             fill
             className="object-cover object-[75%_center] md:object-center"
@@ -36,8 +36,11 @@ export default function HeroSection() {
         {/* Rotating globe motif with an orbiting plane, a subtle accent clear of the background artwork */}
         <div className="hidden md:block absolute z-[1] top-[10%] right-[3%] w-[200px] h-[200px] lg:w-[260px] lg:h-[260px]">
           <Globe className="absolute inset-0 pointer-events-none opacity-80 drop-shadow-[0_0_30px_rgba(23,62,115,0.5)]" />
-          <OrbitPlane size={340} className="lg:hidden" />
-          <OrbitPlane size={420} className="hidden lg:block" />
+          {/* OrbitPlane renders only the track + plane now, stacked above the globe so it's always visible in front of it */}
+          <div className="absolute inset-0 z-10">
+            <OrbitPlane size={200} className="lg:hidden" />
+            <OrbitPlane size={260} className="hidden lg:block" />
+          </div>
         </div>
 
         {/* Mobile-only white fade so text stays readable over the image */}
@@ -45,19 +48,24 @@ export default function HeroSection() {
 
         <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] mb-3 md:mb-6">
+            <span className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.18em] uppercase text-[#1B2B6B] bg-white/70 border border-[#bfd0ee] rounded-full px-3 py-1 mb-4 md:mb-5">
+              Trusted Worldwide Since 2007
+            </span>
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-3 md:mb-6">
               <span className="block">Save on Shipping</span>
-              <span className="block">with Top Carriers</span>
+              <span className="block">
+                with Top <span className="text-[#1B2B6B]">Carriers</span>
+              </span>
             </h1>
-            <p className="text-sm sm:text-lg font-normal text-gray-800 leading-relaxed max-w-2xl mb-4 md:mb-8">
+            <p className="text-sm sm:text-lg font-normal text-gray-700 leading-relaxed max-w-2xl mb-5 md:mb-9">
               Compare real-time rates from UPS, FedEx, DHL{' '}
               <span className="hidden sm:inline"><br /></span>
               and more. Ship smarter. Pay less.
             </p>
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
+            <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 md:mb-12">
               {trustBadges.map(({ icon: Icon, title, sub }) => (
-                <div key={title} className="flex items-center gap-1.5 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-[#537dcf] border border-[#bfd0ee] flex items-center justify-center flex-shrink-0">
+                <div key={title} className="flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl px-2.5 py-2 sm:px-3 sm:py-2.5 shadow-sm">
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-[#537dcf] to-[#1B2B6B] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(27,43,107,0.35)]">
                     <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                   <div>
@@ -67,16 +75,13 @@ export default function HeroSection() {
                 </div>
               ))}
             </div>
-            <div className="max-w-5xl w-full py-24">
-              {/* <QuoteForm /> */}
-            </div>
           </div>
         </div>
       </section>
 
       <section className="bg-white py-6 md:py-8 border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-center text-xs font-normal text-gray-500 leading-[1.4] mb-4 md:mb-6">
+          <p className="text-center text-xs font-semibold tracking-[0.08em] uppercase text-gray-400 leading-[1.4] mb-4 md:mb-6">
             Trusted by Shippers. Powered by Leading Carriers.
           </p>
           <ul className="flex flex-wrap items-end justify-center gap-3 sm:gap-4 md:gap-6">
