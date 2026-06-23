@@ -843,7 +843,7 @@ export default function BookingPage() {
     <div className="min-h-screen bg-[#f5f6f8]">
       <Navbar />
 
-      <div className="pt-16">
+      <div className="pt-20">
         <StepBar current={step} />
 
         <div className="max-w-6xl mx-auto px-4 py-6">

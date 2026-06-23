@@ -31,25 +31,25 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   }, [isAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-[#f5f6f8] flex flex-col">
+    <div className="min-h-screen bg-[#f5f6f8] flex flex-col pt-20">
       {/* Navbar auto-shows AuthNavbar since user is logged in */}
       <Navbar />
 
-      {/* Dark sub-nav — only for My Account pages, not History & Tracking */}
+      {/* Sub-nav — only for My Account pages, not History & Tracking */}
       {isMyAccount && (
-        <div className="bg-[#2e3338] sticky top-[97px] z-40">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex overflow-x-auto">
+        <div className="bg-white border-b border-gray-200 sticky top-20 z-40 shadow-sm">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex overflow-x-auto -mb-px">
               {SUB_TABS.map(({ href, label }) => {
                 const active = pathname === href || (href === '/account/payment' && pathname === '/account');
                 return (
                   <Link
                     key={href}
                     href={href}
-                    className={`flex-shrink-0 px-5 py-2.5 text-xs font-medium whitespace-nowrap transition-all ${
+                    className={`flex-shrink-0 px-4 py-3 text-[13px] font-medium whitespace-nowrap border-b-2 transition-colors ${
                       active
-                        ? 'text-white font-semibold bg-[#3d4349]'
-                        : 'text-gray-400 hover:text-white hover:bg-[#3d4349]'
+                        ? 'text-[#1B2B6B] font-semibold border-[#1B2B6B]'
+                        : 'text-gray-500 border-transparent hover:text-[#1B2B6B] hover:border-gray-300'
                     }`}
                   >
                     {label}
