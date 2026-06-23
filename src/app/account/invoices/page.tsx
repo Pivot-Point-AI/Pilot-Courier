@@ -91,44 +91,44 @@ export default function InvoicesPage() {
 
       {/* Filter bar */}
       <div className="px-6 py-4 border-b border-gray-100">
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-3">
+          <div className="w-full sm:w-auto">
             <p className="text-xs text-gray-500 mb-1">From Date</p>
             <div className="relative">
-              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className={inp} />
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className={`${inp} w-full sm:w-auto`} />
             </div>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <p className="text-xs text-gray-500 mb-1">To Date</p>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className={inp} />
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className={`${inp} w-full sm:w-auto`} />
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <p className="text-xs text-gray-500 mb-1">Invoice Number</p>
             <input type="text" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)}
-              placeholder="NPI..." className={`${inp} w-36`} />
+              placeholder="NPI..." className={`${inp} w-full sm:w-36`} />
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <p className="text-xs text-gray-500 mb-1">Payment Status</p>
-            <select value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)} className={inp}>
+            <select value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)} className={`${inp} w-full sm:w-auto`}>
               {STATUS_OPTS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <p className="text-xs text-gray-500 mb-1">Results Per Page</p>
-            <select value={perPage} onChange={e => setPerPage(Number(e.target.value))} className={inp}>
+            <select value={perPage} onChange={e => setPerPage(Number(e.target.value))} className={`${inp} w-full sm:w-auto`}>
               {PER_PAGE_OPTS.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
-          <div className="flex gap-2 pb-0.5">
+          <div className="flex flex-wrap gap-2 pb-0.5 w-full sm:w-auto">
             <button onClick={handleSearch}
-              className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-[#00529B] hover:text-[#00529B] transition-all bg-white">
+              className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-[#00529B] hover:text-[#00529B] transition-all bg-white flex-1 sm:flex-initial">
               Search
             </button>
-            <button className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-[#00529B] transition-all bg-white">
+            <button className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-[#00529B] transition-all bg-white flex-1 sm:flex-initial">
               Summary
             </button>
             <button onClick={handleReset}
-              className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-gray-400 transition-all bg-white">
+              className="px-5 py-1.5 text-sm border border-gray-300 rounded text-gray-600 hover:border-gray-400 transition-all bg-white flex-1 sm:flex-initial">
               Reset
             </button>
           </div>
@@ -147,7 +147,7 @@ export default function InvoicesPage() {
       ) : (
         <>
           {/* Count + pagination */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-6 py-3 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-700">
               <span className="text-[#00529B] font-bold mr-1">{total}</span> Invoices
             </p>
@@ -166,8 +166,58 @@ export default function InvoicesPage() {
             )}
           </div>
 
+          {/* Mobile cards */}
+          <div className="md:hidden p-3 space-y-3 bg-gray-50">
+            {shipments.map((s: any) => {
+              const inv = invoiceNum(s);
+              const amt = s.payment?.amount || 0;
+              const overdue = new Date(s.createdAt).getTime() + 5 * 86400000 < Date.now() && s.payment?.status !== 'completed';
+              const statusLabel = s.payment?.status === 'completed' ? 'Paid' : s.payment?.status || 'Pending';
+              return (
+                <div key={s._id} className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+                  <div className="flex items-center gap-3 px-4 pt-4">
+                    <div className="w-10 h-10 rounded-xl bg-[#00529B] text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm">
+                      INV
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/account/invoices/${s._id}`} className="font-mono text-[13px] font-bold text-[#c0392b] hover:underline truncate block">{inv}</Link>
+                      <p className="text-[11px] text-gray-400">{fmtDate(s.createdAt)}</p>
+                    </div>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusLabel === 'Paid' ? 'bg-green-100 text-green-700' : overdue ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {statusLabel}
+                    </span>
+                  </div>
+
+                  <div className="px-4 pt-3 pb-4 space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Due Date</p>
+                        <p className={`font-medium ${overdue ? 'text-[#c0392b]' : 'text-gray-700'}`}>{dueDateStr(s.createdAt)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Total</p>
+                        <p className="font-bold text-[#00529B] text-base leading-tight">${amt.toFixed(2)} <span className="text-[10px] font-normal text-gray-400">{s.payment?.currency || 'CAD'}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 border-t border-gray-100 divide-x divide-gray-100 bg-gray-50/60">
+                    <button onClick={() => handleDownload(s)}
+                      className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-[#00529B] transition-colors">
+                      <Download className="w-4 h-4" /> Download
+                    </button>
+                    <Link href={`/account/invoices/${s._id}`}
+                      className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-[#00529B] transition-colors">
+                      <FileText className="w-4 h-4" /> View
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm min-w-[800px]">
               <thead>
                 <tr className="border-b border-gray-100">

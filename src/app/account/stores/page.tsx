@@ -33,10 +33,10 @@ export default function StoresPage() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
         <h2 className="text-base font-semibold text-gray-800">Manage Stores</h2>
         <button onClick={() => setShowModal(true)}
-          className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center gap-1.5">
+          className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center justify-center gap-1.5 w-full sm:w-auto">
           <Plus className="w-3.5 h-3.5" /> Add New Store +
         </button>
       </div>
@@ -52,18 +52,18 @@ export default function StoresPage() {
             <p className="text-sm font-semibold text-gray-600">{stores.length} Store{stores.length !== 1 ? 's' : ''} Connected</p>
             <div className="divide-y divide-gray-100">
               {stores.map((s: any) => (
-                <div key={s.id} className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                <div key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                       <Store className="w-5 h-5 text-[#00529B]" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-sm text-gray-800">{s.storeName}</p>
-                      <p className="text-xs text-gray-400">{s.platform} · {s.storeUrl}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-gray-800 truncate">{s.storeName}</p>
+                      <p className="text-xs text-gray-400 truncate">{s.platform} · {s.storeUrl}</p>
                     </div>
                   </div>
                   <button onClick={() => setStores(p => p.filter(x => x.id !== s.id))}
-                    className="text-xs text-red-400 hover:text-red-600">Remove</button>
+                    className="text-xs text-red-400 hover:text-red-600 self-start sm:self-auto">Remove</button>
                 </div>
               ))}
             </div>
@@ -74,7 +74,7 @@ export default function StoresPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h3 className="font-semibold text-gray-800">Add New Store</h3>
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
@@ -96,11 +96,11 @@ export default function StoresPage() {
                 <input className={inp} value={form.storeUrl} onChange={e => f('storeUrl', e.target.value)} placeholder="https://mystore.com" />
               </div>
             </div>
-            <div className="flex gap-3 justify-end px-5 py-4 border-t border-gray-100">
+            <div className="flex flex-wrap gap-3 justify-end px-5 py-4 border-t border-gray-100">
               <button onClick={() => setShowModal(false)}
-                className="px-5 py-2 text-sm border border-gray-300 rounded text-gray-600 hover:border-gray-400">Cancel</button>
+                className="px-5 py-2 text-sm border border-gray-300 rounded text-gray-600 hover:border-gray-400 flex-1 sm:flex-initial">Cancel</button>
               <button onClick={handleSave}
-                className="px-6 py-2 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90">Save Store</button>
+                className="px-6 py-2 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex-1 sm:flex-initial">Save Store</button>
             </div>
           </div>
         </div>

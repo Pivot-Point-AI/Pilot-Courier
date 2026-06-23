@@ -500,12 +500,12 @@ export default function QuoteClient() {
   return (
     <div className="min-h-screen bg-[#f4f6f9]">
       <Navbar />
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 pt-24">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <h1 className="text-lg font-bold text-[#1B2B6B]">Provide Details To Get A Quick Quote</h1>
-          <Link href="/booking" className="flex items-center gap-1 text-sm text-[#1B2B6B] hover:text-[#FF6B00] font-medium transition-colors">
+          <Link href="/booking" className="flex items-center gap-1 text-sm text-[#1B2B6B] hover:text-[#FF6B00] font-medium transition-colors self-start sm:self-auto">
             Switch to Rate &amp; Ship <ExternalLink className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -532,13 +532,13 @@ export default function QuoteClient() {
                   </label>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
-                    <div className="flex-1"><CountrySelect value={form.originCountry} onChange={v => setForm(p => ({ ...p, originCountry: v, originProvince: '', originCity: '' }))} /></div>
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
+                    <div className="w-full md:flex-1"><CountrySelect value={form.originCountry} onChange={v => setForm(p => ({ ...p, originCountry: v, originProvince: '', originCity: '' }))} /></div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code <span className="text-[#FF6B00]">*</span></label>
-                    <div className="relative flex-1">
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code <span className="text-[#FF6B00]">*</span></label>
+                    <div className="relative w-full md:flex-1">
                       <input type="text" value={form.originPostal}
                         onChange={e => handlePostalChange('origin', form.originCountry, e.target.value)}
                         placeholder="e.g. L1Z 0R6"
@@ -547,13 +547,13 @@ export default function QuoteClient() {
                       {postalLookingUp === 'origin' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">City <span className="text-[#FF6B00]">*</span></label>
-                    <div className="flex-1"><CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required /></div>
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">City <span className="text-[#FF6B00]">*</span></label>
+                    <div className="w-full md:flex-1"><CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required /></div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Province / State <span className="text-[#FF6B00]">*</span></label>
-                    <div className="flex-1">
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Province / State <span className="text-[#FF6B00]">*</span></label>
+                    <div className="w-full md:flex-1">
                       <ProvinceSelect
                         value={form.originProvince}
                         onChange={v => setField('originProvince', v)}
@@ -580,13 +580,13 @@ export default function QuoteClient() {
                   </label>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
-                    <div className="flex-1"><CountrySelect value={form.destinationCountry} onChange={v => setForm(p => ({ ...p, destinationCountry: v, destinationProvince: '', destinationCity: '' }))} /></div>
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Country</label>
+                    <div className="w-full md:flex-1"><CountrySelect value={form.destinationCountry} onChange={v => setForm(p => ({ ...p, destinationCountry: v, destinationProvince: '', destinationCity: '' }))} /></div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code</label>
-                    <div className="relative flex-1">
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Zip / Postal Code</label>
+                    <div className="relative w-full md:flex-1">
                       <input type="text" value={form.destinationPostal}
                         onChange={e => handlePostalChange('destination', form.destinationCountry, e.target.value)}
                         placeholder="e.g. V6B 1A1 (optional)"
@@ -594,13 +594,13 @@ export default function QuoteClient() {
                       {postalLookingUp === 'destination' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">City</label>
-                    <div className="flex-1"><CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} /></div>
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">City</label>
+                    <div className="w-full md:flex-1"><CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} /></div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <label className="w-32 flex-shrink-0 text-xs font-medium text-gray-500">Province / State</label>
-                    <div className="flex-1">
+                  <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                    <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Province / State</label>
+                    <div className="w-full md:flex-1">
                       <ProvinceSelect
                         value={form.destinationProvince}
                         onChange={v => setField('destinationProvince', v)}
@@ -615,7 +615,7 @@ export default function QuoteClient() {
 
           {/* ── Package Details ── */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
-            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-6 py-4 border-b border-gray-100">
+            <div className="flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-start md:items-center gap-3 md:gap-4 px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#FF6B00]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -623,7 +623,7 @@ export default function QuoteClient() {
                 </svg>
                 <span className="font-bold text-[#1B2B6B] text-sm">Package Details</span>
               </div>
-              <div className="flex items-center justify-center gap-4 flex-wrap">
+              <div className="flex items-center justify-start md:justify-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-gray-500 font-medium">Packaging Type</label>
                   <select value={packagingType} onChange={e => setPackagingType(e.target.value)}
@@ -646,12 +646,12 @@ export default function QuoteClient() {
                   </select>
                 </div>
               </div>
-              <div />
+              <div className="hidden md:block" />
             </div>
 
-            <div className="px-6 py-4 overflow-x-auto">
-              {/* Header */}
-              <div className="grid gap-2 mb-2 min-w-[800px]"
+            <div className="px-6 py-4 md:overflow-x-auto">
+              {/* Header (desktop) */}
+              <div className="hidden md:grid gap-2 mb-2 min-w-[800px]"
                 style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
                 <span className="text-xs font-semibold text-gray-400 text-center">#</span>
                 <span className="text-xs font-semibold text-gray-500 text-center">L ({form.dimensionUnit})</span>
@@ -665,7 +665,8 @@ export default function QuoteClient() {
                 <span />
               </div>
 
-              <div className="space-y-2 min-w-[800px]">
+              {/* Rows (desktop grid) */}
+              <div className="hidden md:block space-y-2 min-w-[800px]">
                 {packages.map((pkg, idx) => {
                   const divisor = form.dimensionUnit === 'cm' ? 5000 : 166;
                   const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
@@ -715,16 +716,96 @@ export default function QuoteClient() {
                   );
                 })}
               </div>
+
+              {/* Cards (mobile) */}
+              <div className="md:hidden space-y-3">
+                {packages.map((pkg, idx) => {
+                  const divisor = form.dimensionUnit === 'cm' ? 5000 : 166;
+                  const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+                  return (
+                  <div key={pkg.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-400">Package {idx + 1}</span>
+                      <div className="flex items-center gap-0.5">
+                        <button type="button" title="Add" onClick={addPkg}
+                          className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" title="Duplicate" onClick={() => dupPkg(pkg)}
+                          className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                        {packages.length > 1 && (
+                          <button type="button" title="Remove" onClick={() => removePkg(pkg.id)}
+                            className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['length','width','height'] as const).map(f => (
+                        <div key={f}>
+                          <label className="text-[11px] text-gray-400 block mb-0.5">{f[0].toUpperCase()} ({form.dimensionUnit})</label>
+                          <input type="number" value={pkg[f]}
+                            onChange={e => updatePkg(pkg.id, f, e.target.value)}
+                            min="1" step="0.1"
+                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Weight ({form.weightUnit})</label>
+                        <input type="number" value={pkg.weight}
+                          onChange={e => updatePkg(pkg.id, 'weight', e.target.value)}
+                          min="1" step="0.1" required={idx === 0}
+                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({form.weightUnit})</label>
+                        <div className="border border-gray-200 rounded px-2 py-1.5 text-sm w-full text-center text-gray-500 bg-white">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Insurance ($)</label>
+                        <input type="number" value={pkg.insuranceAmount}
+                          onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
+                          min="0" step="0.01"
+                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Sp. Handling</label>
+                        <select value={pkg.specialHandling ? 'Yes' : 'No'}
+                          onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'Yes')}
+                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center">
+                          <option>No</option>
+                          <option>Yes</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-gray-400 block mb-0.5">Description</label>
+                      <input type="text" value={pkg.description}
+                        onChange={e => updatePkg(pkg.id, 'description', e.target.value)}
+                        placeholder="Description"
+                        className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors" />
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
           {/* ── Submit ── */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <p className="text-xs text-gray-400 hidden sm:block">
               Select <span className="text-[#FF6B00] font-semibold">Get Quote</span> to view available pricing and carrier options for the selected route
             </p>
             <button type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-[#1B2B6B] hover:bg-[#152259] text-white font-bold text-sm px-10 py-3 rounded-lg transition-colors shadow-sm disabled:opacity-60 ml-auto">
+              className="flex items-center justify-center gap-2 bg-[#1B2B6B] hover:bg-[#152259] text-white font-bold text-sm px-10 py-3 rounded-lg transition-colors shadow-sm disabled:opacity-60 w-full sm:w-auto sm:ml-auto">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Getting Rates...</> : 'Get Quote'}
             </button>
           </div>

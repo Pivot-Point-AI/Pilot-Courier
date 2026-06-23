@@ -41,7 +41,7 @@ export default function ProfilePage() {
           </div>
         </div>
         <div className="p-5 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={lbl}>First Name</label>
               <input className={inp} value={form.firstName} onChange={e => setForm(p => ({ ...p, firstName: e.target.value }))} />
@@ -61,7 +61,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <div className="pt-2">
-            <button onClick={handleSave} disabled={saving} className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center gap-2 disabled:opacity-60">
+            <button onClick={handleSave} disabled={saving} className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center justify-center gap-2 disabled:opacity-60 w-full sm:w-auto">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <>Save Changes</>}
             </button>
           </div>
@@ -73,7 +73,7 @@ export default function ProfilePage() {
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-gray-700 text-sm">Account Information</h2>
         </div>
-        <div className="p-5 grid grid-cols-2 gap-6 text-sm">
+        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
           <div>
             <p className="text-xs text-gray-400 mb-1">Contact Name</p>
             <p className="font-medium text-gray-800">{user?.firstName} {user?.lastName}</p>

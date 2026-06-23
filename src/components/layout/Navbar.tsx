@@ -12,6 +12,7 @@ function AuthNavbar() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [dropOpen, setDropOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,6 +92,11 @@ function AuthNavbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Mobile menu toggle */}
+            <button onClick={() => setMobileOpen(v => !v)} className="md:hidden p-2 text-gray-500 hover:text-[#1B2B6B] transition-colors">
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
             <button className="relative p-2 text-gray-400 hover:text-[#1B2B6B] transition-colors">
               <Bell className="w-[18px] h-[18px]" />
             </button>
@@ -130,6 +136,25 @@ function AuthNavbar() {
             </div>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="md:hidden border-t border-gray-100 py-2 space-y-1">
+            {tabs.map(({ href, label, active, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
+                  active ? 'bg-orange-50 text-[#1B2B6B]' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {icon}
+                {label}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </header>
   );

@@ -70,7 +70,7 @@ export default function AccountPaymentPage() {
       <div className="grid md:grid-cols-2 gap-5">
         {/* My Account Details */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <span className="text-[#c0392b]">👤</span> My Account Details
             </div>
@@ -83,11 +83,11 @@ export default function AccountPaymentPage() {
 
           {editing ? (
             <div className="p-5 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={lbl}>First Name</label><input className={inp} value={form.firstName} onChange={e => f('firstName', e.target.value)} /></div>
                 <div><label className={lbl}>Last Name</label><input className={inp} value={form.lastName} onChange={e => f('lastName', e.target.value)} /></div>
-                <div className="col-span-2"><label className={lbl}>Company</label><input className={inp} value={form.company} onChange={e => f('company', e.target.value)} /></div>
-                <div className="col-span-2"><label className={lbl}>Street Address</label><input className={inp} value={form.street} onChange={e => f('street', e.target.value)} /></div>
+                <div className="sm:col-span-2"><label className={lbl}>Company</label><input className={inp} value={form.company} onChange={e => f('company', e.target.value)} /></div>
+                <div className="sm:col-span-2"><label className={lbl}>Street Address</label><input className={inp} value={form.street} onChange={e => f('street', e.target.value)} /></div>
                 <div><label className={lbl}>City</label><input className={inp} value={form.city} onChange={e => f('city', e.target.value)} /></div>
                 <div><label className={lbl}>Province</label>
                   <select className={inp} value={form.province} onChange={e => f('province', e.target.value)}>
@@ -98,15 +98,15 @@ export default function AccountPaymentPage() {
                 <div><label className={lbl}>Postal Code</label><input className={inp} value={form.postalCode} onChange={e => f('postalCode', e.target.value)} /></div>
                 <div><label className={lbl}>Phone</label><input className={inp} value={form.phone} onChange={e => f('phone', e.target.value)} /></div>
               </div>
-              <div className="flex gap-3 pt-2">
-                <button onClick={handleSave} disabled={saving} className="px-5 py-1.5 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 disabled:opacity-60 flex items-center gap-2">
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button onClick={handleSave} disabled={saving} className="px-5 py-1.5 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 disabled:opacity-60 flex items-center justify-center gap-2 flex-1 sm:flex-initial">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Save
                 </button>
-                <button onClick={() => setEditing(false)} className="px-4 py-1.5 text-sm border border-gray-300 rounded text-gray-500 hover:border-gray-400">Cancel</button>
+                <button onClick={() => setEditing(false)} className="px-4 py-1.5 text-sm border border-gray-300 rounded text-gray-500 hover:border-gray-400 flex-1 sm:flex-initial">Cancel</button>
               </div>
             </div>
           ) : (
-            <div className="p-5 grid grid-cols-2 gap-5 text-sm">
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
               <div>
                 <p className="font-semibold text-gray-600 mb-2">Contact Details</p>
                 <p className="text-gray-700">{user?.firstName} {user?.lastName}</p>
@@ -137,17 +137,17 @@ export default function AccountPaymentPage() {
 
         {/* My Payment Information */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
               <span className="text-[#00529B]">💳</span> My Payment Information
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button className="px-3 py-1 text-xs text-[#c0392b] hover:underline">View Payment History</button>
               <button className="px-3 py-1 text-xs border border-gray-300 rounded text-gray-600 hover:border-[#00529B]">Manage</button>
               <button className="px-3 py-1 text-xs border border-gray-300 rounded text-gray-600 hover:border-[#00529B]">Add</button>
             </div>
           </div>
-          <div className="p-5 grid grid-cols-2 gap-5 text-sm text-gray-500">
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm text-gray-500">
             <div>
               <p className="text-xs font-semibold text-gray-600 mb-1">Last 4 digits on Card</p>
               <p>—</p>
@@ -166,7 +166,7 @@ export default function AccountPaymentPage() {
 
       {/* API Credentials */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-w-lg">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
             <span className="text-[#c0392b]">👤</span> API Credentials
           </div>
@@ -174,7 +174,7 @@ export default function AccountPaymentPage() {
             Regenerate
           </button>
         </div>
-        <div className="p-5 grid grid-cols-2 gap-5 text-sm">
+        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
           <div>
             <p className="text-xs font-semibold text-gray-600 mb-1">API UserName</p>
             <p className="text-gray-700 font-mono">{user?.email?.split('@')[0] || '—'}</p>

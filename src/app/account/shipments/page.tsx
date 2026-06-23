@@ -240,9 +240,9 @@ export default function HistoryTrackingPage() {
           <h2 className="font-semibold text-gray-700 text-sm">Search &amp; Filter</h2>
         </div>
         <div className="p-5 space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             {/* Date range */}
-            <div className="col-span-2 md:col-span-1">
+            <div className="sm:col-span-2 md:col-span-1">
               <label className="block text-xs text-gray-500 mb-1">Select time period</label>
               <div className="flex gap-1 items-center">
                 <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
@@ -314,17 +314,17 @@ export default function HistoryTrackingPage() {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-wrap gap-3 pt-1">
             <button onClick={handleSearch}
-              className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center gap-2">
+              className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center justify-center gap-2 flex-1 sm:flex-initial">
               <Search className="w-3.5 h-3.5" /> Search
             </button>
             <button
-              className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
+              className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white flex-1 sm:flex-initial">
               Save List
             </button>
             <button onClick={handleReset}
-              className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
+              className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white flex-1 sm:flex-initial">
               Reset
             </button>
           </div>
@@ -334,11 +334,11 @@ export default function HistoryTrackingPage() {
       {/* ── Results table ── */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {/* Table header bar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-b border-gray-100">
           <h3 className="font-semibold text-gray-700 text-sm">
             {loading ? 'Loading...' : `${pagination?.total ?? shipments.length} Shipment${(pagination?.total ?? shipments.length) !== 1 ? 's' : ''}`}
           </h3>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* Label copies */}
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <span>Shipping Label Copies</span>
@@ -378,7 +378,139 @@ export default function HistoryTrackingPage() {
             <button onClick={handleReset} className="mt-3 text-xs text-brand-orange hover:underline">Reset Filters</button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Mobile cards */}
+          <div className="md:hidden p-3 space-y-3 bg-gray-50">
+            {shipments.map((s: any) => {
+              const carrierColor: Record<string, string> = {
+                UPS: 'bg-yellow-600', PUROLATOR: 'bg-purple-700', DHL: 'bg-red-600', FEDEX: 'bg-purple-900', ICS: 'bg-blue-700',
+              };
+              const carrierName = s.selectedRate?.carrierName || '';
+              const carrierBg = carrierColor[carrierName.toUpperCase()] || 'bg-brand-navy';
+              const carrierInitials = (carrierName || '?').slice(0, 3).toUpperCase();
+              const statusStripe: Record<string, string> = {
+                pending_payment: 'bg-yellow-400', paid: 'bg-blue-400', label_generated: 'bg-indigo-400',
+                pickup_scheduled: 'bg-purple-400', in_transit: 'bg-cyan-400', out_for_delivery: 'bg-orange-400',
+                delivered: 'bg-green-400', cancelled: 'bg-red-400', refunded: 'bg-gray-300',
+              };
+              return (
+              <div key={s._id} className={`relative rounded-2xl border bg-white shadow-sm hover:shadow-md overflow-hidden transition-all ${selected.has(s._id) ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-gray-200'}`}>
+                {/* Status accent stripe */}
+                <span className={`absolute left-0 top-0 bottom-0 w-1 ${statusStripe[s.status] || 'bg-gray-200'}`} />
+
+                {/* Card header */}
+                <div className="flex items-center gap-3 px-4 pt-4 pl-5">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(s._id)}
+                    onChange={() => toggleSelect(s._id)}
+                    className="accent-brand-navy w-4 h-4 flex-shrink-0"
+                  />
+                  <div className={`w-10 h-10 rounded-xl ${carrierBg} text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm`}>
+                    {carrierInitials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-[13px] font-bold text-gray-800 tracking-tight">{s.shipmentNumber}</p>
+                    <p className="text-[11px] text-gray-400">{fmtDate(s.createdAt)}</p>
+                  </div>
+                  <StatusCell status={s.status} />
+                </div>
+
+                {/* Service line */}
+                <div className="px-4 pl-5 pt-3">
+                  <p className="text-[13px] font-semibold text-gray-700">{carrierName || 'Carrier TBD'} <span className="text-gray-400 font-normal">· {s.selectedRate?.serviceName || '—'}</span></p>
+                </div>
+
+                {/* Body */}
+                <div className="px-4 pl-5 pt-3 pb-4 space-y-3 text-xs">
+                  <div className="flex items-start gap-2 text-gray-600">
+                    <svg className="w-3.5 h-3.5 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" /><circle cx="12" cy="9" r="2.5" />
+                    </svg>
+                    <p className="truncate"><span className="text-gray-400">To </span>{s.recipient?.company || s.recipient?.name}, {s.recipient?.city}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Weight</p>
+                      <p className="text-gray-700 font-medium">{fmtWeight(s)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Total Charge</p>
+                      <p className="font-bold text-brand-navy text-base leading-tight">${s.payment?.amount?.toFixed(2)} <span className="text-[10px] font-normal text-gray-400">{s.payment?.currency}</span></p>
+                    </div>
+                  </div>
+
+                  {s.trackingNumber && (
+                    <div className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-gray-200 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Tracking #</p>
+                        <Link href={`/track?number=${s.trackingNumber}`} className="font-mono text-xs font-semibold text-brand-orange hover:underline truncate block">
+                          {s.trackingNumber}
+                        </Link>
+                      </div>
+                      <button
+                        title="Copy tracking link"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/track?number=${s.trackingNumber}`);
+                          toast.success('Tracking link copied!');
+                        }}
+                        className="p-1.5 text-gray-400 hover:text-brand-navy transition-colors rounded-lg hover:bg-gray-100 flex-shrink-0"
+                      >
+                        <Link2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="grid grid-cols-3 border-t border-gray-100 divide-x divide-gray-100 bg-gray-50/60">
+                  {hasLabel(s) ? (
+                    <button
+                      onClick={() => handleDownloadLabel(s)}
+                      disabled={labelLoading === s._id}
+                      className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-brand-navy transition-colors"
+                    >
+                      {labelLoading === s._id
+                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                        : <RotateCw className="w-4 h-4" />}
+                      Label
+                    </button>
+                  ) : (
+                    <button onClick={() => s.trackingNumber && router.push(`/track?number=${s.trackingNumber}`)}
+                      className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-brand-navy transition-colors">
+                      <Truck className="w-4 h-4" />
+                      Track
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleRepeat(s)}
+                    className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-green-600 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Repeat
+                  </button>
+
+                  {cancellable(s) ? (
+                    <button
+                      onClick={() => handleCancel(s._id)}
+                      className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  ) : (
+                    <div className="flex items-center justify-center text-gray-300 text-[11px]">—</div>
+                  )}
+                </div>
+              </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm min-w-[900px]">
               <thead>
                 <tr className="border-b border-gray-100">
@@ -528,15 +660,16 @@ export default function HistoryTrackingPage() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-t border-gray-100 text-sm">
             <p className="text-xs text-gray-400">
               Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, pagination.total)} of {pagination.total}
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap overflow-x-auto">
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                 className="p-1.5 rounded border border-gray-200 text-gray-500 hover:border-brand-navy hover:text-brand-navy disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                 <ChevronLeft className="w-4 h-4" />

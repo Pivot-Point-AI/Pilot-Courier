@@ -70,6 +70,54 @@ export default function SavedQuotesPage() {
           <p className="text-sm text-gray-500">No saved quotes yet. Quotes from Quick Quote are kept for 15 days, and from Rate &amp; Ship for 2 months.</p>
         </div>
       ) : (
+        <>
+        {/* Mobile cards */}
+        <div className="md:hidden p-3 space-y-3 bg-gray-50">
+          {quotes.map((q) => (
+            <div key={q._id} className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+              <div className="flex items-center gap-3 px-4 pt-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm text-white ${q.type === 'detailed' ? 'bg-blue-600' : 'bg-orange-500'}`}>
+                  {q.type === 'detailed' ? 'R&S' : 'QQ'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{q.formData?.originPostal} → {q.formData?.destinationPostal || '—'}</p>
+                  <p className="text-[11px] text-gray-400">{new Date(q.createdAt).toLocaleDateString()}</p>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded font-medium ${q.type === 'detailed' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                  {q.type === 'detailed' ? 'Rate & Ship' : 'Quick Quote'}
+                </span>
+              </div>
+              <div className="px-4 pt-3 pb-4 space-y-3 text-xs">
+                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Weight</p>
+                    <p className="text-gray-700 font-medium">{q.formData?.weight} {q.formData?.weightUnit}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Rates Found</p>
+                    <p className="font-bold text-[#00529B] text-base leading-tight">{q.rates?.length || 0}</p>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1 text-gray-500">
+                  <Clock className="w-3 h-3" /> {daysLeft(q.expiresAt)}d left
+                </span>
+              </div>
+              <div className="grid grid-cols-2 border-t border-gray-100 divide-x divide-gray-100 bg-gray-50/60">
+                <button onClick={() => handleResume(q)}
+                  className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-white hover:text-[#00529B] transition-colors">
+                  <ArrowRight className="w-4 h-4" /> Resume
+                </button>
+                <button onClick={() => handleDelete(q._id)} disabled={deleting === q._id}
+                  className="flex flex-col items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+                  {deleting === q._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block">
         <table className="w-full text-sm">
           <thead><tr className="border-b border-gray-100">{['Type','Route','Weight','Rates Found','Saved On','Expires',''].map(h => (
             <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-gray-400">{h}</th>
@@ -105,14 +153,16 @@ export default function SavedQuotesPage() {
             ))}
           </tbody>
         </table>
+        </div>
+        </>
       )}
 
       {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-t border-gray-100 text-sm">
           <p className="text-xs text-gray-400">
             Showing {(page - 1) * PER_PAGE + 1}–{Math.min(page * PER_PAGE, pagination.total)} of {pagination.total}
           </p>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap overflow-x-auto">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
               className="p-1.5 rounded border border-gray-200 text-gray-500 hover:border-[#00529B] hover:text-[#00529B] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
               <ChevronLeft className="w-4 h-4" />

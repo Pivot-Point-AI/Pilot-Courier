@@ -42,18 +42,18 @@ export default function CarriersPage() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
         <h2 className="text-base font-semibold text-gray-800">Manage Carriers</h2>
-        <button className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90">
+        <button className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 w-full sm:w-auto">
           Add New Carrier +
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 px-5">
+      <div className="flex border-b border-gray-200 px-5 overflow-x-auto">
         {[['netparcel', 'netParcel Carriers'], ['yours', 'Your Carrier Accounts']].map(([val, label]) => (
           <button key={val} onClick={() => setActiveTab(val as any)}
-            className={`px-4 py-3 text-xs font-medium border-b-2 transition-all ${activeTab === val ? 'border-[#00529B] text-[#00529B]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
+            className={`px-4 py-3 text-xs font-medium border-b-2 transition-all whitespace-nowrap ${activeTab === val ? 'border-[#00529B] text-[#00529B]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}>
             {label}
           </button>
         ))}
@@ -61,17 +61,17 @@ export default function CarriersPage() {
 
       {activeTab === 'netparcel' && (
         <div>
-          <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 items-center px-5 py-2 border-b border-gray-50">
+          <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-x-6 items-center px-5 py-2 border-b border-gray-50">
             <span className="text-xs font-semibold text-gray-500">Name</span>
             <span className="text-xs font-semibold text-gray-500 w-32 text-center" />
             <span className="text-xs font-semibold text-gray-500 w-16 text-right">Active</span>
           </div>
           <div className="divide-y divide-gray-50">
             {NETPARCEL_CARRIERS.map(carrier => (
-              <div key={carrier} className="grid grid-cols-[1fr_auto_auto] gap-x-6 items-center px-5 py-3 hover:bg-gray-50 transition-colors">
+              <div key={carrier} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-gray-50 transition-colors md:grid md:grid-cols-[1fr_auto_auto] md:gap-x-6">
                 <span className="text-sm text-gray-700">{carrier}</span>
-                <div className="w-32 flex justify-center"><CarrierLogo name={carrier} /></div>
-                <div className="w-16 flex justify-end"><Toggle on={enabled[carrier]} onChange={() => toggle(carrier)} /></div>
+                <div className="flex justify-center md:w-32"><CarrierLogo name={carrier} /></div>
+                <div className="flex justify-end md:w-16"><Toggle on={enabled[carrier]} onChange={() => toggle(carrier)} /></div>
               </div>
             ))}
           </div>

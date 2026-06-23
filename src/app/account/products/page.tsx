@@ -47,27 +47,27 @@ export default function ProductsPage() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
         <h2 className="text-base font-semibold text-gray-800">Manage Products</h2>
-        <div className="flex gap-2">
-          <button onClick={() => setShowModal(true)} className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center gap-1.5">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowModal(true)} className="px-4 py-1.5 text-xs font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center justify-center gap-1.5 flex-1 sm:flex-initial">
             <Plus className="w-3.5 h-3.5" /> Add New Product +
           </button>
-          <button className="px-4 py-1.5 text-xs font-semibold rounded border border-gray-300 text-gray-600 hover:border-[#00529B]">Import Products (CSV)</button>
+          <button className="px-4 py-1.5 text-xs font-semibold rounded border border-gray-300 text-gray-600 hover:border-[#00529B] flex-1 sm:flex-initial">Import Products (CSV)</button>
         </div>
       </div>
 
       {/* Search */}
       <div className="px-6 py-4 border-b border-gray-100">
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <div><label className={lbl}>Product Name</label><input className={inp} value={search.name} onChange={e => setSearch(p => ({ ...p, name: e.target.value }))} /></div>
           <div><label className={lbl}>Product Code</label><input className={inp} value={search.code} onChange={e => setSearch(p => ({ ...p, code: e.target.value }))} /></div>
           <div><label className={lbl}>Description</label><input className={inp} value={search.description} onChange={e => setSearch(p => ({ ...p, description: e.target.value }))} /></div>
           <div><label className={lbl}>Harmonized HS Code</label><input className={inp} value={search.harmonized} onChange={e => setSearch(p => ({ ...p, harmonized: e.target.value }))} /></div>
         </div>
-        <div className="flex gap-2 mt-3">
-          <button className="px-5 py-1.5 text-xs font-semibold border border-gray-300 rounded text-gray-600 hover:border-[#00529B]"><Search className="w-3 h-3 inline mr-1" />Search</button>
-          <button onClick={() => setSearch({ name:'',code:'',description:'',harmonized:'' })} className="px-4 py-1.5 text-xs border border-gray-300 rounded text-gray-500">Reset</button>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button className="px-5 py-1.5 text-xs font-semibold border border-gray-300 rounded text-gray-600 hover:border-[#00529B] flex-1 sm:flex-initial"><Search className="w-3 h-3 inline mr-1" />Search</button>
+          <button onClick={() => setSearch({ name:'',code:'',description:'',harmonized:'' })} className="px-4 py-1.5 text-xs border border-gray-300 rounded text-gray-500 flex-1 sm:flex-initial">Reset</button>
         </div>
       </div>
 
@@ -79,6 +79,46 @@ export default function ProductsPage() {
           <p className="text-sm text-gray-500">Simply capture your product details here, and the next time you need to create a customs invoice all the fields will populate for you.</p>
         </div>
       ) : (
+        <>
+        {/* Mobile cards */}
+        <div className="md:hidden p-3 space-y-3 bg-gray-50">
+          {filtered.map((p: any) => (
+            <div key={p._id} className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all overflow-hidden">
+              <div className="flex items-center gap-3 px-4 pt-4">
+                <div className="w-10 h-10 rounded-xl bg-[#00529B] text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm">
+                  {(p.productName || '?').slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-[#c0392b] text-sm truncate">{p.productName}</p>
+                  <p className="text-xs text-gray-500 font-mono truncate">{p.productCode}</p>
+                </div>
+              </div>
+              <div className="px-4 pt-3 pb-4 space-y-2 text-xs">
+                {p.description && <p className="text-gray-500">{p.description}</p>}
+                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl px-3 py-2.5">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">HS Code</p>
+                    <p className="text-gray-700 font-medium">{p.harmonizedCode || '—'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">Unit Price</p>
+                    <p className="font-bold text-[#00529B] text-base leading-tight">${p.unitPrice?.toFixed(2)}</p>
+                  </div>
+                </div>
+                <p className="text-gray-400">Origin: {p.originCountry}</p>
+              </div>
+              <div className="border-t border-gray-100 bg-gray-50/60">
+                <button onClick={() => handleDelete(p._id)} disabled={deleting === p._id}
+                  className="w-full flex items-center justify-center gap-1 py-3 text-[11px] font-semibold text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors">
+                  {deleting === p._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block">
         <table className="w-full text-sm">
           <thead><tr className="border-b border-gray-100">{['Product Name','Product Code','Description','HS Code','Unit Price','Country',''].map(h => (
             <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-gray-400">{h}</th>
@@ -99,18 +139,20 @@ export default function ProductsPage() {
             ))}
           </tbody>
         </table>
+        </div>
+        </>
       )}
 
       {/* Add Product Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h3 className="font-semibold text-gray-800">Add New Product</h3>
               <button onClick={() => setShowModal(false)}><X className="w-5 h-5 text-gray-400" /></button>
             </div>
             <div className="p-5 space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={lbl}>Product Name <span className="text-red-500">*</span></label><input className={inp} value={form.productName} onChange={e => f('productName', e.target.value)} /></div>
                 <div><label className={lbl}>Description <span className="text-red-500">*</span></label><input className={inp} value={form.description} onChange={e => f('description', e.target.value)} /></div>
                 <div><label className={lbl}>Harmonized HS Code <span className="text-red-500">*</span></label><input className={inp} value={form.harmonizedCode} onChange={e => f('harmonizedCode', e.target.value)} /></div>
@@ -123,11 +165,11 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-3 px-5 py-4 border-t border-gray-100">
-              <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center gap-2 disabled:opacity-60">
+            <div className="flex flex-wrap gap-3 px-5 py-4 border-t border-gray-100">
+              <button onClick={handleSave} disabled={saving} className="px-5 py-2 text-sm font-semibold rounded text-white bg-[#00529B] hover:bg-[#00529B]/90 flex items-center justify-center gap-2 disabled:opacity-60 flex-1 sm:flex-initial">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Save Product
               </button>
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-500">Cancel</button>
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-500 flex-1 sm:flex-initial">Cancel</button>
             </div>
           </div>
         </div>
