@@ -2,7 +2,12 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Privacy Policy — Pilot Courier Canada' };
+export const metadata: Metadata = {
+  title: 'Privacy Policy — Pilot Courier Canada',
+  description: 'Read Pilot Courier\'s privacy policy to understand how we collect, use, and protect your personal information.',
+  alternates: { canonical: '/privacy' },
+  robots: { index: false, follow: true },
+};
 
 function TopoBackground() {
   return (

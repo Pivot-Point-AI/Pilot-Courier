@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { Package, CreditCard, Truck, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'How It Works — Pilot Courier Canada' };
+export const metadata: Metadata = {
+  title: 'How It Works — Pilot Courier Canada',
+  description: 'See how Pilot Courier helps you compare carrier rates, book shipments, generate labels, and track packages in a few simple steps.',
+  alternates: { canonical: '/how-it-works' },
+  openGraph: {
+    title: 'How It Works — Pilot Courier Canada',
+    description: 'Compare carrier rates, book shipments, generate labels, and track packages in a few simple steps.',
+    url: '/how-it-works',
+  },
+};
 
 export default function HowItWorksPage() {
   return (

@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { ArrowRight, MapPin } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'About Us — Pilot Courier Canada' };
+export const metadata: Metadata = {
+  title: 'About Us — Pilot Courier Canada',
+  description: 'Learn about Pilot Courier, Canada\'s shipping rate comparison platform connecting businesses with UPS, FedEx, DHL, Purolator and more.',
+  alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Us — Pilot Courier Canada',
+    description: 'Learn about Pilot Courier, Canada\'s shipping rate comparison platform.',
+    url: '/about',
+  },
+};
 
 
 // Canada outline SVG (simplified)

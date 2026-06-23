@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { Phone, Mail, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Support — Pilot Courier Canada' };
+export const metadata: Metadata = {
+  title: 'Support — Pilot Courier Canada',
+  description: 'Get help with bookings, tracking, billing, and carrier issues from the Pilot Courier support team.',
+  alternates: { canonical: '/support' },
+  openGraph: {
+    title: 'Support — Pilot Courier Canada',
+    description: 'Get help with bookings, tracking, billing, and carrier issues from the Pilot Courier support team.',
+    url: '/support',
+  },
+};
 
 export default function SupportPage() {
   return (

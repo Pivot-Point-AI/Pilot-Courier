@@ -2,7 +2,12 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = { title: 'Terms & Conditions — Pilot Courier Canada' };
+export const metadata: Metadata = {
+  title: 'Terms & Conditions — Pilot Courier Canada',
+  description: 'Read the terms and conditions for using Pilot Courier\'s shipping rate comparison and booking platform.',
+  alternates: { canonical: '/terms' },
+  robots: { index: false, follow: true },
+};
 
 const sections = [
   {
