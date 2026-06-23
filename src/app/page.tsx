@@ -8,7 +8,6 @@ import HowItWorksSection from '@/components/sections/howItWorks';
 import CtaSection from '@/components/sections/Cta';
 
 
-
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
