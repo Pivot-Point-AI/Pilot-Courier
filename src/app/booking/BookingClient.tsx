@@ -266,7 +266,8 @@ function CityInput({ value, onChange, country }: { value: string; onChange: (val
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const inp = 'w-full border border-gray-300 rounded px-2.5 py-1.5 text-sm text-gray-800 focus:outline-none focus:border-brand-navy focus:ring-1 focus:ring-brand-navy/20 bg-white placeholder:text-gray-300';
 const lbl = 'block text-xs text-gray-500 mb-0.5';
-const lblRow = 'w-32 flex-shrink-0 text-xs text-gray-500';
+const lblRow = 'md:w-32 md:flex-shrink-0 text-xs text-gray-500';
+const fieldRow = 'flex flex-col gap-1 md:flex-row md:items-center md:gap-2';
 const req = <span className="text-red-500">*</span>;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -369,25 +370,25 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
           <input type="checkbox" checked={!!address.isResidential} onChange={e => onChange('isResidential', e.target.checked)} className="accent-brand-navy" />
           Residential
         </label>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Company / Person {req}</label>
-          <input className={`${inp} flex-1`} value={address.company || ''} onChange={e => onChange('company', e.target.value)} placeholder="Company or person name" />
+          <input className={`${inp} w-full md:flex-1`} value={address.company || ''} onChange={e => onChange('company', e.target.value)} placeholder="Company or person name" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Address Line 1 {req}</label>
-          <input className={`${inp} flex-1`} value={address.street} onChange={e => onChange('street', e.target.value)} placeholder="Street address" required />
+          <input className={`${inp} w-full md:flex-1`} value={address.street} onChange={e => onChange('street', e.target.value)} placeholder="Street address" required />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Address Line 2</label>
-          <input className={`${inp} flex-1`} value={address.street2 || ''} onChange={e => onChange('street2', e.target.value)} placeholder="Suite / Unit / Apt" />
+          <input className={`${inp} w-full md:flex-1`} value={address.street2 || ''} onChange={e => onChange('street2', e.target.value)} placeholder="Suite / Unit / Apt" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Country {req}</label>
-          <div className="flex-1"><CountrySelect value={address.country || ''} onChange={v => { onChange('country', v); onChange('province', ''); onChange('city', ''); }} /></div>
+          <div className="w-full md:flex-1"><CountrySelect value={address.country || ''} onChange={v => { onChange('country', v); onChange('province', ''); onChange('city', ''); }} /></div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Zip / Postal code</label>
-          <div className="relative flex-1">
+          <div className="relative w-full md:flex-1">
             <input
               className={`${inp} ${!address.country ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               value={address.postalCode}
@@ -398,29 +399,29 @@ function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
             {postalLoading && <Loader2 className="absolute right-2.5 top-2 w-3.5 h-3.5 text-gray-400 animate-spin" />}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>City {req}</label>
-          <div className="flex-1"><CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} /></div>
+          <div className="w-full md:flex-1"><CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} /></div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Province / State</label>
-          <div className="flex-1"><ProvinceSelect value={address.province} onChange={v => onChange('province', v)} options={provinces} /></div>
+          <div className="w-full md:flex-1"><ProvinceSelect value={address.province} onChange={v => onChange('province', v)} options={provinces} /></div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Attention {req}</label>
-          <input className={`${inp} flex-1`} value={address.name} onChange={e => onChange('name', e.target.value)} placeholder="Contact name" required />
+          <input className={`${inp} w-full md:flex-1`} value={address.name} onChange={e => onChange('name', e.target.value)} placeholder="Contact name" required />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Phone {req}</label>
-          <input className={`${inp} flex-1`} type="tel" value={address.phone} onChange={e => onChange('phone', e.target.value)} placeholder="+1 416 555 0100" required />
+          <input className={`${inp} w-full md:flex-1`} type="tel" value={address.phone} onChange={e => onChange('phone', e.target.value)} placeholder="+1 416 555 0100" required />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Email {req}</label>
-          <input className={`${inp} flex-1`} type="email" value={address.email || ''} onChange={e => onChange('email', e.target.value)} placeholder="email@example.com" />
+          <input className={`${inp} w-full md:flex-1`} type="email" value={address.email || ''} onChange={e => onChange('email', e.target.value)} placeholder="email@example.com" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className={fieldRow}>
           <label className={lblRow}>Instruction</label>
-          <input className={`${inp} flex-1`} placeholder="Delivery instructions (optional)" />
+          <input className={`${inp} w-full md:flex-1`} placeholder="Delivery instructions (optional)" />
         </div>
         <div className="flex flex-col gap-1.5 pt-1">
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
@@ -448,17 +449,19 @@ function RateCard({ rate, selected, onSelect }: { rate: Rate; selected: boolean;
   const bg = carrierColor[rate.carrierName.toUpperCase()] || 'bg-gray-600';
 
   return (
-    <label className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${selected ? 'border-brand-orange bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+    <label className={`flex flex-wrap sm:flex-nowrap items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${selected ? 'border-brand-orange bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
       <input type="radio" checked={selected} onChange={onSelect} className="sr-only" />
       <div className={`w-10 h-10 rounded-lg ${bg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0`}>{initials}</div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-gray-800 text-sm">{rate.serviceName}</p>
         <p className="text-xs text-gray-400">{rate.transitDays} business day{rate.transitDays !== 1 ? 's' : ''}{rate.estimatedDelivery ? ` · Est. ${rate.estimatedDelivery}` : ''}</p>
       </div>
-      <div className="flex items-center gap-3 flex-shrink-0">
-        {rate.isCheapest && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Cheapest</span>}
-        {rate.isFastest && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Fastest</span>}
-        {rate.isBestValue && !rate.isCheapest && !rate.isFastest && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Best Value</span>}
+      <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap flex-shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex items-center gap-2">
+          {rate.isCheapest && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Cheapest</span>}
+          {rate.isFastest && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Fastest</span>}
+          {rate.isBestValue && !rate.isCheapest && !rate.isFastest && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">Best Value</span>}
+        </div>
         <p className="font-bold text-lg text-brand-navy">${rate.totalCharge.toFixed(2)} <span className="text-xs font-normal text-gray-400">{rate.currency}</span></p>
         <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 ${selected ? 'border-brand-orange bg-brand-orange' : 'border-gray-300'}`}>
           {selected && <div className="w-2.5 h-2.5 bg-white rounded-full m-auto mt-0.5" />}
@@ -509,13 +512,13 @@ function StripePaymentForm({ amount, currency, onSuccess, onBack }: {
         </div>
         <PaymentElement />
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <button type="button" onClick={onBack}
-          className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
+          className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white order-2 sm:order-1">
           ← Back
         </button>
         <button type="submit" disabled={!stripe || paying}
-          className="px-8 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-60">
+          className="px-8 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center justify-center gap-2 disabled:opacity-60 order-1 sm:order-2">
           {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><Lock className="w-4 h-4" /> Pay ${amount.toFixed(2)} {currency}</>}
         </button>
       </div>
@@ -852,23 +855,23 @@ export default function BookingClient() {
           {step === 0 && (
             <div className="space-y-4">
               {/* Title */}
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <h1 className="text-lg font-semibold text-gray-700">Provide Complete Details To Get A Quote</h1>
-                <button onClick={() => router.push('/quote')} className="text-xs text-brand-navy hover:underline">Switch to Quick Quote ↗</button>
+                <button onClick={() => router.push('/quote')} className="text-xs text-brand-navy hover:underline self-start sm:self-auto">Switch to Quick Quote ↗</button>
               </div>
 
               {/* Address panels side by side */}
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="flex items-stretch gap-0 relative">
+                <div className="flex flex-col md:flex-row items-stretch gap-0 relative">
                   <AddressPanel title="Shipping From" color="red" address={shipper} onChange={updateShipper} />
                   {/* Swap button */}
-                  <div className="flex items-start justify-center pt-12 px-2 flex-shrink-0">
+                  <div className="flex items-center justify-center py-2 md:pt-12 md:px-2 flex-shrink-0">
                     <button
                       onClick={swapAddresses}
                       title="Swap addresses"
                       className="w-8 h-8 rounded-full border border-gray-300 bg-white flex items-center justify-center text-gray-400 hover:border-brand-orange hover:text-brand-orange transition-all shadow-sm"
                     >
-                      <ArrowLeftRight className="w-3.5 h-3.5" />
+                      <ArrowLeftRight className="w-3.5 h-3.5 rotate-90 md:rotate-0" />
                     </button>
                   </div>
                   <AddressPanel title="Shipping To" color="blue" address={recipient} onChange={updateRecipient} showConfirmEmail />
@@ -877,7 +880,7 @@ export default function BookingClient() {
 
               {/* Package Details */}
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <span className="w-5 h-5 rounded-full bg-brand-orange text-white flex items-center justify-center text-xs">📦</span>
                     <span className="font-semibold text-gray-700 text-sm">Package Details</span>
@@ -914,8 +917,8 @@ export default function BookingClient() {
                     </label>
                   </div>
 
-                  {/* Table header */}
-                  <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-2 px-2">
+                  {/* Table header (desktop) */}
+                  <div className="hidden md:grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-2 px-2">
                     <span className="text-xs text-gray-400 w-6" />
                     <span className="text-xs text-gray-400">Dimensions L × W × H ({dimUnit})</span>
                     <span className="text-xs text-gray-400" />
@@ -928,8 +931,8 @@ export default function BookingClient() {
                     <span className="text-xs text-gray-400 w-20" />
                   </div>
 
-                  {/* Package rows */}
-                  <div className="space-y-2">
+                  {/* Package rows (desktop grid) */}
+                  <div className="hidden md:block space-y-2">
                     {packages.map((pkg, idx) => {
                       const divisor = dimUnit === 'cm' ? 5000 : 166;
                       const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
@@ -962,6 +965,75 @@ export default function BookingClient() {
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           )}
+                        </div>
+                      </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Package cards (mobile) */}
+                  <div className="md:hidden space-y-3">
+                    {packages.map((pkg, idx) => {
+                      const divisor = dimUnit === 'cm' ? 5000 : 166;
+                      const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+                      return (
+                      <div key={pkg.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-400 font-mono">Package {String(idx + 1).padStart(2, '0')}</span>
+                          <div className="flex items-center gap-1">
+                            <button type="button" onClick={addPkg} title="Add row" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                            <button type="button" onClick={() => dupPkg(pkg)} title="Duplicate" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            {packages.length > 1 && (
+                              <button type="button" onClick={() => removePkg(pkg.id)} title="Remove" className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">L ({dimUnit})</label>
+                            <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">W ({dimUnit})</label>
+                            <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">H ({dimUnit})</label>
+                            <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">Weight ({weightUnit})</label>
+                            <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} required={idx === 0} />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({weightUnit})</label>
+                            <div className={`${inp} text-center text-gray-500`}>{volWeight > 0 ? volWeight.toFixed(2) : '—'}</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">Insurance Val ($)</label>
+                            <input type="number" value={pkg.insuranceAmount} onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
+                          </div>
+                          <div>
+                            <label className="text-[11px] text-gray-400 block mb-0.5">Special Handling</label>
+                            <select value={pkg.specialHandling ? 'yes' : 'no'} onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'yes')} className={inp}>
+                              <option value="no">No</option>
+                              <option value="yes">Yes</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[11px] text-gray-400 block mb-0.5">Description</label>
+                          <input type="text" value={pkg.description} onChange={e => updatePkg(pkg.id, 'description', e.target.value)} placeholder="Description" className={`${inp} w-full`} />
                         </div>
                       </div>
                       );
@@ -1088,11 +1160,11 @@ export default function BookingClient() {
               </div>
 
               {/* Bottom action bar */}
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <p className="text-xs text-gray-500">
                   Select <button onClick={handleGetQuote} className="text-brand-orange font-semibold hover:underline">Get Quote</button> to view available pricing and carrier options for the route selected
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => {
                       if (!validateStep0()) return;
@@ -1105,7 +1177,7 @@ export default function BookingClient() {
                   <button
                     onClick={handleGetQuote}
                     disabled={quoteLoading}
-                    className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center gap-2 disabled:opacity-60"
+                    className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                   >
                     {quoteLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Getting Rates...</> : 'Get Quote'}
                   </button>
@@ -1117,14 +1189,14 @@ export default function BookingClient() {
           {/* ── STEP 1: GET QUOTE ────────────────────────────────────────── */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-700">Available Rates</h2>
                   <p className="text-sm text-gray-400">
                     {shipper.city || shipper.postalCode} → {recipient.city || recipient.postalCode} · {totalWeight.toFixed(2)} {weightUnit} · {packages.length} pkg
                   </p>
                 </div>
-                <button onClick={() => setStep(0)} className="text-sm text-brand-navy hover:underline flex items-center gap-1">
+                <button onClick={() => setStep(0)} className="text-sm text-brand-navy hover:underline flex items-center gap-1 self-start sm:self-auto">
                   ← Edit Details
                 </button>
               </div>
@@ -1142,16 +1214,16 @@ export default function BookingClient() {
               )}
 
               {selectedRate && (
-                <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
+                <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="text-sm text-gray-600">
                     Selected: <span className="font-semibold text-brand-navy">{selectedRate.carrierName} — {selectedRate.serviceName}</span>
                     <span className="ml-3 font-bold text-brand-orange">${selectedRate.totalCharge.toFixed(2)} {selectedRate.currency}</span>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <button onClick={() => setStep(0)} className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
                       ← Back
                     </button>
-                    <button onClick={() => setStep(2)} className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center gap-2">
+                    <button onClick={() => setStep(2)} className="px-6 py-2 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all flex items-center justify-center gap-2">
                       Review & Payment <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -1168,7 +1240,7 @@ export default function BookingClient() {
               {/* Rate summary */}
               <div className="bg-white border border-gray-200 rounded-lg p-5">
                 <p className="text-xs text-gray-400 mb-1">Selected Service</p>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <p className="font-bold text-brand-navy text-lg">{selectedRate.carrierName} — {selectedRate.serviceName}</p>
                     <p className="text-sm text-gray-500">{selectedRate.transitDays} business days · Est. {selectedRate.estimatedDelivery}</p>
@@ -1200,7 +1272,7 @@ export default function BookingClient() {
                 <p className="font-semibold text-sm text-gray-700 mb-3">{packages.length} Package{packages.length > 1 ? 's' : ''} · {totalWeight.toFixed(2)} {weightUnit}</p>
                 <div className="divide-y divide-gray-50">
                   {packages.map((p, i) => (
-                    <div key={p.id} className="flex items-center gap-4 py-1.5 text-sm text-gray-600">
+                    <div key={p.id} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-1.5 text-sm text-gray-600">
                       <span className="text-gray-400 text-xs font-mono">#{i + 1}</span>
                       <span>{p.length}×{p.width}×{p.height} {dimUnit}</span>
                       <span>{p.weight} {weightUnit}</span>
@@ -1225,14 +1297,14 @@ export default function BookingClient() {
               </div>
 
               {/* Payment action */}
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center justify-between">
-                <button onClick={() => setStep(1)} className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white">
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <button onClick={() => setStep(1)} className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white order-2 sm:order-1">
                   ← Back
                 </button>
                 <button
                   onClick={handleBook}
                   disabled={bookLoading}
-                  className="px-6 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center gap-2 disabled:opacity-60"
+                  className="px-6 py-2.5 text-sm font-semibold rounded text-white bg-brand-orange hover:bg-orange-600 transition-all flex items-center justify-center gap-2 disabled:opacity-60 order-1 sm:order-2"
                 >
                   {bookLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <>Proceed to Payment <ArrowRight className="w-4 h-4" /></>}
                 </button>
@@ -1243,7 +1315,7 @@ export default function BookingClient() {
           {/* ── STEP 3: PAYMENT ──────────────────────────────────────────── */}
           {step === 3 && clientSecret && (
             <div className="max-w-xl mx-auto space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                 <h2 className="text-lg font-semibold text-gray-700">Complete Payment</h2>
                 <p className="text-sm text-gray-400">Order: <span className="font-mono font-semibold text-brand-navy">{createdNumber}</span></p>
               </div>
@@ -1271,7 +1343,7 @@ export default function BookingClient() {
                   <p className="text-gray-500 text-sm mb-4">Tracking: <span className="font-mono font-semibold text-brand-orange">{trackingNumber}</span></p>
                 )}
 
-                <div className="flex gap-3 justify-center mt-6">
+                <div className="flex flex-wrap gap-3 justify-center mt-6">
                   {labelBase64 ? (
                     <button onClick={downloadLabel} className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all">
                       <Download className="w-4 h-4" /> Download Label (PDF)
