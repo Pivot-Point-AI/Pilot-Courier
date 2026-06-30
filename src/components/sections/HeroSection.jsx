@@ -58,7 +58,7 @@ export default function HeroSection() {
                 with Top <span className="text-[#1B2B6B]">Carriers</span>
               </span>
             </h1>
-            <p className="text-sm sm:text-lg font-normal text-gray-700 leading-relaxed max-w-2xl mb-5 md:mb-9">
+            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 leading-relaxed max-w-2xl mb-5 md:mb-9 bg-white/70 backdrop-blur-sm rounded-xl px-4 py-3 w-fit">
               Compare real-time rates from UPS, FedEx, DHL{' '}
               <span className="hidden sm:inline"><br /></span>
               and more. Ship smarter. Pay less.
