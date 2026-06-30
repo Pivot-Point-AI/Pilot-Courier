@@ -464,6 +464,18 @@ export default function QuoteClient() {
     if (!first.weight || !first.length || !first.width || !first.height) {
       toast.error('Please fill in all package dimensions and weight.'); return;
     }
+    const isValidPostal = (postal: string, country: string) => {
+      const s = postal.trim().replace(/\s/g, '');
+      if (country === 'CA') return /^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$/.test(s);
+      if (country === 'US') return /^\d{5}(\d{4})?$/.test(s);
+      return s.length >= 3;
+    };
+    if (form.originPostal && !isValidPostal(form.originPostal, form.originCountry)) {
+      toast.error('Origin postal code is incomplete or invalid.'); return;
+    }
+    if (form.destinationPostal && !isValidPostal(form.destinationPostal, form.destinationCountry)) {
+      toast.error('Destination postal code is incomplete or invalid.'); return;
+    }
     if (!form.originCity) {
       toast.error('Please enter the origin city.'); return;
     }
