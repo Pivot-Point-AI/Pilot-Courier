@@ -461,8 +461,13 @@ export default function QuoteClient() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const first = packages[0];
-    if (!first.weight || !first.length || !first.width || !first.height) {
-      toast.error('Please fill in all package dimensions and weight.'); return;
+    const isEnvelope = packagingType === 'Envelope';
+    const isPak = packagingType === 'Pak';
+    if (!isEnvelope) {
+      if (!first.weight) { toast.error('Please fill in package weight.'); return; }
+      if (!isPak && (!first.length || !first.width || !first.height)) {
+        toast.error('Please fill in all package dimensions and weight.'); return;
+      }
     }
     const isValidPostal = (postal: string, country: string) => {
       const s = postal.trim().replace(/\s/g, '');
@@ -507,6 +512,10 @@ export default function QuoteClient() {
       setLoading(false);
     }
   };
+
+  const isEnvelope = packagingType === 'Envelope';
+  const isPak = packagingType === 'Pak';
+  const hideDims = isEnvelope || isPak;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -651,41 +660,53 @@ export default function QuoteClient() {
               <div className="flex items-center justify-start md:justify-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-gray-500 font-medium">Packaging Type</label>
-                  <select value={packagingType} onChange={e => setPackagingType(e.target.value)}
+                  <select value={packagingType} onChange={e => {
+                    const val = e.target.value;
+                    setPackagingType(val);
+                    if (val === 'Envelope' || val === 'Pak') setPackages([newPkg()]);
+                  }}
                     className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
                     {PACKAGING_TYPES.map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-500 font-medium">Weight</label>
-                  <select value={form.weightUnit} onChange={e => setField('weightUnit', e.target.value)}
-                    className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
-                    <option value="lbs">lbs</option>
-                    <option value="kg">kg</option>
-                  </select>
-                  <label className="text-xs text-gray-500 font-medium">Dims</label>
-                  <select value={form.dimensionUnit} onChange={e => setField('dimensionUnit', e.target.value)}
-                    className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
-                    <option value="in">in</option>
-                    <option value="cm">cm</option>
-                  </select>
+                <div className="flex items-center bg-gray-100 rounded-full p-0.5">
+                  {(['I', 'M'] as const).map(u => (
+                    <button key={u} type="button"
+                      onClick={() => setForm(p => ({ ...p, weightUnit: u === 'I' ? 'lbs' : 'kg', dimensionUnit: u === 'I' ? 'in' : 'cm' }))}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                        (u === 'I' ? form.weightUnit === 'lbs' : form.weightUnit === 'kg')
+                          ? 'bg-[#1B2B6B] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}>
+                      {u === 'I' ? 'Imperial' : 'Metric'}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="hidden md:block" />
             </div>
 
-            <div className="px-6 py-4 md:overflow-x-auto">
+            {isPak && (
+              <div className="px-6 py-4">
+                <label className="text-xs font-semibold text-gray-500 block mb-1.5">Weight ({form.weightUnit})</label>
+                <input type="number" value={packages[0]?.weight ?? ''}
+                  onChange={e => updatePkg(packages[0].id, 'weight', e.target.value)}
+                  placeholder={form.weightUnit === 'lbs' ? 'Lbs' : 'Kg'} min="0.1" step="0.1" required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors" />
+              </div>
+            )}
+
+            {!hideDims && <div className="px-6 py-4 md:overflow-x-auto">
               {/* Header (desktop) */}
               <div className="hidden md:grid gap-2 mb-2 min-w-[800px]"
-                style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
+                style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
                 <span className="text-xs font-semibold text-gray-400 text-center">#</span>
-                <span className="text-xs font-semibold text-gray-500 text-center">L ({form.dimensionUnit})</span>
-                <span className="text-xs font-semibold text-gray-500 text-center">W ({form.dimensionUnit})</span>
-                <span className="text-xs font-semibold text-gray-500 text-center">H ({form.dimensionUnit})</span>
+                {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">L ({form.dimensionUnit})</span>}
+                {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">W ({form.dimensionUnit})</span>}
+                {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">H ({form.dimensionUnit})</span>}
                 <span className="text-xs font-semibold text-gray-500 text-center">Weight ({form.weightUnit})</span>
-                <span className="text-xs font-semibold text-gray-500 text-center">Vol. Weight ({form.weightUnit})</span>
+                {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">Vol. Weight ({form.weightUnit})</span>}
                 <span className="text-xs font-semibold text-gray-500 text-center">Insurance ($)</span>
-                <span className="text-xs font-semibold text-gray-500 text-center">Sp. Handling</span>
+                <span className="text-xs font-semibold text-gray-500 text-center">Signature</span>
                 <span className="text-xs font-semibold text-gray-500 text-center">Description</span>
                 <span />
               </div>
@@ -697,16 +718,16 @@ export default function QuoteClient() {
                   const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
                   return (
                   <div key={pkg.id} className="grid gap-2 items-center bg-gray-50/70 rounded-xl px-2 py-2.5 border border-gray-100"
-                    style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
+                    style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
                     <span className="flex items-center justify-center w-5 h-5 mx-auto rounded-full bg-white text-gray-400 text-[10px] font-bold">{idx + 1}</span>
-                    {(['length','width','height','weight'] as const).map(f => (
+                    {(hideDims ? (['weight'] as const) : (['length','width','height','weight'] as const)).map(f => (
                       <input key={f} type="number" value={pkg[f]}
                         onChange={e => updatePkg(pkg.id, f, e.target.value)}
                         placeholder={f[0].toUpperCase()} min="1" step="0.1"
                         required={idx === 0}
                         className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                     ))}
-                    <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>
+                    {!hideDims && <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>}
                     <input type="number" value={pkg.insuranceAmount}
                       onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
                       placeholder="0.00" min="0" step="0.01"
@@ -768,30 +789,25 @@ export default function QuoteClient() {
                         )}
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(['length','width','height'] as const).map(f => (
+                    <div className={hideDims ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-4 gap-2'}>
+                      {(hideDims ? (['weight'] as const) : (['length','width','height','weight'] as const)).map(f => (
                         <div key={f}>
-                          <label className="text-[11px] text-gray-400 block mb-0.5">{f[0].toUpperCase()} ({form.dimensionUnit})</label>
+                          <label className="text-[11px] text-gray-400 block mb-0.5">
+                            {f === 'weight' ? `Weight (${form.weightUnit})` : `${f[0].toUpperCase()} (${form.dimensionUnit})`}
+                          </label>
                           <input type="number" value={pkg[f]}
                             onChange={e => updatePkg(pkg.id, f, e.target.value)}
-                            min="1" step="0.1"
+                            min="1" step="0.1" required={f === 'weight' && idx === 0}
                             className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                         </div>
                       ))}
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-[11px] text-gray-400 block mb-0.5">Weight ({form.weightUnit})</label>
-                        <input type="number" value={pkg.weight}
-                          onChange={e => updatePkg(pkg.id, 'weight', e.target.value)}
-                          min="1" step="0.1" required={idx === 0}
-                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
-                      </div>
+                    {!hideDims && (
                       <div>
                         <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({form.weightUnit})</label>
                         <div className="border border-gray-200 rounded px-2 py-1.5 text-sm w-full text-center text-gray-500 bg-white">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</div>
                       </div>
-                    </div>
+                    )}
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-[11px] text-gray-400 block mb-0.5">Insurance ($)</label>
@@ -801,7 +817,7 @@ export default function QuoteClient() {
                           className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                       </div>
                       <div>
-                        <label className="text-[11px] text-gray-400 block mb-0.5">Sp. Handling</label>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Signature</label>
                         <select value={pkg.specialHandling ? 'Yes' : 'No'}
                           onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'Yes')}
                           className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">
@@ -821,7 +837,7 @@ export default function QuoteClient() {
                   );
                 })}
               </div>
-            </div>
+            </div>}
           </div>
 
           {/* ── Submit ── */}

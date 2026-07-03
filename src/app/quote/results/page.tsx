@@ -71,6 +71,9 @@ export default function QuoteResultsPage() {
   }, [router]);
 
   const firstPkg = quoteForm?.packages?.[0];
+  const isEnvelope = quoteForm?.packagingType === 'Envelope';
+  const isPak = quoteForm?.packagingType === 'Pak';
+  const hasDims = !isEnvelope && !isPak;
   const displayWeight = quoteForm?.weight ?? firstPkg?.weight;
   const displayWeightUnit = quoteForm?.weightUnit;
   const displayLength = quoteForm?.length ?? firstPkg?.length;
@@ -139,7 +142,7 @@ export default function QuoteResultsPage() {
                   Edit
                 </button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className={`grid grid-cols-2 gap-4 ${!hasDims && isEnvelope ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
                 <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-[#1B2B6B] shrink-0">
                     <MapPin className="w-4 h-4" />
@@ -158,23 +161,27 @@ export default function QuoteResultsPage() {
                     <p className="font-semibold text-gray-800 truncate">{quoteForm.destinationPostal || '—'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-green-700 shrink-0">
-                    <Scale className="w-4 h-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Weight</p>
-                    <p className="font-semibold text-gray-800 truncate">{displayWeight ? `${displayWeight} ${displayWeightUnit || ''}` : '—'}</p>
+                {!isEnvelope && (
+                  <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
+                    <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-green-700 shrink-0">
+                      <Scale className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Weight</p>
+                      <p className="font-semibold text-gray-800 truncate">{displayWeight ? `${displayWeight} ${displayWeightUnit || ''}` : '—'}</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
                   <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 shrink-0">
                     <Box className="w-4 h-4" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Dimensions ({quoteForm.dimensionUnit || 'cm'})</p>
+                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Packaging</p>
                     <p className="font-semibold text-gray-800 truncate">
-                      {displayLength && displayWidth && displayHeight ? `${displayLength} × ${displayWidth} × ${displayHeight}` : '—'}
+                      {!hasDims
+                        ? (isEnvelope ? 'Envelope' : 'Pak')
+                        : (displayLength && displayWidth && displayHeight ? `${displayLength} × ${displayWidth} × ${displayHeight} ${quoteForm.dimensionUnit || 'cm'}` : '—')}
                     </p>
                   </div>
                 </div>

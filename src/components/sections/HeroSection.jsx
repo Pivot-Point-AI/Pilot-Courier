@@ -1,9 +1,9 @@
 // components/sections/HeroSection.tsx
 'use client';
 import Image from 'next/image';
-import QuoteForm from '@/components/sections/QuoteForm';
 import Globe from '@/components/sections/Globe';
 import OrbitPlane from '@/components/sections/OrbitPlane';
+import { ShieldCheck, Tag, Gauge } from 'lucide-react';
 
 const carriers = [
   { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto' },
@@ -42,9 +42,30 @@ export default function HeroSection() {
 
         <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
-            <span className="inline-block text-[11px] sm:text-xs font-bold tracking-[0.18em] uppercase text-[#1B2B6B] bg-white/70 border border-[#bfd0ee] rounded-full px-3 py-1 mb-4 md:mb-5">
-              Trusted Worldwide Since 2007
-            </span>
+            <div className="inline-flex items-center gap-3 sm:gap-4 bg-white/90 border border-[#e3e9f5] rounded-full pl-2.5 pr-5 py-2.5 mb-4 md:mb-5 shadow-sm">
+              <span className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#2c4bb8] to-[#0f1a4a] text-white shrink-0">
+                <ShieldCheck className="w-5.5 h-5.5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+              </span>
+              <span className="w-px h-8 bg-gray-200 shrink-0" />
+              <div className="flex flex-col gap-0.5">
+                <p className="text-base sm:text-lg font-extrabold text-gray-900 leading-tight whitespace-nowrap">
+                  Trusted Worldwide <span className="text-[#2c4bb8]">Since 2007</span>
+                </p>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-semibold text-gray-500">
+                  <span className="inline-flex items-center gap-1">
+                    <Tag className="w-3.5 h-3.5 text-[#2c4bb8]" /> Low Rates
+                  </span>
+                  <span className="text-gray-300">|</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Gauge className="w-3.5 h-3.5 text-[#2c4bb8]" /> Speed
+                  </span>
+                  <span className="text-gray-300">|</span>
+                  <span className="inline-flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#2c4bb8]" /> Reliability
+                  </span>
+                </div>
+              </div>
+            </div>
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-3 md:mb-6">
               <span className="block">Save on Shipping</span>
               <span className="block">
