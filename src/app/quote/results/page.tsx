@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import type { Rate } from '@/lib/api';
-import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, MapPin, Scale, Box, Sparkles, Clock } from 'lucide-react';
 
 // Carrier logo renderers
 function CarrierLogo({ name }: { name: string }) {
@@ -60,7 +60,6 @@ export default function QuoteResultsPage() {
   const [rates, setRates] = useState<Rate[]>([]);
   const [selected, setSelected] = useState<Rate | null>(null);
   const [quoteForm, setQuoteForm] = useState<any>(null);
-  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('pc_rates');
@@ -71,6 +70,13 @@ export default function QuoteResultsPage() {
     if (form) setQuoteForm(JSON.parse(form));
   }, [router]);
 
+  const firstPkg = quoteForm?.packages?.[0];
+  const displayWeight = quoteForm?.weight ?? firstPkg?.weight;
+  const displayWeightUnit = quoteForm?.weightUnit;
+  const displayLength = quoteForm?.length ?? firstPkg?.length;
+  const displayWidth = quoteForm?.width ?? firstPkg?.width;
+  const displayHeight = quoteForm?.height ?? firstPkg?.height;
+
   const handleSelect = (rate: Rate) => {
     setSelected(rate);
     sessionStorage.setItem('pc_selected_rate', JSON.stringify(rate));
@@ -78,169 +84,184 @@ export default function QuoteResultsPage() {
   };
 
   if (!rates.length) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[#fafbfc]">
+      <div className="relative w-10 h-10">
+        <div className="absolute inset-0 rounded-full border-4 border-gray-100" />
+        <div className="absolute inset-0 rounded-full border-4 border-[#1B2B6B] border-t-transparent animate-spin" />
+      </div>
+      <p className="text-sm text-gray-400 font-medium">Fetching your rates…</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="min-h-screen bg-[#fafbfc]">
       <Navbar />
-      <div className="pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="pt-24 pb-20 px-4">
+        <div className="max-w-5xl mx-auto">
 
           {/* Back */}
           <button
-            onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 text-sm mb-4 transition-colors"
+            onClick={() => router.push('/quote')}
+            className="group inline-flex items-center gap-2 text-gray-500 hover:text-[#1B2B6B] text-sm font-semibold mb-6 pl-1 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white border border-gray-200 group-hover:border-[#1B2B6B]/30 group-hover:bg-blue-50/60 shadow-sm transition-colors">
+              <ArrowLeft className="w-3.5 h-3.5" />
+            </span>
+            Back to Quote
           </button>
 
-          {/* Main card */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-
-            {/* Card header */}
-            <div className="px-6 pt-6 pb-4 border-b border-gray-100">
-              <h1 className="text-xl font-semibold text-gray-800">
-                {rates.length} Services Available for Your Shipment
-              </h1>
+          {/* Header banner */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B2B6B] via-[#1B2B6B] to-[#0f1a4a] px-6 sm:px-8 py-7 mb-5 shadow-lg shadow-blue-900/10">
+            <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/5" />
+            <div className="absolute -right-2 bottom-0 w-24 h-24 rounded-full bg-[#FF6B00]/10" />
+            <div className="relative flex items-center gap-2 text-[#FFB27A] text-xs font-semibold uppercase tracking-wider mb-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              Your Quote is Ready
             </div>
+            <h1 className="relative text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              {rates.length} Service{rates.length !== 1 ? 's' : ''} Available
+            </h1>
+            <p className="relative text-sm text-blue-100/70 mt-1.5">Compare rates and transit times below, then select a service to continue.</p>
+          </div>
 
-            {/* Shipping details accordion */}
-            {quoteForm && (
-              <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
-                <button
-                  onClick={() => setShowDetails(!showDetails)}
-                  className="flex items-center gap-2 text-[#00529B] text-sm font-medium hover:underline"
-                >
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+          {/* Shipping details */}
+          {quoteForm && (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 sm:px-8 py-5 mb-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-gray-800 text-sm font-semibold">
+                  <MapPin className="w-4 h-4 text-[#FF6B00]" />
                   Shipping Details
-                  {showDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </div>
+                <button
+                  onClick={() => router.push('/quote')}
+                  className="px-3.5 py-1.5 text-xs font-semibold border border-gray-200 rounded-lg text-gray-600 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                >
+                  Edit
                 </button>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowDetails(!showDetails)}
-                    className="px-4 py-1.5 text-xs font-medium border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    {showDetails ? 'Hide Details' : 'Show Details'}
-                  </button>
-                  <button
-                    onClick={() => router.push('/quote')}
-                    className="px-4 py-1.5 text-xs font-medium border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    Edit
-                  </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-[#1B2B6B] shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">From</p>
+                    <p className="font-semibold text-gray-800 truncate">{quoteForm.originPostal || '—'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-[#FF6B00] shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">To</p>
+                    <p className="font-semibold text-gray-800 truncate">{quoteForm.destinationPostal || '—'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-green-700 shrink-0">
+                    <Scale className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Weight</p>
+                    <p className="font-semibold text-gray-800 truncate">{displayWeight ? `${displayWeight} ${displayWeightUnit || ''}` : '—'}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 rounded-xl bg-gray-50/80 px-3.5 py-3">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-700 shrink-0">
+                    <Box className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-gray-400 text-[11px] font-medium uppercase tracking-wide mb-0.5">Dimensions ({quoteForm.dimensionUnit || 'cm'})</p>
+                    <p className="font-semibold text-gray-800 truncate">
+                      {displayLength && displayWidth && displayHeight ? `${displayLength} × ${displayWidth} × ${displayHeight}` : '—'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            )}
-
-            {/* Shipping details expanded */}
-            {showDetails && quoteForm && (
-              <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-400 text-xs mb-0.5">From</p>
-                  <p className="font-medium text-gray-700">{quoteForm.originPostal}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs mb-0.5">To</p>
-                  <p className="font-medium text-gray-700">{quoteForm.destinationPostal}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs mb-0.5">Weight</p>
-                  <p className="font-medium text-gray-700">{quoteForm.weight} {quoteForm.weightUnit}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-xs mb-0.5">Dimensions (cm)</p>
-                  <p className="font-medium text-gray-700">{quoteForm.length} × {quoteForm.width} × {quoteForm.height}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Table header */}
-            <div className="grid grid-cols-[40px_1fr_80px_120px_140px_110px] items-center px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              <span></span>
-              <span>Service</span>
-              <span></span>
-              <span className="text-center">Business Days</span>
-              <span className="text-center">Your Price</span>
-              <span></span>
             </div>
+          )}
 
-            {/* Rows */}
-            <div className="divide-y divide-gray-100">
-              {rates.map((rate, idx) => {
-                const isSelected = selected?.serviceCode === rate.serviceCode && selected?.carrierId === rate.carrierId;
+          {/* Rate cards */}
+          <div className="space-y-3">
+            {rates.map((rate, idx) => {
+              const isSelected = selected?.serviceCode === rate.serviceCode && selected?.carrierId === rate.carrierId;
 
-                return (
-                  <div
-                    key={`${rate.carrierId}-${rate.serviceCode}`}
-                    className={`grid grid-cols-[40px_1fr_80px_120px_140px_110px] items-center px-6 py-4 transition-colors ${
-                      isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    {/* Row number */}
-                    <span className="text-gray-400 text-sm font-medium">{idx + 1}</span>
+              return (
+                <div
+                  key={`${rate.carrierId}-${rate.serviceCode}`}
+                  className={`group bg-white rounded-2xl border transition-all ${
+                    isSelected
+                      ? 'border-[#1B2B6B] ring-2 ring-[#1B2B6B]/10 shadow-md'
+                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 px-5 sm:px-7 py-5">
 
-                    {/* Service name + badges */}
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-gray-800 text-sm">{rate.serviceName}</span>
-                        {rate.isCheapest && (
-                          <span className="bg-green-100 text-green-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">
-                            Cheapest
-                          </span>
-                        )}
-                        {rate.isFastest && (
-                          <span className="bg-blue-100 text-blue-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">
-                            Fastest
-                          </span>
-                        )}
-                        {rate.isBestValue && !rate.isCheapest && !rate.isFastest && (
-                          <span className="bg-purple-100 text-purple-700 text-[10px] font-semibold px-1.5 py-0.5 rounded">
-                            Best Value
-                          </span>
+                    {/* Carrier + service */}
+                    <div className="flex items-center gap-4 sm:w-[280px] shrink-0">
+                      <div className="flex items-center justify-center w-16 h-14 rounded-xl bg-gray-50 border border-gray-100 shrink-0">
+                        <CarrierLogo name={rate.carrierName} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                          <span className="font-bold text-gray-800 text-sm leading-tight">{rate.serviceName}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {rate.isCheapest && (
+                            <span className="bg-green-50 text-green-700 ring-1 ring-inset ring-green-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                              Cheapest
+                            </span>
+                          )}
+                          {rate.isFastest && (
+                            <span className="bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                              Fastest
+                            </span>
+                          )}
+                          {rate.isBestValue && !rate.isCheapest && !rate.isFastest && (
+                            <span className="bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                              Best Value
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Transit */}
+                    <div className="flex items-center gap-2 sm:w-[160px] shrink-0">
+                      <Clock className="w-4 h-4 text-gray-300 shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">
+                          {rate.transitDays} business day{rate.transitDays !== 1 ? 's' : ''}
+                        </p>
+                        {rate.estimatedDelivery && (
+                          <p className="text-xs text-gray-400">
+                            Est. {new Date(rate.estimatedDelivery).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+                          </p>
                         )}
                       </div>
-                      {rate.estimatedDelivery && (
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          Est. {new Date(rate.estimatedDelivery).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
-                        </p>
-                      )}
                     </div>
 
-                    {/* Carrier logo */}
-                    <div className="flex justify-center">
-                      <CarrierLogo name={rate.carrierName} />
-                    </div>
+                    {/* Spacer */}
+                    <div className="hidden sm:block flex-1" />
 
-                    {/* Business days */}
-                    <div className="text-center text-sm text-gray-600">
-                      {rate.transitDays} day{rate.transitDays !== 1 ? 's' : ''}
-                    </div>
-
-                    {/* Price */}
-                    <div className="text-center">
-                      <span className="text-xs text-gray-400 mr-1">{rate.currency}</span>
-                      <span className="text-[#1a73e8] font-bold text-base">${rate.totalCharge.toFixed(2)}</span>
-                    </div>
-
-                    {/* Select button */}
-                    <div className="flex justify-end">
+                    {/* Price + select */}
+                    <div className="flex items-center justify-between sm:justify-end gap-5 sm:gap-6">
+                      <div className="text-right">
+                        <span className="text-[11px] text-gray-400 font-medium mr-1">{rate.currency}</span>
+                        <span className="text-[#1B2B6B] font-bold text-xl tracking-tight">${rate.totalCharge.toFixed(2)}</span>
+                      </div>
                       <button
                         onClick={() => handleSelect(rate)}
-                        className="bg-[#00529B] hover:bg-[#003f7a] text-white text-sm font-semibold px-5 py-2 rounded transition-colors whitespace-nowrap"
+                        className="bg-[#1B2B6B] hover:bg-[#14204f] hover:shadow-lg hover:-translate-y-0.5 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-all whitespace-nowrap shadow-sm"
                       >
                         Select
                       </button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
 
         </div>

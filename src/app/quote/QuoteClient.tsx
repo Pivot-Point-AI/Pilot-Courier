@@ -145,7 +145,7 @@ function CountrySelect({ value, onChange, placeholder = 'Select country' }: {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between border border-gray-300 rounded px-3 py-2 text-sm bg-white hover:border-[#1B2B6B] focus:outline-none focus:border-[#1B2B6B] transition-colors"
+        className="w-full flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 hover:border-[#1B2B6B] focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors"
       >
         <span className={selected ? 'text-gray-800' : 'text-gray-400'}>
           {selected ? `${selected.name}` : placeholder}
@@ -153,7 +153,7 @@ function CountrySelect({ value, onChange, placeholder = 'Select country' }: {
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+        <div className="absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
           <div className="p-2 border-b border-gray-100">
             <div className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1.5">
               <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
@@ -226,7 +226,7 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder="Province / State"
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B6B] transition-colors"
+        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors"
       />
     );
   }
@@ -236,7 +236,7 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between border border-gray-300 rounded px-3 py-2 text-sm bg-white hover:border-[#1B2B6B] focus:outline-none focus:border-[#1B2B6B] transition-colors"
+        className="w-full flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 hover:border-[#1B2B6B] focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors"
       >
         <span className={selected || value ? 'text-gray-800' : 'text-gray-400'}>
           {selected ? selected.label : value || placeholder}
@@ -244,7 +244,7 @@ function ProvinceSelect({ value, onChange, options, placeholder = 'Select provin
         <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden">
+        <div className="absolute z-50 w-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
           <div className="p-2 border-b border-gray-100">
             <div className="flex items-center gap-2 bg-gray-50 rounded px-2 py-1.5">
               <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
@@ -322,7 +322,7 @@ function CityInput({ value, onChange, country, placeholder = 'City', required }:
         placeholder={placeholder}
         required={required}
         autoComplete="off"
-        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B6B] transition-colors"
+        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors"
       />
       {showSugg && (
         <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1 py-1 max-h-48 overflow-y-auto">
@@ -510,28 +510,37 @@ export default function QuoteClient() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#f4f6f9]">
+    <div className="min-h-screen bg-[#fafbfc]">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-8 pt-24">
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-          <h1 className="text-lg font-bold text-[#1B2B6B]">Provide Details To Get A Quick Quote</h1>
-          <Link href="/booking" className="flex items-center gap-1 text-sm text-[#1B2B6B] hover:text-[#FF6B00] font-medium transition-colors self-start sm:self-auto">
-            Switch to Rate &amp; Ship <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
+        {/* Header banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1B2B6B] via-[#1B2B6B] to-[#0f1a4a] px-6 sm:px-8 py-6 mb-6 shadow-lg shadow-blue-900/10">
+          <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/5" />
+          <div className="absolute -right-2 bottom-0 w-24 h-24 rounded-full bg-[#FF6B00]/10" />
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-[#FFB27A] text-xs font-semibold uppercase tracking-wider mb-1.5">Get Started</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Provide Details To Get A Quick Quote</h1>
+            </div>
+            <Link href="/booking" className="inline-flex items-center gap-1.5 text-sm text-white/90 hover:text-white font-semibold bg-white/10 hover:bg-white/15 border border-white/15 rounded-lg px-3.5 py-2 transition-colors self-start sm:self-auto whitespace-nowrap">
+              Switch to Rate &amp; Ship <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
 
           {/* ── Addresses ── */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
             <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-100">
 
               {/* From */}
               <div className="p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <PinIcon color="#1B2B6B" />
+                <div className="flex items-center gap-2.5 mb-5">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 text-[#1B2B6B] shrink-0">
+                    <PinIcon color="#1B2B6B" />
+                  </span>
                   <span className="font-bold text-[#1B2B6B] text-sm tracking-wide">Shipping From</span>
                   <label className="ml-auto flex items-center gap-2 cursor-pointer select-none">
                     <div className="relative">
@@ -540,7 +549,7 @@ export default function QuoteClient() {
                       <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-[#1B2B6B] transition-colors" />
                       <div className="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
                     </div>
-                    <span className="text-xs text-gray-500">Residential</span>
+                    <span className="text-xs text-gray-500 font-medium">Residential</span>
                   </label>
                 </div>
                 <div className="space-y-3">
@@ -554,7 +563,7 @@ export default function QuoteClient() {
                       <input type="text" value={form.originPostal}
                         onChange={e => handlePostalChange('origin', form.originCountry, e.target.value)}
                         placeholder="e.g. L1Z 0R6"
-                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B6B] transition-colors"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors"
                         required />
                       {postalLookingUp === 'origin' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
@@ -578,8 +587,10 @@ export default function QuoteClient() {
 
               {/* To */}
               <div className="p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <PinIcon color="#FF6B00" />
+                <div className="flex items-center gap-2.5 mb-5">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-orange-100 text-[#FF6B00] shrink-0">
+                    <PinIcon color="#FF6B00" />
+                  </span>
                   <span className="font-bold text-[#1B2B6B] text-sm tracking-wide">Shipping To</span>
                   <label className="ml-auto flex items-center gap-2 cursor-pointer select-none">
                     <div className="relative">
@@ -588,7 +599,7 @@ export default function QuoteClient() {
                       <div className="w-8 h-4 bg-gray-200 rounded-full peer peer-checked:bg-[#1B2B6B] transition-colors" />
                       <div className="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
                     </div>
-                    <span className="text-xs text-gray-500">Residential</span>
+                    <span className="text-xs text-gray-500 font-medium">Residential</span>
                   </label>
                 </div>
                 <div className="space-y-3">
@@ -602,7 +613,7 @@ export default function QuoteClient() {
                       <input type="text" value={form.destinationPostal}
                         onChange={e => handlePostalChange('destination', form.destinationCountry, e.target.value)}
                         placeholder="e.g. V6B 1A1 (optional)"
-                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#1B2B6B] transition-colors" />
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors" />
                       {postalLookingUp === 'destination' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>
                   </div>
@@ -626,33 +637,35 @@ export default function QuoteClient() {
           </div>
 
           {/* ── Package Details ── */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-5">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
             <div className="flex flex-col md:grid md:grid-cols-[auto_1fr_auto] items-start md:items-center gap-3 md:gap-4 px-6 py-4 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#FF6B00]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
-                </svg>
+              <div className="flex items-center gap-2.5">
+                <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-purple-100 text-purple-700 shrink-0">
+                  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+                  </svg>
+                </span>
                 <span className="font-bold text-[#1B2B6B] text-sm">Package Details</span>
               </div>
               <div className="flex items-center justify-start md:justify-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-gray-500 font-medium">Packaging Type</label>
                   <select value={packagingType} onChange={e => setPackagingType(e.target.value)}
-                    className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors">
+                    className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
                     {PACKAGING_TYPES.map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-gray-500 font-medium">Weight</label>
                   <select value={form.weightUnit} onChange={e => setField('weightUnit', e.target.value)}
-                    className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors">
+                    className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
                     <option value="lbs">lbs</option>
                     <option value="kg">kg</option>
                   </select>
                   <label className="text-xs text-gray-500 font-medium">Dims</label>
                   <select value={form.dimensionUnit} onChange={e => setField('dimensionUnit', e.target.value)}
-                    className="border border-gray-300 rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors">
+                    className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-gray-50/60 transition-colors">
                     <option value="in">in</option>
                     <option value="cm">cm</option>
                   </select>
@@ -683,43 +696,43 @@ export default function QuoteClient() {
                   const divisor = form.dimensionUnit === 'cm' ? 5000 : 166;
                   const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
                   return (
-                  <div key={pkg.id} className="grid gap-2 items-center bg-gray-50 rounded-lg px-2 py-2.5 border border-gray-100"
+                  <div key={pkg.id} className="grid gap-2 items-center bg-gray-50/70 rounded-xl px-2 py-2.5 border border-gray-100"
                     style={{ gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
-                    <span className="text-xs font-bold text-gray-400 text-center">{idx + 1}</span>
+                    <span className="flex items-center justify-center w-5 h-5 mx-auto rounded-full bg-white text-gray-400 text-[10px] font-bold">{idx + 1}</span>
                     {(['length','width','height','weight'] as const).map(f => (
                       <input key={f} type="number" value={pkg[f]}
                         onChange={e => updatePkg(pkg.id, f, e.target.value)}
                         placeholder={f[0].toUpperCase()} min="1" step="0.1"
                         required={idx === 0}
-                        className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                        className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                     ))}
                     <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>
                     <input type="number" value={pkg.insuranceAmount}
                       onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
                       placeholder="0.00" min="0" step="0.01"
-                      className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                      className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                     <select value={pkg.specialHandling ? 'Yes' : 'No'}
                       onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'Yes')}
-                      className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center">
+                      className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">
                       <option>No</option>
                       <option>Yes</option>
                     </select>
                     <input type="text" value={pkg.description}
                       onChange={e => updatePkg(pkg.id, 'description', e.target.value)}
                       placeholder="Description"
-                      className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors" />
+                      className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors" />
                     <div className="flex items-center gap-0.5">
                       <button type="button" title="Add" onClick={addPkg}
-                        className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#1B2B6B] hover:bg-white transition-colors">
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                       <button type="button" title="Duplicate" onClick={() => dupPkg(pkg)}
-                        className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#1B2B6B] hover:bg-white transition-colors">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                       {packages.length > 1 && (
                         <button type="button" title="Remove" onClick={() => removePkg(pkg.id)}
-                          className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
@@ -735,21 +748,21 @@ export default function QuoteClient() {
                   const divisor = form.dimensionUnit === 'cm' ? 5000 : 166;
                   const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
                   return (
-                  <div key={pkg.id} className="bg-gray-50 rounded-lg p-3 border border-gray-100 space-y-2">
+                  <div key={pkg.id} className="bg-gray-50/70 rounded-xl p-3 border border-gray-100 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-400">Package {idx + 1}</span>
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-white text-gray-400 text-[10px] font-bold">{idx + 1}</span>
                       <div className="flex items-center gap-0.5">
                         <button type="button" title="Add" onClick={addPkg}
-                          className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-[#1B2B6B] hover:bg-white transition-colors">
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                         <button type="button" title="Duplicate" onClick={() => dupPkg(pkg)}
-                          className="p-1.5 rounded text-gray-400 hover:text-[#1B2B6B] hover:bg-gray-200 transition-colors">
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-[#1B2B6B] hover:bg-white transition-colors">
                           <Copy className="w-3.5 h-3.5" />
                         </button>
                         {packages.length > 1 && (
                           <button type="button" title="Remove" onClick={() => removePkg(pkg.id)}
-                            className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         )}
@@ -762,7 +775,7 @@ export default function QuoteClient() {
                           <input type="number" value={pkg[f]}
                             onChange={e => updatePkg(pkg.id, f, e.target.value)}
                             min="1" step="0.1"
-                            className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                            className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                         </div>
                       ))}
                     </div>
@@ -772,7 +785,7 @@ export default function QuoteClient() {
                         <input type="number" value={pkg.weight}
                           onChange={e => updatePkg(pkg.id, 'weight', e.target.value)}
                           min="1" step="0.1" required={idx === 0}
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                       </div>
                       <div>
                         <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({form.weightUnit})</label>
@@ -785,13 +798,13 @@ export default function QuoteClient() {
                         <input type="number" value={pkg.insuranceAmount}
                           onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
                           min="0" step="0.01"
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center" />
+                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                       </div>
                       <div>
                         <label className="text-[11px] text-gray-400 block mb-0.5">Sp. Handling</label>
                         <select value={pkg.specialHandling ? 'Yes' : 'No'}
                           onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'Yes')}
-                          className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors text-center">
+                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">
                           <option>No</option>
                           <option>Yes</option>
                         </select>
@@ -802,7 +815,7 @@ export default function QuoteClient() {
                       <input type="text" value={pkg.description}
                         onChange={e => updatePkg(pkg.id, 'description', e.target.value)}
                         placeholder="Description"
-                        className="border border-gray-300 rounded px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] bg-white transition-colors" />
+                        className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors" />
                     </div>
                   </div>
                   );
@@ -817,7 +830,7 @@ export default function QuoteClient() {
               Select <span className="text-[#FF6B00] font-semibold">Get Quote</span> to view available pricing and carrier options for the selected route
             </p>
             <button type="submit" disabled={loading}
-              className="flex items-center justify-center gap-2 bg-[#1B2B6B] hover:bg-[#152259] text-white font-bold text-sm px-10 py-3 rounded-lg transition-colors shadow-sm disabled:opacity-60 w-full sm:w-auto sm:ml-auto">
+              className="flex items-center justify-center gap-2 bg-[#1B2B6B] hover:bg-[#14204f] hover:shadow-lg hover:-translate-y-0.5 text-white font-bold text-sm px-10 py-3 rounded-xl transition-all shadow-sm disabled:opacity-60 disabled:hover:translate-y-0 w-full sm:w-auto sm:ml-auto">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Getting Rates...</> : 'Get Quote'}
             </button>
           </div>

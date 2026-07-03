@@ -32,6 +32,29 @@ export default function Globe({ className = '' }) {
         })
       );
 
+      const oceanGradient = am5.RadialGradient.new(root, {
+        stops: [
+          { color: am5.color('#3a5ba8') },
+          { color: am5.color('#152a5e') },
+          { color: am5.color('#0a1638') },
+        ],
+      });
+
+      const backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
+      backgroundSeries.mapPolygons.template.setAll({
+        fillGradient: oceanGradient,
+        strokeOpacity: 0,
+      });
+      backgroundSeries.data.push({
+        geometry: am5map.getGeoRectangle(90, 180, -90, -180),
+      });
+
+      const graticuleSeries = chart.series.push(am5map.GraticuleSeries.new(root, {}));
+      graticuleSeries.mapLines.template.setAll({
+        strokeOpacity: 0.08,
+        stroke: am5.color('#a8c2f0'),
+      });
+
       const polygonSeries = chart.series.push(
         am5map.MapPolygonSeries.new(root, {
           geoJSON: am4geodata_worldLow,
@@ -42,29 +65,15 @@ export default function Globe({ className = '' }) {
         tooltipText: '{name}',
         toggleKey: 'active',
         interactive: true,
-        fill: am5.color('#1B2B6B'),
-        stroke: am5.color('#bfd0ee'),
+        fill: am5.color('#7fa6e8'),
+        fillOpacity: 0.9,
+        stroke: am5.color('#e8f0ff'),
         strokeWidth: 0.5,
+        strokeOpacity: 0.6,
       });
 
       polygonSeries.mapPolygons.template.states.create('hover', {
-        fill: am5.color('#537dcf'),
-      });
-
-      const backgroundSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {}));
-      backgroundSeries.mapPolygons.template.setAll({
-        fill: am5.color('#bfd0ee'),
-        fillOpacity: 0.15,
-        strokeOpacity: 0,
-      });
-      backgroundSeries.data.push({
-        geometry: am5map.getGeoRectangle(90, 180, -90, -180),
-      });
-
-      const graticuleSeries = chart.series.push(am5map.GraticuleSeries.new(root, {}));
-      graticuleSeries.mapLines.template.setAll({
-        strokeOpacity: 0.15,
-        stroke: am5.color('#1B2B6B'),
+        fill: am5.color('#a8c4f5'),
       });
 
       chart.animate({
@@ -84,5 +93,15 @@ export default function Globe({ className = '' }) {
     };
   }, []);
 
-  return <div ref={chartRef} className={className} />;
+  return (
+    <div className={className}>
+      <div ref={chartRef} className="absolute inset-0 rounded-full overflow-hidden" />
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.35), rgba(255,255,255,0) 45%)',
+        }}
+      />
+    </div>
+  );
 }

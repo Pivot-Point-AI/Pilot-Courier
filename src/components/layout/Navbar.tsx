@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Bell, Calculator } from 'lucide-react';
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard, Bell, Calculator, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 
 // ── Authenticated 4-tab navbar (netParcel style) ──────────────────────────────
@@ -175,9 +175,7 @@ function PublicNavbar() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-        { href: '/quote', label: 'Get a Quote' },
-        { href: '/booking', label: 'Start Shipping' },
-
+    { href: '/booking', label: 'Start Shipping' },
     { href: '/about', label: 'About Us' },
     { href: '/how-it-works', label: 'How It Works' },
     { href: '/track', label: 'Track' },
@@ -195,7 +193,15 @@ function PublicNavbar() {
 
           {/* Desktop links */}
           <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map(link => (
+            <Link href="/" className={`px-3.5 py-2 rounded-lg text-[15px] font-semibold transition-colors ${
+                pathname === '/' ? 'text-[#FF6B00]' : 'text-gray-700 hover:text-[#1B2B6B] hover:bg-gray-50'
+              }`}>
+              Home
+            </Link>
+            <Link href="/quote" className="inline-flex items-center gap-2 bg-[#FF6B00] hover:bg-[#e55f00] text-white text-[14px] font-bold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+              Get a Quote
+            </Link>
+            {navLinks.filter(link => link.href !== '/').map(link => (
               <Link key={link.href} href={link.href}
                 className={`px-3.5 py-2 rounded-lg text-[15px] font-semibold transition-colors ${
                   pathname === link.href ? 'text-[#FF6B00]' : 'text-gray-700 hover:text-[#1B2B6B] hover:bg-gray-50'
@@ -207,11 +213,9 @@ function PublicNavbar() {
 
           {/* Auth buttons */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/auth/login" className="text-[15px] font-semibold text-gray-600 hover:text-[#1B2B6B] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Link href="/auth/login" className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#1B2B6B] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+              <User className="w-4 h-4" />
               Sign In
-            </Link>
-            <Link href="/quote" className="inline-flex items-center gap-2 bg-[#FF6B00] hover:bg-[#e55f00] text-white text-[14px] font-bold px-5 py-2.5 rounded-lg transition-colors shadow-sm">
-              Get a Quote
             </Link>
           </div>
 
@@ -234,7 +238,8 @@ function PublicNavbar() {
             ))}
             <div className="pt-2 flex flex-col gap-2">
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}
-                className="block text-center border border-gray-300 text-[13.5px] font-semibold px-6 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                className="flex items-center justify-center gap-1.5 text-[13.5px] font-semibold px-6 py-3 rounded-lg text-[#1B2B6B] hover:bg-gray-50 transition-colors">
+                <User className="w-4 h-4" />
                 Sign In
               </Link>
               <Link href="/quote" onClick={() => setMobileOpen(false)}

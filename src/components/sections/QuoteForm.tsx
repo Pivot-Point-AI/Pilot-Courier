@@ -171,7 +171,14 @@ export default function QuoteForm() {
         packagingType: pkgType,
       } as any);
       sessionStorage.setItem('pc_rates', JSON.stringify(data.rates));
-      sessionStorage.setItem('pc_quote_form', JSON.stringify({ originPostal, originCity, originCountry, destPostal, destCity, destCountry, packages, pkgType, uom }));
+      sessionStorage.setItem('pc_quote_form', JSON.stringify({
+        originPostal, originCity, originCountry,
+        destPostal, destCity, destCountry,
+        destinationPostal: destPostal, destinationCity: destCity, destinationCountry: destCountry,
+        weight: first.weight, weightUnit: uom === 'I' ? 'lbs' : 'kg',
+        length: first.length, width: first.width, height: first.height,
+        packages, pkgType, uom,
+      }));
       router.push('/quote/results');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to fetch rates.');

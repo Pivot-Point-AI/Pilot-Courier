@@ -1,16 +1,9 @@
 // components/sections/HeroSection.tsx
 'use client';
 import Image from 'next/image';
-import { CreditCard, Clock1, BanknoteIcon } from 'lucide-react';
 import QuoteForm from '@/components/sections/QuoteForm';
 import Globe from '@/components/sections/Globe';
 import OrbitPlane from '@/components/sections/OrbitPlane';
-
-const trustBadges = [
-  { icon: BanknoteIcon, title: 'Lowest Rates', sub: 'Compare & Save' },
-  { icon: Clock1, title: 'Fast & Reliable', sub: 'Trusted Carriers' },
-  { icon: CreditCard, title: 'Easy & Secure', sub: 'Book in Minutes' },
-];
 
 const carriers = [
   { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto' },
@@ -23,10 +16,10 @@ export default function HeroSection() {
   return (
 
     <>
-      <section className="relative overflow-hidden bg-gray-50 mt-16 pt-20 pb-6 md:py-30 lg:py-40 min-h-[400px] md:min-h-[500px] lg:min-h-[560px]">
+      <section className="relative overflow-hidden bg-gray-50 mt-16 pt-20 pb-16 md:py-36 lg:py-48 min-h-[560px] md:min-h-[650px] lg:min-h-[720px]">
         <div className="absolute inset-0 z-0 ">
           <Image
-            src="/images/hero-scene2.webp"
+            src="/images/hero.webp"
             alt="Shipping background"
             fill
             className="object-cover object-[75%_center] md:object-center"
@@ -35,13 +28,13 @@ export default function HeroSection() {
         </div>
 
         {/* Rotating globe motif with an orbiting plane, a subtle accent clear of the background artwork */}
-        <div className="hidden md:block absolute z-[1] top-[10%] right-[3%] w-[200px] h-[200px] lg:w-[260px] lg:h-[260px]">
-          <Globe className="absolute inset-0 pointer-events-none opacity-80 drop-shadow-[0_0_30px_rgba(23,62,115,0.5)]" />
+        <div className="hidden md:block absolute z-[1] top-[5%] right-[6%] w-[160px] h-[160px] lg:w-[200px] lg:h-[200px]">
+          <Globe className="absolute inset-0 pointer-events-none opacity-100 drop-shadow-[0_0_40px_rgba(23,62,115,0.7)]" />
           {/* OrbitPlane renders only the track + plane now, stacked above the globe so it's always visible in front of it */}
-          <div className="absolute inset-0 z-10">
+          {/* <div className="absolute inset-0 z-10">
             <OrbitPlane size={200} className="lg:hidden" />
             <OrbitPlane size={260} className="hidden lg:block" />
-          </div>
+          </div> */}
         </div>
 
         {/* Mobile-only white fade so text stays readable over the image */}
@@ -58,24 +51,6 @@ export default function HeroSection() {
                 with Top <span className="text-[#1B2B6B]">Carriers</span>
               </span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 leading-relaxed max-w-2xl mb-5 md:mb-9 bg-white/70 backdrop-blur-sm rounded-xl px-4 py-3 w-fit">
-              Compare real-time rates from UPS, FedEx, DHL{' '}
-              <span className="hidden sm:inline"><br /></span>
-              and more. Ship smarter. Pay less.
-            </p>
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 md:mb-12">
-              {trustBadges.map(({ icon: Icon, title, sub }) => (
-                <div key={title} className="flex items-center gap-1.5 sm:gap-3 bg-white/60 backdrop-blur-sm border border-white/80 rounded-xl px-2.5 py-2 sm:px-3 sm:py-2.5 shadow-sm">
-                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-[#537dcf] to-[#1B2B6B] flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_rgba(27,43,107,0.35)]">
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-[#1B2B6B] text-xs sm:text-sm leading-none">{title}</p>
-                    {/* <p className="text-gray-600 text-[10px] sm:text-xs mt-0.5">{sub}</p> */}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
