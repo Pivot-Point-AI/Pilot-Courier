@@ -362,12 +362,16 @@ async function fetchProvinces(country: string): Promise<{ label: string; value: 
 interface PackageRow {
   id: string; length: string; width: string; height: string;
   weight: string; insuranceAmount: string; specialHandling: boolean; description: string;
+  freightClass: string;
 }
 const newPkg = (): PackageRow => ({
   id: Math.random().toString(36).slice(2),
   length: '1', width: '1', height: '1', weight: '1',
-  insuranceAmount: '0.00', specialHandling: false, description: '',
+  insuranceAmount: '0.00', specialHandling: false, description: '', freightClass: '',
 });
+
+// Standard NMFC freight classes — required by netParcel's API when packaging_type is "Pallet"
+const FREIGHT_CLASSES = ['50', '55', '60', '65', '70', '77.5', '85', '92.5', '100', '110', '125', '150', '175', '200', '250', '300', '400', '500'];
 
 // ── Pin Icon ──────────────────────────────────────────────────────────────────
 function PinIcon({ color }: { color: string }) {
@@ -416,6 +420,7 @@ export default function QuoteClient() {
           insuranceAmount: String(storedForm.insuranceAmount ?? '0.00'),
           specialHandling: !!storedForm.specialHandling,
           description: storedForm.description || '',
+          freightClass: String(storedForm.freightClass ?? ''),
         }]);
       }
       if (storedPackagingType) setPackagingType(storedPackagingType);
@@ -487,6 +492,9 @@ export default function QuoteClient() {
     if (!form.originProvince) {
       toast.error('Please select the origin province / state.'); return;
     }
+    if (packagingType === 'Pallet' && !first.freightClass) {
+      toast.error('Please select a freight class for Pallet shipments.'); return;
+    }
     setLoading(true);
     try {
       const { data } = await shipmentApi.getRates({
@@ -501,6 +509,7 @@ export default function QuoteClient() {
         dimensionUnit: form.dimensionUnit, description: first.description || 'Package',
         insuranceAmount: parseFloat(first.insuranceAmount) || 0,
         specialHandling: first.specialHandling, packagingType,
+        freightClass: first.freightClass || undefined,
         quoteType: 'quick',
       } as any);
       sessionStorage.setItem('pc_rates', JSON.stringify(data.rates));
@@ -515,6 +524,7 @@ export default function QuoteClient() {
 
   const isEnvelope = packagingType === 'Envelope';
   const isPak = packagingType === 'Pak';
+  const isPallet = packagingType === 'Pallet';
   const hideDims = isEnvelope || isPak;
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -698,13 +708,14 @@ export default function QuoteClient() {
             {!hideDims && <div className="px-6 py-4 md:overflow-x-auto">
               {/* Header (desktop) */}
               <div className="hidden md:grid gap-2 mb-2 min-w-[800px]"
-                style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
+                style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : `2rem 1fr 1fr 1fr 1fr 1fr${isPallet ? ' 5rem' : ''} 1fr 6rem 1fr 4.5rem` }}>
                 <span className="text-xs font-semibold text-gray-400 text-center">#</span>
                 {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">L ({form.dimensionUnit})</span>}
                 {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">W ({form.dimensionUnit})</span>}
                 {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">H ({form.dimensionUnit})</span>}
                 <span className="text-xs font-semibold text-gray-500 text-center">Weight ({form.weightUnit})</span>
                 {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">Vol. Weight ({form.weightUnit})</span>}
+                {isPallet && <span className="text-xs font-semibold text-gray-500 text-center">Freight Class</span>}
                 <span className="text-xs font-semibold text-gray-500 text-center">Insurance ($)</span>
                 <span className="text-xs font-semibold text-gray-500 text-center">Signature</span>
                 <span className="text-xs font-semibold text-gray-500 text-center">Description</span>
@@ -718,7 +729,7 @@ export default function QuoteClient() {
                   const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
                   return (
                   <div key={pkg.id} className="grid gap-2 items-center bg-gray-50/70 rounded-xl px-2 py-2.5 border border-gray-100"
-                    style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : '2rem 1fr 1fr 1fr 1fr 1fr 1fr 6rem 1fr 4.5rem' }}>
+                    style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : `2rem 1fr 1fr 1fr 1fr 1fr${isPallet ? ' 5rem' : ''} 1fr 6rem 1fr 4.5rem` }}>
                     <span className="flex items-center justify-center w-5 h-5 mx-auto rounded-full bg-white text-gray-400 text-[10px] font-bold">{idx + 1}</span>
                     {(hideDims ? (['weight'] as const) : (['length','width','height','weight'] as const)).map(f => (
                       <input key={f} type="number" value={pkg[f]}
@@ -728,6 +739,15 @@ export default function QuoteClient() {
                         className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                     ))}
                     {!hideDims && <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>}
+                    {isPallet && (
+                      <select value={pkg.freightClass}
+                        onChange={e => updatePkg(pkg.id, 'freightClass', e.target.value)}
+                        required={idx === 0}
+                        className="border border-gray-200 rounded-lg px-1 py-1.5 text-sm focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">
+                        <option value="">Select</option>
+                        {FREIGHT_CLASSES.map(fc => <option key={fc} value={fc}>{fc}</option>)}
+                      </select>
+                    )}
                     <input type="number" value={pkg.insuranceAmount}
                       onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)}
                       placeholder="0.00" min="0" step="0.01"
@@ -806,6 +826,18 @@ export default function QuoteClient() {
                       <div>
                         <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({form.weightUnit})</label>
                         <div className="border border-gray-200 rounded px-2 py-1.5 text-sm w-full text-center text-gray-500 bg-white">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</div>
+                      </div>
+                    )}
+                    {isPallet && (
+                      <div>
+                        <label className="text-[11px] text-gray-400 block mb-0.5">Freight Class</label>
+                        <select value={pkg.freightClass}
+                          onChange={e => updatePkg(pkg.id, 'freightClass', e.target.value)}
+                          required={idx === 0}
+                          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">
+                          <option value="">Select</option>
+                          {FREIGHT_CLASSES.map(fc => <option key={fc} value={fc}>{fc}</option>)}
+                        </select>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-2">

@@ -780,6 +780,7 @@ export default function BookingClient() {
       const { data: bookData } = await shipmentApi.book({
         shipper, recipient,
         parcels: pkgList,
+        packagingType,
         selectedRate,
         shipmentType: recipient.country !== shipper.country ? 'international' : 'domestic',
         guestEmail: shipper.email,

@@ -131,9 +131,11 @@ export interface Rate {
   serviceCode: string;
   serviceName: string;
   totalCharge: number;
+  tariffPrice?: number;
   currency: string;
   transitDays: number;
   estimatedDelivery?: string;
+  mode?: number;
   isCheapest?: boolean;
   isFastest?: boolean;
   isBestValue?: boolean;
