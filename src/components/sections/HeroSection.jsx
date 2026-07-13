@@ -18,58 +18,71 @@ const priceCards = [
   {
     name: 'UPS',
     logo: '/carriers/ups.svg',
-    className: 'h-7 w-auto',
+    className: 'h-8 w-auto',
     showName: true,
     original: '120.00',
     price: '89.99',
     save: '25%',
-    badgeClass: 'bg-[#3b2a0e] text-white',
+    accentFrom: '#4a3418',
+    accentTo: '#2a1c0a',
+    priceColor: '#2a1c0a',
   },
   {
     name: 'FedEx',
     logo: '/carriers/fedex.svg',
-    className: 'h-6 w-auto',
+    className: 'h-7 w-auto',
     original: '110.00',
     price: '79.99',
     save: '27%',
-    badgeClass: 'bg-[#4d148c] text-white',
+    accentFrom: '#6d28d9',
+    accentTo: '#4d148c',
+    priceColor: '#4d148c',
   },
   {
     name: 'DHL',
     logo: '/carriers/dhl.svg',
-    className: 'h-6 w-auto',
+    className: 'h-7 w-auto',
     original: '100.00',
     price: '69.99',
     save: '30%',
-    badgeClass: 'bg-[#f0b800] text-[#3b2a0e]',
+    accentFrom: '#f6c744',
+    accentTo: '#d99a00',
+    priceColor: '#c98c00',
   },
   {
     name: 'Purolator',
     logo: '/carriers/purolator.svg',
-    className: 'h-6 w-auto',
+    className: 'h-7 w-auto',
     original: '95.00',
     price: '64.99',
     save: '32%',
-    badgeClass: 'bg-[#1e3a8a] text-white',
+    accentFrom: '#2e56c7',
+    accentTo: '#1e3a8a',
+    priceColor: '#1e3a8a',
   },
   {
     name: 'Canada Post',
     logo: '/carriers/canadapost.svg',
-    className: 'h-5 w-auto',
+    className: 'h-8 w-auto',
+    showName: true,
     original: '85.00',
     price: '59.99',
     save: '29%',
-    badgeClass: 'bg-[#d0202f] text-white',
+    accentFrom: '#e6394f',
+    accentTo: '#c0102a',
+    priceColor: '#c0102a',
     logoColor: '#d0202f',
   },
   {
     name: 'USPS',
     logo: '/carriers/usps.svg',
-    className: 'h-6 w-auto',
+    className: 'h-7 w-auto',
     original: '90.00',
     price: '54.99',
     save: '39%',
-    badgeClass: 'bg-[#0f1a4a] text-white',
+    accentFrom: '#1c2f66',
+    accentTo: '#0f1a4a',
+    priceColor: '#0f1a4a',
   },
 ];
 
@@ -122,26 +135,42 @@ export default function HeroSection() {
               </div>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-4 md:mb-5 mt-6">
-              <span className="block">Save Big on Shipping</span>
+
+
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-6 md:mb-6 mt-3 md:mt-4">
+              <span className="block">
+                Save Big on{' '}
+                <span
+                  className="text-[#e0a400]"
+                  style={{
+                    WebkitTextStroke: '1.5px #0f1a4a',
+                    textShadow: '0 2px 6px rgba(0,0,0,0.35)',
+                  }}
+                >
+                  Shipping
+                </span>
+              </span>
               <span className="block">
                 with Top <span className="text-[#2c3fd6]">Carriers!</span>
               </span>
             </h1>
-
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-lg">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-sm sm:max-w-xl mx-auto sm:mx-0">
+             
               {priceCards.map((c) => (
                 <div
                   key={c.name}
-                  className="group flex flex-col items-center rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 px-2 py-3 text-center"
+                  className="relative flex flex-col rounded-xl bg-white border border-gray-100 shadow-md overflow-hidden px-2.5 py-2.5 sm:px-3 sm:py-4"
                 >
-                  <div className="flex items-center justify-center gap-1 h-9 mb-2 max-w-full">
+                  <span
+                    className="absolute top-0 inset-x-0 h-1 rounded-t-xl"
+                    style={{
+                      background: `linear-gradient(90deg, ${c.accentFrom}, ${c.accentTo})`,
+                    }}
+                  />
+
+                  <div className="flex items-center gap-1.5 h-5 mb-1">
                     {c.logo ? (
-                      <img
-                        src={c.logo}
-                        alt={c.name}
-                        className={`${['Canada Post', 'UPS'].includes(c.name) ? 'h-8' : c.name === 'USPS' ? 'h-5' : 'h-4'} w-auto object-contain`}
-                      />
+                      <img src={c.logo} alt={c.name} className={`${c.className} object-contain`} />
                     ) : (
                       <span
                         className="flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0"
@@ -151,24 +180,43 @@ export default function HeroSection() {
                       </span>
                     )}
                     {c.showName && (
-                      <span className="text-[10px] font-extrabold text-gray-800 uppercase tracking-tight truncate">
+                      <span className="text-[11px] font-extrabold text-gray-900 uppercase tracking-tight leading-tight truncate">
                         {c.name}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[10px] text-gray-400 line-through leading-none">
-                      ${c.original}
+
+                  <div className="border-t border-gray-100 mb-1" />
+
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wide text-center leading-none">
+                    Original Price
+                  </p>
+                  <p className="text-xs text-gray-400 line-through text-center mb-0.5 leading-none">
+                    ${c.original}
+                  </p>
+
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wide text-center leading-none">
+                    Our Price
+                  </p>
+                  <p
+                    className="text-lg sm:text-xl font-extrabold text-center mb-1 leading-none"
+                    style={{ color: c.priceColor }}
+                  >
+                    ${c.price}
+                  </p>
+
+                  <div
+                    className="flex items-center gap-0.5 rounded-md px-1 py-0.5 shadow-sm"
+                    style={{ background: `linear-gradient(135deg, ${c.accentFrom}, ${c.accentTo})` }}
+                  >
+                    <span className="flex items-center justify-center w-2.5 h-2.5 rounded-full bg-white shrink-0">
+                      <Tag className="w-1.5 h-1.5" style={{ color: c.accentTo }} strokeWidth={2.5} />
                     </span>
-                    <span className="text-sm font-extrabold text-[#1B2B6B] leading-none">
-                      ${c.price}
+                    <span className="flex flex-col leading-none text-white">
+                      <span className="text-[5px] font-bold uppercase tracking-wide">Save</span>
+                      <span className="text-[9px] font-extrabold leading-tight">{c.save}</span>
                     </span>
                   </div>
-                  <span
-                    className={`text-[9px] font-bold tracking-wide px-1.5 py-1 rounded-full w-full shadow-sm ${c.badgeClass}`}
-                  >
-                    SAVE {c.save}
-                  </span>
                 </div>
               ))}
             </div>
