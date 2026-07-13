@@ -1,23 +1,83 @@
 // components/sections/HeroSection.tsx
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import Globe from '@/components/sections/Globe';
 import OrbitPlane from '@/components/sections/OrbitPlane';
-import { ShieldCheck, Tag, Gauge } from 'lucide-react';
+import {
+  ShieldCheck,
+  Tag,
+  Gauge,
+  MapPin,
+  Headphones,
+  Clock,
+  Globe2,
+} from 'lucide-react';
 
-const carriers = [
-  { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto' },
-  { name: 'FedEx', logo: '/carriers/fedex.svg', className: 'h-8 w-auto' },
-  { name: 'DHL', logo: '/carriers/dhl.svg', className: 'h-8 w-auto' },
-  { name: 'Purolator', logo: '/carriers/purolator.svg', className: 'h-8 w-auto' },
+const priceCards = [
+  {
+    name: 'UPS',
+    logo: '/carriers/ups.svg',
+    className: 'h-7 w-auto',
+    showName: true,
+    original: '120.00',
+    price: '89.99',
+    save: '25%',
+    badgeClass: 'bg-[#3b2a0e] text-white',
+  },
+  {
+    name: 'FedEx',
+    logo: '/carriers/fedex.svg',
+    className: 'h-6 w-auto',
+    original: '110.00',
+    price: '79.99',
+    save: '27%',
+    badgeClass: 'bg-[#4d148c] text-white',
+  },
+  {
+    name: 'DHL',
+    logo: '/carriers/dhl.svg',
+    className: 'h-6 w-auto',
+    original: '100.00',
+    price: '69.99',
+    save: '30%',
+    badgeClass: 'bg-[#f0b800] text-[#3b2a0e]',
+  },
+  {
+    name: 'Purolator',
+    logo: '/carriers/purolator.svg',
+    className: 'h-6 w-auto',
+    original: '95.00',
+    price: '64.99',
+    save: '32%',
+    badgeClass: 'bg-[#1e3a8a] text-white',
+  },
+  {
+    name: 'Canada Post',
+    logo: '/carriers/canadapost.svg',
+    className: 'h-5 w-auto',
+    original: '85.00',
+    price: '59.99',
+    save: '29%',
+    badgeClass: 'bg-[#d0202f] text-white',
+    logoColor: '#d0202f',
+  },
+  {
+    name: 'USPS',
+    logo: '/carriers/usps.svg',
+    className: 'h-6 w-auto',
+    original: '90.00',
+    price: '54.99',
+    save: '39%',
+    badgeClass: 'bg-[#0f1a4a] text-white',
+  },
 ];
 
 export default function HeroSection() {
   return (
-
     <>
-      <section className="relative overflow-hidden bg-gray-50 mt-16 pt-20 pb-16 md:py-36 lg:py-48 min-h-[560px] md:min-h-[650px] lg:min-h-[720px]">
-        <div className="absolute inset-0 z-0 ">
+      <section className="relative overflow-hidden bg-gray-50 mt-16 pt-10 pb-14 md:pt-14 md:pb-20 min-h-[500px] md:min-h-[600px]">
+        <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero.webp"
             alt="Shipping background"
@@ -30,18 +90,13 @@ export default function HeroSection() {
         {/* Rotating globe motif with an orbiting plane, a subtle accent clear of the background artwork */}
         <div className="hidden md:block absolute z-[1] top-[5%] right-[6%] w-[160px] h-[160px] lg:w-[200px] lg:h-[200px]">
           <Globe className="absolute inset-0 pointer-events-none opacity-100 drop-shadow-[0_0_40px_rgba(23,62,115,0.7)]" />
-          {/* OrbitPlane renders only the track + plane now, stacked above the globe so it's always visible in front of it */}
-          {/* <div className="absolute inset-0 z-10">
-            <OrbitPlane size={200} className="lg:hidden" />
-            <OrbitPlane size={260} className="hidden lg:block" />
-          </div> */}
         </div>
 
         {/* Mobile-only white fade so text stays readable over the image */}
         <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white/90 via-white/70 to-transparent md:hidden" />
 
         <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl">
+          <div className="max-w-2xl">
             <div className="inline-flex items-center gap-3 sm:gap-4 bg-white/90 border border-[#e3e9f5] rounded-full pl-2.5 pr-5 py-2.5 mb-4 md:mb-5 shadow-sm">
               <span className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#2c4bb8] to-[#0f1a4a] text-white shrink-0">
                 <ShieldCheck className="w-5.5 h-5.5 sm:w-6 sm:h-6" strokeWidth={2.5} />
@@ -66,23 +121,100 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-3 md:mb-6">
-              <span className="block">Save on Shipping</span>
+
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-4 md:mb-5 mt-6">
+              <span className="block">Save Big on Shipping</span>
               <span className="block">
-                with Top <span className="text-[#1B2B6B]">Carriers</span>
+                with Top <span className="text-[#2c3fd6]">Carriers!</span>
               </span>
             </h1>
+
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 max-w-lg">
+              {priceCards.map((c) => (
+                <div
+                  key={c.name}
+                  className="group flex flex-col items-center rounded-xl bg-white/95 backdrop-blur-sm border border-gray-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 px-2 py-3 text-center"
+                >
+                  <div className="flex items-center justify-center gap-1 h-9 mb-2 max-w-full">
+                    {c.logo ? (
+                      <img
+                        src={c.logo}
+                        alt={c.name}
+                        className={`${['Canada Post', 'UPS'].includes(c.name) ? 'h-8' : c.name === 'USPS' ? 'h-5' : 'h-4'} w-auto object-contain`}
+                      />
+                    ) : (
+                      <span
+                        className="flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0"
+                        style={{ backgroundColor: c.logoColor }}
+                      >
+                        {c.name.charAt(0)}
+                      </span>
+                    )}
+                    {c.showName && (
+                      <span className="text-[10px] font-extrabold text-gray-800 uppercase tracking-tight truncate">
+                        {c.name}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[10px] text-gray-400 line-through leading-none">
+                      ${c.original}
+                    </span>
+                    <span className="text-sm font-extrabold text-[#1B2B6B] leading-none">
+                      ${c.price}
+                    </span>
+                  </div>
+                  <span
+                    className={`text-[9px] font-bold tracking-wide px-1.5 py-1 rounded-full w-full shadow-sm ${c.badgeClass}`}
+                  >
+                    SAVE {c.save}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-6 md:py-8 border-y border-gray-200">
+      <section className="bg-[#0f1a4a]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-7 flex flex-col lg:flex-row items-center justify-between gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 sm:gap-x-10 text-white">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <Clock className="w-4.5 h-4.5 text-[#8fa3ff]" />
+              Fast Delivery Worldwide
+            </span>
+            <span className="hidden lg:block w-px h-5 bg-white/15" />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <Globe2 className="w-4.5 h-4.5 text-[#8fa3ff]" />
+              Serving 220+ Countries
+            </span>
+            <span className="hidden lg:block w-px h-5 bg-white/15" />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <Headphones className="w-4.5 h-4.5 text-[#8fa3ff]" />
+              24/7 Support — We&apos;re Here to Help
+            </span>
+          </div>
+          <Link
+            href="/quote"
+            className="inline-flex items-center justify-center rounded-xl bg-[#3b4fd6] hover:bg-[#4a5ce0] transition-colors text-white font-semibold px-6 py-3 text-sm sm:text-base shrink-0 shadow-lg shadow-black/20"
+          >
+            Ship Smarter, Save More!
+          </Link>
+        </div>
+      </section>
+
+      <section className="bg-white py-6 md:py-8 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <p className="text-center text-xs font-semibold tracking-[0.08em] uppercase text-gray-400 leading-[1.4] mb-4 md:mb-6">
             Trusted by Shippers. Powered by Leading Carriers.
           </p>
           <ul className="flex flex-wrap items-end justify-center gap-3 sm:gap-4 md:gap-6">
-            {carriers.map(({ name, logo, className }) => (
+            {[
+              { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto' },
+              { name: 'FedEx', logo: '/carriers/fedex.svg', className: 'h-8 w-auto' },
+              { name: 'DHL', logo: '/carriers/dhl.svg', className: 'h-8 w-auto' },
+              { name: 'Purolator', logo: '/carriers/purolator.svg', className: 'h-8 w-auto' },
+            ].map(({ name, logo, className }) => (
               <li key={name} className="flex items-end justify-center h-8 sm:h-10 md:h-11 px-1.5 list-none">
                 <img src={logo} alt={name} className={`${className} object-contain block`} />
               </li>
