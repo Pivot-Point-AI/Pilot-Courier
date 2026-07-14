@@ -16,35 +16,35 @@ import {
 
 const priceCards = [
   {
-    name: 'UPS',
-    logo: '/carriers/ups.svg',
-    className: 'h-8 w-auto',
-    showName: true,
-    original: '120.00',
-    price: '89.99',
-    save: '25%',
-    accentFrom: '#4a3418',
-    accentTo: '#2a1c0a',
-    priceColor: '#2a1c0a',
-  },
-  {
     name: 'FedEx',
     logo: '/carriers/fedex.svg',
     className: 'h-7 w-auto',
     original: '110.00',
-    price: '79.99',
-    save: '27%',
+    price: '30.80',
+    save: '72%',
     accentFrom: '#6d28d9',
     accentTo: '#4d148c',
     priceColor: '#4d148c',
+  },
+  {
+    name: '',
+    logo: '/carriers/ups.svg',
+    className: 'h-10 w-auto',
+    showName: true,
+    original: '120.00',
+    price: '26.40',
+    save: '78%',
+    accentFrom: '#4a3418',
+    accentTo: '#2a1c0a',
+    priceColor: '#2a1c0a',
   },
   {
     name: 'DHL',
     logo: '/carriers/dhl.svg',
     className: 'h-7 w-auto',
     original: '100.00',
-    price: '69.99',
-    save: '30%',
+    price: '15.00',
+    save: '85%',
     accentFrom: '#f6c744',
     accentTo: '#d99a00',
     priceColor: '#c98c00',
@@ -54,8 +54,8 @@ const priceCards = [
     logo: '/carriers/purolator.svg',
     className: 'h-7 w-auto',
     original: '95.00',
-    price: '64.99',
-    save: '32%',
+    price: '22.80',
+    save: '76%',
     accentFrom: '#2e56c7',
     accentTo: '#1e3a8a',
     priceColor: '#1e3a8a',
@@ -66,8 +66,8 @@ const priceCards = [
     className: 'h-8 w-auto',
     showName: true,
     original: '85.00',
-    price: '59.99',
-    save: '29%',
+    price: '8.50',
+    save: '90%',
     accentFrom: '#e6394f',
     accentTo: '#c0102a',
     priceColor: '#c0102a',
@@ -78,8 +78,8 @@ const priceCards = [
     logo: '/carriers/usps.svg',
     className: 'h-7 w-auto',
     original: '90.00',
-    price: '54.99',
-    save: '39%',
+    price: '18.00',
+    save: '80%',
     accentFrom: '#1c2f66',
     accentTo: '#0f1a4a',
     priceColor: '#0f1a4a',
@@ -108,7 +108,7 @@ export default function HeroSection() {
         {/* Mobile-only white fade so text stays readable over the image */}
         <div className="absolute inset-0 z-[1] bg-gradient-to-r from-white/90 via-white/70 to-transparent md:hidden" />
 
-        <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="relative z-[2] max-w-7xl mx-auto px-4 sm:px-6 md:pr-6 md:pl-2 lg:pl-0">
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-3 sm:gap-4 bg-white/90 border border-[#e3e9f5] rounded-full pl-2.5 pr-5 py-2.5 mb-4 md:mb-5 shadow-sm">
               <span className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#2c4bb8] to-[#0f1a4a] text-white shrink-0">
@@ -154,7 +154,7 @@ export default function HeroSection() {
                 with Top <span className="text-[#2c3fd6]">Carriers!</span>
               </span>
             </h1>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-sm sm:max-w-xl mx-auto sm:mx-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-sm sm:max-w-xl mx-0">
              
               {priceCards.map((c) => (
                 <div
@@ -168,7 +168,7 @@ export default function HeroSection() {
                     }}
                   />
 
-                  <div className="flex items-center gap-1.5 h-5 mb-1">
+                  <div className="flex items-center justify-center gap-1.5 h-5 mb-1">
                     {c.logo ? (
                       <img src={c.logo} alt={c.name} className={`${c.className} object-contain`} />
                     ) : (
@@ -205,18 +205,16 @@ export default function HeroSection() {
                     ${c.price}
                   </p>
 
-                  <div
-                    className="flex items-center gap-0.5 rounded-md px-1 py-0.5 shadow-sm"
+                  <Link
+                    href="/quote"
+                    className="flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 shadow-sm cursor-pointer hover:brightness-110 transition-[filter]"
                     style={{ background: `linear-gradient(135deg, ${c.accentFrom}, ${c.accentTo})` }}
                   >
-                    <span className="flex items-center justify-center w-2.5 h-2.5 rounded-full bg-white shrink-0">
-                      <Tag className="w-1.5 h-1.5" style={{ color: c.accentTo }} strokeWidth={2.5} />
+                    <Tag className="w-3 h-3 text-white" strokeWidth={2.5} />
+                    <span className="text-[11px] font-extrabold uppercase tracking-wide text-white">
+                      Save {c.save}
                     </span>
-                    <span className="flex flex-col leading-none text-white">
-                      <span className="text-[5px] font-bold uppercase tracking-wide">Save</span>
-                      <span className="text-[9px] font-extrabold leading-tight">{c.save}</span>
-                    </span>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </div>
