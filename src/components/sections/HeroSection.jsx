@@ -18,6 +18,7 @@ const priceCards = [
   {
     name: 'FedEx',
     logo: '/carriers/fedex.svg',
+    logoW: 233, logoH: 64,
     className: 'h-7 w-auto',
     original: '110.00',
     price: '30.80',
@@ -29,6 +30,7 @@ const priceCards = [
   {
     name: '',
     logo: '/carriers/ups.svg',
+    logoW: 120, logoH: 60,
     className: 'h-10 w-auto',
     showName: true,
     original: '120.00',
@@ -41,6 +43,7 @@ const priceCards = [
   {
     name: 'DHL',
     logo: '/carriers/dhl.svg',
+    logoW: 196, logoH: 43,
     className: 'h-7 w-auto',
     original: '100.00',
     price: '15.00',
@@ -52,6 +55,7 @@ const priceCards = [
   {
     name: 'Purolator',
     logo: '/carriers/purolator.svg',
+    logoW: 260, logoH: 45,
     className: 'h-7 w-auto',
     original: '95.00',
     price: '22.80',
@@ -63,6 +67,7 @@ const priceCards = [
   {
     name: 'Canada Post',
     logo: '/carriers/canadapost.svg',
+    logoW: 99, logoH: 98,
     className: 'h-8 w-auto',
     showName: true,
     original: '85.00',
@@ -76,6 +81,7 @@ const priceCards = [
   {
     name: 'USPS',
     logo: '/carriers/usps.svg',
+    logoW: 390, logoH: 47,
     className: 'h-7 w-auto',
     original: '90.00',
     price: '18.00',
@@ -171,7 +177,7 @@ export default function HeroSection() {
 
                   <div className="flex items-center justify-center gap-1.5 h-5 mb-1">
                     {c.logo ? (
-                      <img src={c.logo} alt={c.name} className={`${c.className} object-contain`} />
+                      <img src={c.logo} alt={c.name} width={c.logoW} height={c.logoH} className={`${c.className} object-contain`} />
                     ) : (
                       <span
                         className="flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0"
@@ -257,13 +263,13 @@ export default function HeroSection() {
           </p>
           <ul className="flex flex-wrap items-end justify-center gap-3 sm:gap-4 md:gap-6">
             {[
-              { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto' },
-              { name: 'FedEx', logo: '/carriers/fedex.svg', className: 'h-8 w-auto' },
-              { name: 'DHL', logo: '/carriers/dhl.svg', className: 'h-8 w-auto' },
-              { name: 'Purolator', logo: '/carriers/purolator.svg', className: 'h-8 w-auto' },
-            ].map(({ name, logo, className }) => (
+              { name: 'UPS', logo: '/carriers/ups.svg', className: 'h-11 w-auto', logoW: 120, logoH: 60 },
+              { name: 'FedEx', logo: '/carriers/fedex.svg', className: 'h-8 w-auto', logoW: 233, logoH: 64 },
+              { name: 'DHL', logo: '/carriers/dhl.svg', className: 'h-8 w-auto', logoW: 196, logoH: 43 },
+              { name: 'Purolator', logo: '/carriers/purolator.svg', className: 'h-8 w-auto', logoW: 260, logoH: 45 },
+            ].map(({ name, logo, className, logoW, logoH }) => (
               <li key={name} className="flex items-end justify-center h-8 sm:h-10 md:h-11 px-1.5 list-none">
-                <img src={logo} alt={name} className={`${className} object-contain block`} />
+                <img src={logo} alt={name} width={logoW} height={logoH} className={`${className} object-contain block`} />
               </li>
             ))}
             <li className="list-none text-blue-700 text-xs sm:text-sm font-medium ml-1">and more...</li>
