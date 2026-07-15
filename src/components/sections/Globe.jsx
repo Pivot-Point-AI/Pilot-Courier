@@ -1,14 +1,21 @@
 'use client';
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function Globe({ className = '' }) {
   const chartRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    // Decorative globe is hidden below md, so skip loading the heavy
+    // amCharts5 bundle entirely on small screens.
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      return;
+    }
+
     let root;
     let disposed = false;
+    let idleHandle;
 
-    (async () => {
+    const init = async () => {
       const am5 = await import('@amcharts/amcharts5');
       const am5map = await import('@amcharts/amcharts5/map');
       const am5themes_Animated = (await import('@amcharts/amcharts5/themes/Animated')).default;
@@ -244,10 +251,21 @@ export default function Globe({ className = '' }) {
       });
 
       chart.appear(1000, 100);
-    })();
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleHandle = window.requestIdleCallback(() => init());
+    } else {
+      idleHandle = window.setTimeout(init, 200);
+    }
 
     return () => {
       disposed = true;
+      if (typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleHandle);
+      } else {
+        window.clearTimeout(idleHandle);
+      }
       root?.dispose();
     };
   }, []);

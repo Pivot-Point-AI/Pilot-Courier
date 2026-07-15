@@ -54,12 +54,16 @@ export default function Footer() {
             <p className="text-sm text-gray-500 leading-snug mb-1 max-w-[200px]">
               Canadian courier aggregator. Up to 70% off standard rates.
             </p>
-            <p className="text-xs text-gray-400 mb-4 max-w-[200px]">
+            <p className="text-xs text-gray-500 mb-4 max-w-[200px]">
               350 Burnhamthorpe Rd W, Unit #200<br/>Mississauga, ON L5B 3J1
             </p>
             <div className="flex items-center gap-2">
-              {[FacebookIcon, TwitterIcon, LinkedinIcon].map((Icon, i) => (
-                <a key={i} href="#" className="w-8 h-8 bg-gray-100 hover:bg-orange-500 rounded-lg flex items-center justify-center transition">
+              {[
+                { Icon: FacebookIcon, label: 'Facebook' },
+                { Icon: TwitterIcon, label: 'Twitter' },
+                { Icon: LinkedinIcon, label: 'LinkedIn' },
+              ].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={label} className="w-8 h-8 bg-gray-100 hover:bg-orange-500 rounded-lg flex items-center justify-center transition">
                   <Icon />
                 </a>
               ))}
@@ -68,7 +72,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">Company</h4>
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">Company</h3>
             <ul className="space-y-2">
               {footerLinks.company.map(({ href, label }) => (
                 <li key={label}>
@@ -80,7 +84,7 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">Support</h4>
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">Support</h3>
             <ul className="space-y-2">
               {footerLinks.support.map(({ href, label }) => (
                 <li key={label}>
@@ -97,7 +101,7 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-3">Services</h4>
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-3">Services</h3>
             <ul className="space-y-2">
               {footerLinks.services.map(({ href, label }) => (
                 <li key={label}>
@@ -109,7 +113,7 @@ export default function Footer() {
 
           {/* Stay Updated */}
           <div className="col-span-1 lg:col-span-1">
-            <h4 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-2">Stay Updated</h4>
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Stay Updated</h3>
             <p className="text-sm text-gray-500 leading-snug mb-3">Get shipping tips, updates, and promotions.</p>
             <form className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-2" onSubmit={e => e.preventDefault()}>
               <input type="email" placeholder="Enter your email"

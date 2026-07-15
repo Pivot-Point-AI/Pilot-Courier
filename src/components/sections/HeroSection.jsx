@@ -189,14 +189,14 @@ export default function HeroSection() {
 
                   <div className="border-t border-gray-100 mb-1" />
 
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wide text-center leading-none">
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-wide text-center leading-none">
                     Original Price
                   </p>
-                  <p className="text-xs text-gray-400 line-through text-center mb-0.5 leading-none">
+                  <p className="text-xs text-gray-500 line-through text-center mb-0.5 leading-none">
                     ${c.original}
                   </p>
 
-                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wide text-center leading-none">
+                  <p className="text-[8px] font-bold text-gray-500 uppercase tracking-wide text-center leading-none">
                     Our Price
                   </p>
                   <p
@@ -252,7 +252,7 @@ export default function HeroSection() {
 
       <section className="bg-white py-6 md:py-8 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-center text-xs font-semibold tracking-[0.08em] uppercase text-gray-400 leading-[1.4] mb-4 md:mb-6">
+          <p className="text-center text-xs font-semibold tracking-[0.08em] uppercase text-gray-500 leading-[1.4] mb-4 md:mb-6">
             Trusted by Shippers. Powered by Leading Carriers.
           </p>
           <ul className="flex flex-wrap items-end justify-center gap-3 sm:gap-4 md:gap-6">

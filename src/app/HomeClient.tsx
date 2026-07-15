@@ -12,10 +12,12 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      <HeroSection />
-      <HowItWorksSection />
-      <WhyUsSection />
-      <CtaSection />
+      <main>
+        <HeroSection />
+        <HowItWorksSection />
+        <WhyUsSection />
+        <CtaSection />
+      </main>
       <Footer />
     </div>
   );
