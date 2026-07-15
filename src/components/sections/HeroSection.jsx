@@ -95,6 +95,7 @@ export default function HeroSection() {
             src="/images/hero.webp"
             alt="Shipping background"
             fill
+            sizes="(max-width: 768px) 100vw, 1342px"
             className="object-cover object-[75%_center] md:object-center"
             priority
           />

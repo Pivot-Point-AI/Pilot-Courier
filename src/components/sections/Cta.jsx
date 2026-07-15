@@ -41,6 +41,7 @@ const CtaSection = () => {
           src="/images/cta3.webp"
           alt=""
           fill
+          sizes="(max-width: 1024px) 165px, 188px"
           className="object-contain object-right-bottom opacity-100"
         />
       </div>
