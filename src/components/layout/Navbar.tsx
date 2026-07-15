@@ -71,7 +71,7 @@ function AuthNavbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0 mr-8">
-            <Image src="/images/logo.png" alt="Pilot Courier" width={115} height={132} className="h-16 w-auto" priority />
+            <Image src="/images/logo.webp" alt="Pilot Courier" width={115} height={132} className="h-16 w-auto" priority />
           </Link>
 
           {/* Tabs */}
@@ -188,7 +188,7 @@ function PublicNavbar() {
         <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <Image src="/images/logo.png" alt="Pilot Courier" width={115} height={132} className="h-[88px] w-auto" priority />
+            <Image src="/images/logo.webp" alt="Pilot Courier" width={115} height={132} className="h-[88px] w-auto" priority />
           </Link>
 
           {/* Desktop links */}

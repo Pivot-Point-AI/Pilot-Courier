@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     images: ['/images/og-image.jpg'],
   },
   icons: {
-    icon: '/images/logo.png',
+    icon: '/images/logo.webp',
   },
 };
 
@@ -63,7 +63,7 @@ const organizationJsonLd = {
   '@type': 'Organization',
   name: 'Pilot Courier',
   url: siteUrl,
-  logo: `${siteUrl}/images/logo.png`,
+  logo: `${siteUrl}/images/logo.webp`,
   description: 'Compare real-time shipping rates from UPS, FedEx, DHL, Purolator and more. Book shipments, generate labels, and track packages.',
   areaServed: 'CA',
   sameAs: [],

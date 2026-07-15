@@ -49,7 +49,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1 pr-0 lg:pr-4">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
+              <Image src="/images/logo.webp" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
             </Link>
             <p className="text-sm text-gray-500 leading-snug mb-1 max-w-[200px]">
               Canadian courier aggregator. Up to 70% off standard rates.

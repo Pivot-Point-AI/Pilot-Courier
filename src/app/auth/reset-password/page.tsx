@@ -44,7 +44,7 @@ function ResetPasswordForm() {
       <div className="hidden lg:flex lg:w-1/2 bg-hero-gradient flex-col justify-between p-12">
         <Link href="/" className="flex items-center gap-2">
           <div className="bg-white rounded-xl p-2 shadow-md">
-            <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-10 w-auto block" />
+            <Image src="/images/logo.webp" alt="Pilot Courier" width={56} height={56} className="h-10 w-auto block" />
           </div>
         </Link>
         <div>
@@ -61,7 +61,7 @@ function ResetPasswordForm() {
         <div className="w-full max-w-md">
           <div className="lg:hidden flex justify-center mb-8">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/images/logo.png" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
+              <Image src="/images/logo.webp" alt="Pilot Courier" width={56} height={56} className="h-12 w-auto" />
             </Link>
           </div>
 

@@ -38,7 +38,7 @@ const CtaSection = () => {
 
       <div className="hidden sm:block pointer-events-none select-none absolute right-2 sm:right-6 lg:right-10 bottom-0 h-[110px] w-[130px] sm:h-[140px] sm:w-[165px] lg:h-[158px] lg:w-[188px]">
         <Image
-          src="/images/cta34.png"
+          src="/images/cta3.webp"
           alt=""
           fill
           className="object-contain object-right-bottom opacity-100"
