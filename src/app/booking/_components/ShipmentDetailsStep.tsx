@@ -12,6 +12,7 @@ export function ShipmentDetailsStep(props: {
   shipper: Address; recipient: Address;
   updateShipper: (f: string, v: any) => void; updateRecipient: (f: string, v: any) => void;
   swapAddresses: () => void;
+  isInternational: boolean;
 
   packages: PkgRow[]; setPackages: React.Dispatch<React.SetStateAction<PkgRow[]>>;
   packagingType: string; setPackagingType: (v: string) => void;
@@ -45,7 +46,7 @@ export function ShipmentDetailsStep(props: {
   quoteLoading: boolean;
 }) {
   const {
-    router, shipper, recipient, updateShipper, updateRecipient, swapAddresses,
+    router, shipper, recipient, updateShipper, updateRecipient, swapAddresses, isInternational,
     packages, setPackages, packagingType, setPackagingType, dimUnit, setDimUnit, weightUnit, setWeightUnit,
     addPkg, dupPkg, removePkg, updatePkg,
     products, updateProduct, addProduct, removeProduct, productTotal, invoiceTotal,
@@ -68,7 +69,7 @@ export function ShipmentDetailsStep(props: {
       {/* Address panels side by side */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="flex flex-col md:flex-row items-stretch gap-0 relative">
-          <AddressPanel title="Shipping From" color="red" address={shipper} onChange={updateShipper} />
+          <AddressPanel title="Shipping From" color="red" address={shipper} onChange={updateShipper} typeLabel="Shipper Type" />
           {/* Swap button */}
           <div className="flex items-center justify-center py-2 md:pt-12 md:px-2 flex-shrink-0">
             <button
@@ -79,7 +80,7 @@ export function ShipmentDetailsStep(props: {
               <ArrowLeftRight className="w-3.5 h-3.5 rotate-90 md:rotate-0" />
             </button>
           </div>
-          <AddressPanel title="Shipping To" color="blue" address={recipient} onChange={updateRecipient} showConfirmEmail />
+          <AddressPanel title="Shipping To" color="blue" address={recipient} onChange={updateRecipient} showConfirmEmail typeLabel="Consignee Type" />
         </div>
       </div>
 
@@ -253,8 +254,8 @@ export function ShipmentDetailsStep(props: {
         )}
       </div>
 
-      {/* Product Information (customs invoice) */}
-      {packagingType !== 'Envelope' && (
+      {/* Product Information (customs invoice) — only needed when shipping between different countries */}
+      {packagingType !== 'Envelope' && isInternational && (
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
             <span className="text-brand-orange font-bold text-sm">🛒</span>
@@ -415,39 +416,42 @@ export function ShipmentDetailsStep(props: {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={lbl}>Pick Up Date</label>
+                  <input type="date" value={pickupDate} onChange={e => setPickupDate(e.target.value)} className={inp} min={new Date().toISOString().split('T')[0]} />
+                </div>
+                {pickupMethod === 'schedule_pickup' && (
+                  <div>
+                    <label className={lbl}>Pickup Location</label>
+                    <select value={pickupLocation} onChange={e => setPickupLocation(e.target.value)} className={inp}>
+                      {PICKUP_LOCS.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+
               {pickupMethod === 'schedule_pickup' && (
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className={lbl}>Pick Up Date</label>
-                      <input type="date" value={pickupDate} onChange={e => setPickupDate(e.target.value)} className={inp} min={new Date().toISOString().split('T')[0]} />
-                    </div>
-                    <div>
-                      <label className={lbl}>Pickup Location</label>
-                      <select value={pickupLocation} onChange={e => setPickupLocation(e.target.value)} className={inp}>
-                        {PICKUP_LOCS.map(l => <option key={l} value={l}>{l}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
                       <label className={lbl}>Earliest Time Ready</label>
-                      <div className="flex gap-1">
-                        <select value={readyHour} onChange={e => setReadyHour(e.target.value)} className={`${inp} flex-1`}>
+                      <div className="grid grid-cols-2 gap-1">
+                        <select value={readyHour} onChange={e => setReadyHour(e.target.value)} className={inp}>
                           {HOURS.map(h => <option key={h}>{h}</option>)}
                         </select>
-                        <select value={readyMin} onChange={e => setReadyMin(e.target.value)} className={`${inp} w-16`}>
+                        <select value={readyMin} onChange={e => setReadyMin(e.target.value)} className={inp}>
                           {MINS.map(m => <option key={m}>{m}</option>)}
                         </select>
                       </div>
                     </div>
                     <div>
                       <label className={lbl}>Latest Time Ready</label>
-                      <div className="flex gap-1">
-                        <select value={closeHour} onChange={e => setCloseHour(e.target.value)} className={`${inp} flex-1`}>
+                      <div className="grid grid-cols-2 gap-1">
+                        <select value={closeHour} onChange={e => setCloseHour(e.target.value)} className={inp}>
                           {HOURS.map(h => <option key={h}>{h}</option>)}
                         </select>
-                        <select value={closeMin} onChange={e => setCloseMin(e.target.value)} className={`${inp} w-16`}>
+                        <select value={closeMin} onChange={e => setCloseMin(e.target.value)} className={inp}>
                           {MINS.map(m => <option key={m}>{m}</option>)}
                         </select>
                       </div>
@@ -470,14 +474,31 @@ export function ShipmentDetailsStep(props: {
               {/* References */}
               <div>
                 <label className="text-xs font-medium text-gray-600 mb-2 block">References</label>
-                {references.map((ref, i) => (
-                  <div key={i} className="flex gap-2 mb-2">
-                    <input type="text" value={ref.name} onChange={e => { const r = [...references]; r[i] = { ...r[i], name: e.target.value }; setReferences(r); }} placeholder="Reference name" className={`${inp} flex-1`} />
-                    <input type="text" value={ref.value} onChange={e => { const r = [...references]; r[i] = { ...r[i], value: e.target.value }; setReferences(r); }} placeholder="Value" className={`${inp} flex-1`} />
-                  </div>
-                ))}
+                <div className="space-y-2">
+                  {references.map((ref, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-2">
+                      <input type="text" value={ref.name} onChange={e => { const r = [...references]; r[i] = { ...r[i], name: e.target.value }; setReferences(r); }} placeholder="Reference name" className={`${inp} flex-1 bg-white`} />
+                      <input type="text" value={ref.value} onChange={e => { const r = [...references]; r[i] = { ...r[i], value: e.target.value }; setReferences(r); }} placeholder="Value" className={`${inp} flex-1 bg-white`} />
+                      <button
+                        type="button"
+                        onClick={() => setReferences(references.filter((_, idx) => idx !== i))}
+                        title="Remove reference"
+                        disabled={references.length <= 1}
+                        className="p-1.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-gray-400 transition-colors flex-shrink-0"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
                 {references.length < 3 && (
-                  <button type="button" onClick={() => setReferences([...references, { name: '', value: '' }])} className="text-xs text-brand-navy hover:underline">+ Add Reference</button>
+                  <button
+                    type="button"
+                    onClick={() => setReferences([...references, { name: '', value: '' }])}
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-navy hover:text-brand-orange transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Reference
+                  </button>
                 )}
               </div>
 
@@ -486,6 +507,7 @@ export function ShipmentDetailsStep(props: {
                 <label className={lbl}>Signature Type</label>
                 <select value={signatureType} onChange={e => setSignatureType(e.target.value)} className={inp}>
                   <option value="none">Choose an Option for Signature</option>
+                  <option value="not_required">Signature Not Required</option>
                   <option value="signature_required">Signature Required</option>
                   <option value="adult_signature">Adult Signature</option>
                 </select>

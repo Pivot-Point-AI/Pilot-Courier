@@ -101,8 +101,8 @@ export default function QuoteClient() {
     const isEnvelope = packagingType === 'Envelope';
     const isPak = packagingType === 'Pak';
     if (!isEnvelope) {
-      if (!first.weight) { toast.error('Please fill in package weight.'); return; }
-      if (!isPak && (!first.length || !first.width || !first.height)) {
+      if (packages.some(p => !p.weight)) { toast.error('Please fill in package weight.'); return; }
+      if (!isPak && packages.some(p => !p.length || !p.width || !p.height)) {
         toast.error('Please fill in all package dimensions and weight.'); return;
       }
     }
@@ -124,7 +124,7 @@ export default function QuoteClient() {
     if (!form.originProvince) {
       toast.error('Please select the origin province / state.'); return;
     }
-    if (packagingType === 'Pallet' && !first.freightClass) {
+    if (packagingType === 'Pallet' && packages.some(p => !p.freightClass)) {
       toast.error('Please select a freight class for Pallet shipments.'); return;
     }
     setLoading(true);
@@ -143,6 +143,16 @@ export default function QuoteClient() {
         specialHandling: first.specialHandling, packagingType,
         freightClass: first.freightClass || undefined,
         quoteType: 'quick',
+        packages: packages.map(p => ({
+          length: parseFloat(p.length) || 0,
+          width: parseFloat(p.width) || 0,
+          height: parseFloat(p.height) || 0,
+          weight: parseFloat(p.weight) || 0,
+          insuranceAmount: parseFloat(p.insuranceAmount) || 0,
+          description: p.description || 'Package',
+          specialHandling: p.specialHandling,
+          freightClass: p.freightClass || undefined,
+        })),
       } as any);
       sessionStorage.setItem('pc_rates', JSON.stringify(data.rates));
       sessionStorage.setItem('pc_quote_form', JSON.stringify({ ...form, packages, packagingType }));
@@ -151,6 +161,7 @@ export default function QuoteClient() {
       toast.error(err?.response?.data?.message || 'Failed to fetch rates. Please try again.');
     } finally {
       setLoading(false);
+      
     }
   };
 

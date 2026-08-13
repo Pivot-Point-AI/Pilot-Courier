@@ -13,6 +13,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, EMPTY } from './_lib/types';
 import { StepBar } from './_components/StepBar';
+import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
 import { ShipmentDetailsStep } from './_components/ShipmentDetailsStep';
 import { RateCard } from './_components/RateCard';
 import { StripePaymentForm } from './_components/StripePaymentForm';
@@ -208,10 +209,12 @@ export default function BookingClient() {
         toast.error('Please complete package dimensions and weight for at least one package.');
         return false;
       }
-      for (const p of products) {
-        if (!p.description || !p.madeIn || !p.unitPrice) {
-          toast.error('Please complete all product information (description, made in, unit price) for customs.');
-          return false;
+      if (isInternational) {
+        for (const p of products) {
+          if (!p.description || !p.madeIn || !p.unitPrice) {
+            toast.error('Please complete all product information (description, made in, unit price) for customs.');
+            return false;
+          }
         }
       }
     }
@@ -290,7 +293,7 @@ export default function BookingClient() {
         quantity: 1,
       }));
 
-      const customsInvoice = packagingType !== 'Envelope' ? {
+      const customsInvoice = packagingType !== 'Envelope' && isInternational ? {
         taxType,
         currency: invoiceCurrency,
         products: products.map(p => ({
@@ -312,7 +315,7 @@ export default function BookingClient() {
         packagingType,
         customsInvoice,
         selectedRate,
-        shipmentType: recipient.country !== shipper.country ? 'international' : 'domestic',
+        shipmentType: isInternational ? 'international' : 'domestic',
         guestEmail: shipper.email,
         guestPhone: shipper.phone,
         pickupDetails: {
@@ -377,7 +380,8 @@ export default function BookingClient() {
     <div className="min-h-screen bg-[#f5f6f8]">
       <Navbar />
 
-      <div className="pt-20">
+      <div className="pt-24">
+        <ShipmentModeTabs mode="single" />
         <StepBar current={step} />
 
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -389,6 +393,7 @@ export default function BookingClient() {
               shipper={shipper} recipient={recipient}
               updateShipper={updateShipper} updateRecipient={updateRecipient}
               swapAddresses={swapAddresses}
+              isInternational={isInternational}
               packages={packages} setPackages={setPackages}
               packagingType={packagingType} setPackagingType={setPackagingType}
               dimUnit={dimUnit} setDimUnit={setDimUnit}

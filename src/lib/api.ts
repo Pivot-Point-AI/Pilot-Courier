@@ -123,6 +123,16 @@ export interface QuoteFormData {
   insuranceAmount?: number;
   specialHandling?: boolean;
   quoteType?: 'quick' | 'detailed';
+  packages?: Array<{
+    length: number;
+    width: number;
+    height: number;
+    weight: number;
+    insuranceAmount?: number;
+    description?: string;
+    specialHandling?: boolean;
+    freightClass?: string;
+  }>;
 }
 
 export interface Rate {
@@ -153,4 +163,5 @@ export interface Address {
   phone: string;
   email?: string;
   isResidential?: boolean;
+  addressType?: 'consumer' | 'business';
 }

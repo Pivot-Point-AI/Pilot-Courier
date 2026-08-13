@@ -9,10 +9,11 @@ import { ProvinceSelect } from './ProvinceSelect';
 import { CityInput } from './CityInput';
 import { inp, lblRow, fieldRow, req } from './styles';
 
-export function AddressPanel({ title, color, address, onChange, showConfirmEmail }: {
+export function AddressPanel({ title, color, address, onChange, showConfirmEmail, typeLabel }: {
   title: string; color: 'red' | 'blue';
   address: Address; onChange: (f: string, v: any) => void;
   showConfirmEmail?: boolean;
+  typeLabel?: string;
 }) {
   const dot = color === 'red' ? 'bg-brand-orange' : 'bg-brand-navy';
   const hdr = color === 'red' ? 'text-brand-orange' : 'text-brand-navy';
@@ -50,10 +51,33 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
         {title}
       </div>
       <div className="p-4 space-y-2.5">
-        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-          <input type="checkbox" checked={!!address.isResidential} onChange={e => onChange('isResidential', e.target.checked)} className="accent-brand-navy" />
-          Residential
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {typeLabel && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 whitespace-nowrap">{typeLabel}</span>
+              <div className="flex rounded overflow-hidden border border-gray-300">
+                <button
+                  type="button"
+                  onClick={() => onChange('addressType', 'consumer')}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${address.addressType !== 'business' ? 'bg-brand-orange text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                >
+                  Consumer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange('addressType', 'business')}
+                  className={`px-3 py-1 text-xs font-medium border-l border-gray-300 transition-colors ${address.addressType === 'business' ? 'bg-brand-orange text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                >
+                  Business
+                </button>
+              </div>
+            </div>
+          )}
+          <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+            <input type="checkbox" checked={!!address.isResidential} onChange={e => onChange('isResidential', e.target.checked)} className="accent-brand-navy" />
+            Residential
+          </label>
+        </div>
         <div className={fieldRow}>
           <label className={lblRow}>Company / Person {req}</label>
           <input className={`${inp} w-full md:flex-1`} value={address.company || ''} onChange={e => onChange('company', e.target.value)} placeholder="Company or person name" />

@@ -37,5 +37,5 @@ export const mkProduct = (madeIn = ''): ProductRow => ({
 export const EMPTY: Address = {
   name: '', company: '', street: '', street2: '',
   city: '', province: '', postalCode: '', country: '',
-  phone: '', email: '', isResidential: false,
+  phone: '', email: '', isResidential: false, addressType: 'consumer',
 };

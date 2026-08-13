@@ -155,7 +155,7 @@ export default function QuoteForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const first = packages[0];
-    if (!first.weight || !first.length || !first.width || !first.height) {
+    if (packages.some(p => !p.weight || !p.length || !p.width || !p.height)) {
       toast.error('Please fill in package dimensions and weight.'); return;
     }
     setLoading(true);
@@ -169,6 +169,12 @@ export default function QuoteForm() {
         length: parseFloat(first.length), width: parseFloat(first.width), height: parseFloat(first.height),
         dimensionUnit: uom === 'I' ? 'in' : 'cm',
         packagingType: pkgType,
+        packages: packages.map(p => ({
+          length: parseFloat(p.length) || 0,
+          width: parseFloat(p.width) || 0,
+          height: parseFloat(p.height) || 0,
+          weight: parseFloat(p.weight) || 0,
+        })),
       } as any);
       sessionStorage.setItem('pc_rates', JSON.stringify(data.rates));
       sessionStorage.setItem('pc_quote_form', JSON.stringify({
