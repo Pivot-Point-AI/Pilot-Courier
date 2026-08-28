@@ -30,7 +30,9 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
   useEffect(() => {
     const postal = address.postalCode?.trim();
     const country = address.country?.trim();
-    if (!country || !postal || postal.replace(/\s/g, '').length < 5) return;
+    // Minimum length low enough to cover 4-digit postal codes (e.g. Bangladesh) and
+    // CA's 3-char FSA lookup — not just 5+ char formats like US ZIP / UK postcodes.
+    if (!country || !postal || postal.replace(/\s/g, '').length < 3) return;
     const t = setTimeout(async () => {
       setPostalLoading(true);
       try {

@@ -265,6 +265,16 @@ export default function BookingClient() {
           insuranceAmount: p.insuranceAmount, specialHandling: p.specialHandling, description: p.description,
         })),
         quoteType: 'detailed',
+        pickupMethod,
+        pickupLocation,
+        pickupInstructions,
+        readyHour, readyMin, closeHour, closeMin,
+        specialServices: {
+          signatureRequired: signatureType === 'signature_required',
+          adultSignature: signatureType === 'adult_signature',
+          saturdayDelivery,
+          holdForPickup,
+        },
       } as any);
       setRates(data.rates || []);
       if (data.rates?.length) setSelectedRate(data.rates.find((r: Rate) => r.isCheapest) || data.rates[0]);

@@ -123,6 +123,19 @@ export interface QuoteFormData {
   insuranceAmount?: number;
   specialHandling?: boolean;
   quoteType?: 'quick' | 'detailed';
+  pickupMethod?: 'schedule_pickup' | 'drop_off';
+  pickupLocation?: string;
+  pickupInstructions?: string;
+  readyHour?: string;
+  readyMin?: string;
+  closeHour?: string;
+  closeMin?: string;
+  specialServices?: {
+    signatureRequired?: boolean;
+    adultSignature?: boolean;
+    saturdayDelivery?: boolean;
+    holdForPickup?: boolean;
+  };
   packages?: Array<{
     length: number;
     width: number;
