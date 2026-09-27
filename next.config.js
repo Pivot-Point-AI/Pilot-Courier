@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Keep QA previews separate from an already running development server.
+  distDir: process.env.PILOT_BUILD_DIR || '.next',
   images: {
     domains: ['ship.netparcel.com', 'api.pilotcourier.com'],
   },

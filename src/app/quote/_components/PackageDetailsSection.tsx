@@ -84,7 +84,7 @@ export function PackageDetailsSection({
           {!hideDims && <span className="text-xs font-semibold text-gray-500 text-center">Vol. Weight ({weightUnit})</span>}
           {isPallet && <span className="text-xs font-semibold text-gray-500 text-center">Freight Class</span>}
           <span className="text-xs font-semibold text-gray-500 text-center">Insurance ($)</span>
-          <span className="text-xs font-semibold text-gray-500 text-center">Signature</span>
+          <span className="text-xs font-semibold text-gray-500 text-center" title="Special handling may incur a carrier surcharge. This does not request a signature.">Special handling</span>
           <span className="text-xs font-semibold text-gray-500 text-center">Description</span>
           <span />
         </div>
@@ -216,7 +216,7 @@ export function PackageDetailsSection({
                     className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                 </div>
                 <div>
-                  <label className="text-[11px] text-gray-400 block mb-0.5">Signature</label>
+                  <label className="text-[11px] text-gray-400 block mb-0.5" title="Special handling may incur a carrier surcharge. This does not request a signature.">Special handling</label>
                   <select value={pkg.specialHandling ? 'Yes' : 'No'}
                     onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'Yes')}
                     className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center">

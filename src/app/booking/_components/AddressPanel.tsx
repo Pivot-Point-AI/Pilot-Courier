@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { isPostalLookupReady } from '@/lib/postal';
 import type { Address } from '@/lib/api';
 import { API_URL } from '../_lib/constants';
 import { fetchProvinces } from '../_lib/geo';
@@ -18,6 +19,7 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
   const dot = color === 'red' ? 'bg-brand-orange' : 'bg-brand-navy';
   const hdr = color === 'red' ? 'text-brand-orange' : 'text-brand-navy';
   const [provinces, setProvinces] = useState<{ label: string; value: string }[]>([]);
+  const [postalChoices, setPostalChoices] = useState<string[]>([]);
   const [postalLoading, setPostalLoading] = useState(false);
 
   useEffect(() => {
@@ -28,22 +30,26 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
   }, [address.country]);
 
   useEffect(() => {
+    setPostalChoices([]);
+    setPostalLoading(false);
     const postal = address.postalCode?.trim();
     const country = address.country?.trim();
-    // Minimum length low enough to cover 4-digit postal codes (e.g. Bangladesh) and
-    // CA's 3-char FSA lookup — not just 5+ char formats like US ZIP / UK postcodes.
-    if (!country || !postal || postal.replace(/\s/g, '').length < 3) return;
+    // Require a complete Canadian code before allowing an approximate FSA fallback.
+    if (!country || !postal || !isPostalLookupReady(country, postal)) return;
+    let cancelled = false;
     const t = setTimeout(async () => {
       setPostalLoading(true);
       try {
         const res = await fetch(`${API_URL}/geo/postal?country=${encodeURIComponent(country)}&postal=${encodeURIComponent(postal)}`);
         const data = await res.json();
+        if (cancelled) return;
+        setPostalChoices(data?.cities || []);
         if (data?.city) onChange('city', data.city);
         if (data?.province) onChange('province', data.province);
       } catch {}
-      setPostalLoading(false);
+      if (!cancelled) setPostalLoading(false);
     }, 600);
-    return () => clearTimeout(t);
+    return () => { cancelled = true; clearTimeout(t); };
   }, [address.postalCode, address.country]);
 
   return (
@@ -53,6 +59,7 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
         {title}
       </div>
       <div className="p-4 space-y-2.5">
+        <p className="text-xs text-gray-500">Postal lookup may suggest a nearby area. Please confirm the city and province.</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           {typeLabel && (
             <div className="flex items-center gap-2">
@@ -111,7 +118,7 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
         </div>
         <div className={fieldRow}>
           <label className={lblRow}>City {req}</label>
-          <div className="w-full md:flex-1"><CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} /></div>
+          <div className="w-full md:flex-1">{postalChoices.length > 1 && <select aria-label={title + ' city suggestions'} className={inp} value="" onChange={e => onChange('city', e.target.value)}><option value="">Choose a city in this postal area</option>{postalChoices.map(city => <option key={city}>{city}</option>)}</select>}<CityInput value={address.city} onChange={v => onChange('city', v)} country={address.country || ''} /></div>
         </div>
         <div className={fieldRow}>
           <label className={lblRow}>Province / State</label>

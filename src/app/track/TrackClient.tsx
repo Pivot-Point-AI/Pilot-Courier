@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { formatDeliveryDate } from '@/lib/rate-display';
 import { shipmentApi } from '@/lib/api';
 import { Search, Package, Truck, CheckCircle2, MapPin, Clock, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -156,7 +157,7 @@ function TrackPageContent() {
                   <div>
                     <p className="text-gray-400 text-xs">Est. Delivery</p>
                     <p className="font-semibold text-gray-800">
-                      {new Date(trackingData.estimatedDelivery).toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      {formatDeliveryDate(trackingData.estimatedDelivery)}
                     </p>
                   </div>
                 )}

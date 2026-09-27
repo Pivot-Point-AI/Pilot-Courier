@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Plus, ChevronDown, Search } from 'lucide-react';
 import { shipmentApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import { isPostalLookupReady } from '@/lib/postal';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pilot-courier-ackend.vercel.app/api';
 
@@ -139,7 +140,7 @@ export default function QuoteForm() {
 
   const handlePostal = async (side: 'origin' | 'dest', country: string, val: string) => {
     if (side === 'origin') setOriginPostal(val); else setDestPostal(val);
-    if (val.replace(/\s/g, '').length < 4) return;
+    if (!isPostalLookupReady(country, val)) return;
     setLookingUp(side);
     const res = await lookupPostal(country, val);
     setLookingUp(null);

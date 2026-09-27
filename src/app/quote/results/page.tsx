@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { prepareRates, formatDeliveryDate } from '@/lib/rate-display';
 import type { Rate } from '@/lib/api';
 import { ArrowLeft, MapPin, Scale, Box, Sparkles, Clock } from 'lucide-react';
 
@@ -66,7 +67,7 @@ export default function QuoteResultsPage() {
     const form = sessionStorage.getItem('pc_quote_form');
     if (!stored) { router.push('/quote'); return; }
     const parsed = JSON.parse(stored);
-    setRates(parsed);
+    setRates(prepareRates(parsed));
     if (form) setQuoteForm(JSON.parse(form));
   }, [router]);
 
@@ -191,12 +192,13 @@ export default function QuoteResultsPage() {
 
           {/* Rate cards */}
           <div className="space-y-3">
+            {new Set(rates.map(r => r.currency)).size > 1 && <p className="text-sm text-gray-600 mb-3">Rates are grouped by currency. Prices and value badges compare services within the same currency; no currency conversion is applied.</p>}
             {rates.map((rate, idx) => {
-              const isSelected = selected?.serviceCode === rate.serviceCode && selected?.carrierId === rate.carrierId;
+              const isSelected = selected?.serviceCode === rate.serviceCode && selected?.carrierId === rate.carrierId && selected?.currency === rate.currency;
 
               return (
                 <div
-                  key={`${rate.carrierId}-${rate.serviceCode}`}
+                  key={`${rate.carrierId}-${rate.serviceCode}-${rate.currency}`}
                   className={`group bg-white rounded-2xl border transition-all ${
                     isSelected
                       ? 'border-[#1B2B6B] ring-2 ring-[#1B2B6B]/10 shadow-md'
@@ -217,7 +219,7 @@ export default function QuoteResultsPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {rate.isCheapest && (
                             <span className="bg-green-50 text-green-700 ring-1 ring-inset ring-green-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                              Cheapest
+                              Cheapest in {rate.currency}
                             </span>
                           )}
                           {rate.isFastest && (
@@ -227,7 +229,7 @@ export default function QuoteResultsPage() {
                           )}
                           {rate.isBestValue && !rate.isCheapest && !rate.isFastest && (
                             <span className="bg-purple-50 text-purple-700 ring-1 ring-inset ring-purple-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                              Best Value
+                              Best Value in {rate.currency}
                             </span>
                           )}
                         </div>
@@ -243,7 +245,7 @@ export default function QuoteResultsPage() {
                         </p>
                         {rate.estimatedDelivery && (
                           <p className="text-xs text-gray-400">
-                            Est. {new Date(rate.estimatedDelivery).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}
+                            Est. {formatDeliveryDate(rate.estimatedDelivery)}
                           </p>
                         )}
                       </div>

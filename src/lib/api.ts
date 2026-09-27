@@ -97,6 +97,8 @@ export interface QuoteFormData {
   originProvince?: string;
   destinationProvince?: string;
   originCountry?: string;
+  shipperType?: 'consumer' | 'business';
+  consigneeType?: 'consumer' | 'business';
   destinationCountry?: string;
   originResidential?: boolean;
   destinationResidential?: boolean;

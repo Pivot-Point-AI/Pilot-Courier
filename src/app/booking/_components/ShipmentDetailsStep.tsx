@@ -2,6 +2,7 @@
 import { Loader2, ArrowLeftRight, Plus, Copy, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Address } from '@/lib/api';
+import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
 import { ALL_COUNTRIES, PACKAGING_TYPES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { inp, lbl, req } from './styles';
@@ -253,6 +254,15 @@ export function ShipmentDetailsStep(props: {
         </div>
         )}
       </div>
+
+      {packagingType === 'Pallet' && <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+        {packages.map((pkg, index) => <label key={pkg.id} className="flex items-center gap-3 text-sm">Pallet {index + 1} freight class
+          <select className={inp} value={pkg.freightClass || ''} onChange={e => updatePkg(pkg.id, 'freightClass', e.target.value)} required>
+            <option value="">Select freight class</option>
+            {FREIGHT_CLASSES.map(value => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>)}
+      </div>}
 
       {/* Product Information (customs invoice) — only needed when shipping between different countries */}
       {packagingType !== 'Envelope' && isInternational && (

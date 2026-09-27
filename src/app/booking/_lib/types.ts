@@ -7,6 +7,7 @@ export interface PkgRow {
   weight: string;
   insuranceAmount: string;
   specialHandling: boolean;
+  freightClass?: string;
   description: string;
 }
 

@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import { shipmentApi } from '@/lib/api';
 import { Loader2, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { isPostalLookupReady, isPostalFormatValid } from '@/lib/postal';
 
 import { fetchProvinces, lookupPostal } from './_lib/geo';
 import { type PackageRow, newPkg } from './_lib/types';
@@ -73,18 +74,27 @@ export default function QuoteClient() {
 
   const setField = (field: string, value: any) => setForm(p => ({ ...p, [field]: value }));
 
+  const postalRequests = useRef<Record<string, number>>({});
+  const [postalChoices, setPostalChoices] = useState<Record<string, string[]>>({});
   const handlePostalChange = async (prefix: 'origin' | 'destination', country: string, postal: string) => {
+    const request = (postalRequests.current[prefix] || 0) + 1;
+    postalRequests.current[prefix] = request;
     setField(`${prefix}Postal`, postal);
-    const clean = postal.replace(/\s/g, '');
-    if (clean.length < 4) return;
+    setPostalChoices(p => ({ ...p, [prefix]: [] }));
+    if (!isPostalLookupReady(country, postal)) {
+      setPostalLookingUp(null);
+      return;
+    }
     setPostalLookingUp(prefix);
     const result = await lookupPostal(country, postal);
+    if (postalRequests.current[prefix] !== request) return;
     setPostalLookingUp(null);
     if (result) {
-      setForm(p => ({
+      setPostalChoices(p => ({ ...p, [prefix]: result.cities || [] }));
+      setForm(p => p[`${prefix}Postal`] !== postal || p[`${prefix}Country`] !== country ? p : ({
         ...p,
-        [`${prefix}City`]: result.city,
-        [`${prefix}Province`]: result.province,
+        [`${prefix}City`]: result.city || p[`${prefix}City`],
+        [`${prefix}Province`]: result.province || p[`${prefix}Province`],
       }));
     }
   };
@@ -106,16 +116,10 @@ export default function QuoteClient() {
         toast.error('Please fill in all package dimensions and weight.'); return;
       }
     }
-    const isValidPostal = (postal: string, country: string) => {
-      const s = postal.trim().replace(/\s/g, '');
-      if (country === 'CA') return /^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$/.test(s);
-      if (country === 'US') return /^\d{5}(\d{4})?$/.test(s);
-      return s.length >= 3;
-    };
-    if (form.originPostal && !isValidPostal(form.originPostal, form.originCountry)) {
+    if (form.originPostal && !isPostalFormatValid(form.originCountry, form.originPostal)) {
       toast.error('Origin postal code is incomplete or invalid.'); return;
     }
-    if (form.destinationPostal && !isValidPostal(form.destinationPostal, form.destinationCountry)) {
+    if (form.destinationPostal && !isPostalFormatValid(form.destinationCountry, form.destinationPostal)) {
       toast.error('Destination postal code is incomplete or invalid.'); return;
     }
     if (!form.originCity) {
@@ -187,6 +191,7 @@ export default function QuoteClient() {
         </div>
 
         <form onSubmit={handleSubmit}>
+          <p className="text-xs text-gray-500 mb-3">Postal lookup may suggest a nearby area. Please confirm the city and province before getting a quote.</p>
 
           {/* ── Addresses ── */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
@@ -227,7 +232,7 @@ export default function QuoteClient() {
                   </div>
                   <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                     <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">City <span className="text-[#FF6B00]">*</span></label>
-                    <div className="w-full md:flex-1"><CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required /></div>
+                    <div className="w-full md:flex-1">{(postalChoices.origin?.length || 0) > 1 && <select aria-label="Origin city suggestions" className="w-full border rounded p-2 mb-2 text-sm" value="" onChange={e => setField('originCity', e.target.value)}><option value="">Several towns share this postal area — choose your city</option>{postalChoices.origin.map(city => <option key={city}>{city}</option>)}</select>}<CityInput value={form.originCity} onChange={v => setField('originCity', v)} country={form.originCountry} required /></div>
                   </div>
                   <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                     <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Province / State <span className="text-[#FF6B00]">*</span></label>
@@ -276,7 +281,7 @@ export default function QuoteClient() {
                   </div>
                   <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                     <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">City</label>
-                    <div className="w-full md:flex-1"><CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} /></div>
+                    <div className="w-full md:flex-1">{(postalChoices.destination?.length || 0) > 1 && <select aria-label="Destination city suggestions" className="w-full border rounded p-2 mb-2 text-sm" value="" onChange={e => setField('destinationCity', e.target.value)}><option value="">Several towns share this postal area — choose your city</option>{postalChoices.destination.map(city => <option key={city}>{city}</option>)}</select>}<CityInput value={form.destinationCity} onChange={v => setField('destinationCity', v)} country={form.destinationCountry} /></div>
                   </div>
                   <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                     <label className="md:w-32 md:flex-shrink-0 text-xs font-medium text-gray-500">Province / State</label>

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { prepareRates, formatDeliveryDate } from '@/lib/rate-display';
 import { shipmentApi, paymentApi } from '@/lib/api';
 import type { Rate, Address } from '@/lib/api';
 import { Loader2, CheckCircle2, Download, ArrowRight } from 'lucide-react';
@@ -58,12 +59,12 @@ export default function BookingClient() {
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
 
-  // Keep selectedRate in sync with the current rates array (by serviceCode) so a stale
+  // Keep selectedRate in sync with the current service and currency so a stale
   // object from an earlier fetch/resume never shows a different price than the rates list.
   useEffect(() => {
     if (!rates.length) return;
     setSelectedRate(prev => {
-      const match = prev && rates.find(r => r.serviceCode === prev.serviceCode);
+      const match = prev && rates.find(r => r.serviceCode === prev.serviceCode && r.currency === prev.currency && r.carrierId === prev.carrierId);
       return match || rates.find(r => r.isCheapest) || rates[0];
     });
   }, [rates]);
@@ -74,6 +75,7 @@ export default function BookingClient() {
   const [createdNumber, setCreatedNumber] = useState('');
   const [labelBase64, setLabelBase64] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [amountDue, setAmountDue] = useState<{ amount: number; currency: string } | null>(null);
   const [trackingNumber, setTrackingNumber] = useState('');
 
   useEffect(() => {
@@ -97,6 +99,7 @@ export default function BookingClient() {
         province: f.originProvince || '',
         country: f.originCountry || prev.country || 'CA',
         isResidential: f.originResidential || false,
+        addressType: f.shipperType === 'business' ? 'business' : 'consumer',
         name: f.originName || prev.name,
         company: f.originCompany || prev.company,
         street: f.originStreet || prev.street,
@@ -111,6 +114,7 @@ export default function BookingClient() {
         province: f.destinationProvince || '',
         country: f.destinationCountry || 'CA',
         isResidential: f.destinationResidential || false,
+        addressType: f.consigneeType === 'business' ? 'business' : 'consumer',
         name: f.destinationName || prev.name,
         company: f.destinationCompany || prev.company,
         street: f.destinationStreet || prev.street,
@@ -125,7 +129,7 @@ export default function BookingClient() {
           id: p.id || Math.random().toString(36).slice(2),
           length: String(p.length || ''), width: String(p.width || ''), height: String(p.height || ''),
           weight: String(p.weight || ''), insuranceAmount: String(p.insuranceAmount || '0.00'),
-          specialHandling: p.specialHandling || false, description: p.description || '',
+          specialHandling: p.specialHandling || false, description: p.description || '', freightClass: p.freightClass || '',
         })));
       } else if (f.length || f.width || f.height || f.weight) {
         // Flat rate-request shape (e.g. resumed from a saved quote) — rebuild a single package row
@@ -133,7 +137,7 @@ export default function BookingClient() {
           id: Math.random().toString(36).slice(2),
           length: String(f.length ?? '1'), width: String(f.width ?? '1'), height: String(f.height ?? '1'),
           weight: String(f.weight ?? '1'), insuranceAmount: String(f.insuranceAmount ?? '0.00'),
-          specialHandling: !!f.specialHandling, description: f.description || '',
+          specialHandling: !!f.specialHandling, description: f.description || '', freightClass: f.freightClass || '',
         }]);
       }
     }
@@ -141,9 +145,9 @@ export default function BookingClient() {
     // Resumed detailed quote — skip straight to the rates step with the previously fetched rates
     if (savedRates) {
       try {
-        const parsedRates = JSON.parse(savedRates);
+        const parsedRates = prepareRates(JSON.parse(savedRates));
         if (parsedRates?.length) {
-          setRates(parsedRates);
+          setRates(prepareRates(parsedRates));
           setSelectedRate(parsedRates.find((r: Rate) => r.isCheapest) || parsedRates[0]);
           setStep(1);
         }
@@ -198,6 +202,7 @@ export default function BookingClient() {
   };
 
   const validateStep0 = () => {
+    if (packagingType === 'Pallet' && packages.some(p => !p.freightClass)) { toast.error('Please select a freight class for each pallet.'); return false; }
     const reqFields = ['street', 'city', 'postalCode', 'country', 'name', 'phone'];
     for (const f of reqFields) {
       if (!(shipper as any)[f]) { toast.error(`Shipping From: ${f.replace(/([A-Z])/g, ' $1').toLowerCase()} is required`); return false; }
@@ -234,6 +239,9 @@ export default function BookingClient() {
         originProvince: shipper.province,
         originCountry: shipper.country,
         originResidential: shipper.isResidential,
+        shipperType: shipper.addressType || 'consumer',
+        consigneeType: recipient.addressType || 'consumer',
+        packagingType,
         originName: shipper.name,
         originCompany: shipper.company,
         originStreet: shipper.street,
@@ -262,7 +270,7 @@ export default function BookingClient() {
         specialHandling: first.specialHandling,
         packages: packages.map(p => ({
           length: p.length, width: p.width, height: p.height, weight: p.weight,
-          insuranceAmount: p.insuranceAmount, specialHandling: p.specialHandling, description: p.description,
+          insuranceAmount: p.insuranceAmount, specialHandling: p.specialHandling, description: p.description, freightClass: p.freightClass,
         })),
         quoteType: 'detailed',
         pickupMethod,
@@ -276,8 +284,8 @@ export default function BookingClient() {
           holdForPickup,
         },
       } as any);
-      setRates(data.rates || []);
-      if (data.rates?.length) setSelectedRate(data.rates.find((r: Rate) => r.isCheapest) || data.rates[0]);
+      setRates(prepareRates(data.rates || []));
+      if (data.rates?.length) setSelectedRate(prepareRates(data.rates)[0]);
       setStep(1);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to fetch rates. Please try again.');
@@ -300,6 +308,7 @@ export default function BookingClient() {
         description: p.description || 'Package',
         insuranceAmount: parseFloat(p.insuranceAmount) || 0,
         specialHandling: p.specialHandling,
+        freightClass: p.freightClass,
         quantity: 1,
       }));
 
@@ -349,9 +358,17 @@ export default function BookingClient() {
       // Fetch Stripe payment intent
       const { data: intentData } = await paymentApi.createStripeIntent(bookData.shipmentId);
       setClientSecret(intentData.clientSecret);
+      setAmountDue({ amount: intentData.amount, currency: intentData.currency });
       setStep(3);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Booking failed. Please try again.');
+      const data = err?.response?.data;
+      // The server re-prices every booking. If the price moved (or the service is
+      // gone) it sends fresh rates; the rates effect re-selects the same service.
+      if (err?.response?.status === 409 && data?.rates?.length) {
+        setRates(prepareRates(data.rates));
+        if (data.code === 'RATE_UNAVAILABLE') setStep(1);
+      }
+      toast.error(data?.message || 'Booking failed. Please try again.');
     } finally {
       setBookLoading(false);
     }
@@ -368,7 +385,7 @@ export default function BookingClient() {
       if (data.shipment?.labelBase64) setLabelBase64(data.shipment.labelBase64);
       if (data.shipment?.trackingNumber) setTrackingNumber(data.shipment.trackingNumber);
       setStep(4);
-      toast.success('Payment successful! Label is ready.');
+      toast.success(data.shipment?.labelBase64 ? 'Payment successful! Label is ready.' : data.message || 'Payment successful!');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to generate label.');
     } finally {
@@ -453,8 +470,9 @@ export default function BookingClient() {
                 </div>
               ) : (
                 <div className="space-y-2">
+                  {new Set(rates.map(r => r.currency)).size > 1 && <p className="text-sm text-gray-600">Rates are grouped by currency. Prices and value badges compare services within the same currency; no currency conversion is applied.</p>}
                   {rates.map(rate => (
-                    <RateCard key={rate.serviceCode} rate={rate} selected={selectedRate?.serviceCode === rate.serviceCode} onSelect={() => setSelectedRate(rate)} />
+                    <RateCard key={`${rate.carrierId}-${rate.serviceCode}-${rate.currency}`} rate={rate} selected={selectedRate?.serviceCode === rate.serviceCode && selectedRate?.carrierId === rate.carrierId && selectedRate?.currency === rate.currency} onSelect={() => setSelectedRate(rate)} />
                   ))}
                 </div>
               )}
@@ -489,7 +507,7 @@ export default function BookingClient() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <p className="font-bold text-brand-navy text-lg">{selectedRate.carrierName} — {selectedRate.serviceName}</p>
-                    <p className="text-sm text-gray-500">{selectedRate.transitDays} business days · Est. {selectedRate.estimatedDelivery}</p>
+                    <p className="text-sm text-gray-500">{selectedRate.transitDays} business days · Est. {selectedRate.estimatedDelivery ? formatDeliveryDate(selectedRate.estimatedDelivery) : 'Pending'}</p>
                   </div>
                   <p className="font-bold text-2xl text-brand-orange">${selectedRate.totalCharge.toFixed(2)} <span className="text-sm text-gray-400 font-normal">{selectedRate.currency}</span></p>
                 </div>
@@ -567,8 +585,8 @@ export default function BookingClient() {
               </div>
               <Elements stripe={getStripePromise()} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
                 <StripePaymentForm
-                  amount={selectedRate?.totalCharge || 0}
-                  currency={selectedRate?.currency || 'CAD'}
+                  amount={amountDue?.amount ?? selectedRate?.totalCharge ?? 0}
+                  currency={amountDue?.currency || selectedRate?.currency || 'CAD'}
                   onSuccess={handleConfirmPayment}
                   onBack={() => setStep(2)}
                 />
@@ -605,7 +623,7 @@ export default function BookingClient() {
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-gray-100 flex gap-3 justify-center">
-                  <button onClick={() => { setStep(0); setCreatedId(''); setCreatedNumber(''); setTrackingNumber(''); setLabelBase64(''); setClientSecret(''); setRates([]); setSelectedRate(null); setPackages([mkPkg()]); }} className="text-sm text-brand-orange hover:underline">
+                  <button onClick={() => { setStep(0); setCreatedId(''); setCreatedNumber(''); setTrackingNumber(''); setLabelBase64(''); setClientSecret(''); setAmountDue(null); setRates([]); setSelectedRate(null); setPackages([mkPkg()]); }} className="text-sm text-brand-orange hover:underline">
                     + New Shipment
                   </button>
                   <span className="text-gray-300">·</span>
