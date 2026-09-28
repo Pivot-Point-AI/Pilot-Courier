@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { prepareRates, formatDeliveryDate } from '@/lib/rate-display';
-import { shipmentApi, paymentApi } from '@/lib/api';
+import { shipmentApi, paymentApi, authApi } from '@/lib/api';
 import type { Rate, Address } from '@/lib/api';
 import { Loader2, CheckCircle2, Download, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -14,6 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, EMPTY } from './_lib/types';
+import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
 import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
 import { ShipmentDetailsStep } from './_components/ShipmentDetailsStep';
@@ -38,7 +39,9 @@ export default function BookingClient() {
 
   // Product Information (customs invoice) — required for international shipments
   const [products, setProducts] = useState<ProductRow[]>([mkProduct()]);
-  const [taxType, setTaxType] = useState('None');
+  const [taxType, setTaxType] = useState('');
+  const [taxId, setTaxId] = useState('');
+  const [reasonForExport, setReasonForExport] = useState('');
   const [invoiceCurrency, setInvoiceCurrency] = useState<'CAD' | 'USD'>('CAD');
 
   // Pickup & services
@@ -54,6 +57,15 @@ export default function BookingClient() {
   const [saturdayDelivery, setSaturdayDelivery] = useState(false);
   const [holdForPickup, setHoldForPickup] = useState(false);
   const [references, setReferences] = useState([{ name: '', value: '' }]);
+  const [savePickupPref, setSavePickupPref] = useState(false);
+
+  // Address book + recipient notification
+  const [saveShipperToBook, setSaveShipperToBook] = useState(false);
+  const [saveRecipientToBook, setSaveRecipientToBook] = useState(false);
+  const [notifyRecipient, setNotifyRecipient] = useState(true);
+
+  // Draft saved in this browser, offered for restore on arrival
+  const [pendingDraft, setPendingDraft] = useState<BookingDraft | null>(null);
 
   // Quote results
   const [rates, setRates] = useState<Rate[]>([]);
@@ -170,6 +182,20 @@ export default function BookingClient() {
     const today = new Date().toISOString().split('T')[0];
     setPickupDate(today);
 
+    if (user?.id) {
+      const pref = readLocal<PickupPreference>(pickupPrefKey(user.id));
+      if (pref) {
+        setPickupLocation(pref.location || 'Front Door');
+        setPickupInstructions(pref.instructions || '');
+        setReadyHour(pref.readyHour || '15'); setReadyMin(pref.readyMin || '30');
+        setCloseHour(pref.closeHour || '18'); setCloseMin(pref.closeMin || '00');
+        setSavePickupPref(true);
+      }
+      // Offer a saved draft unless the user arrived with a quote to book
+      const draft = readLocal<BookingDraft>(draftKey(user.id));
+      if (!savedForm && !savedRates && draft?.version === DRAFT_VERSION) setPendingDraft(draft);
+    }
+
     // If we have a rate already selected (from quick quote flow), jump to review
     if (savedRate) {
       const rate = JSON.parse(savedRate);
@@ -220,11 +246,12 @@ export default function BookingClient() {
       }
       if (isInternational) {
         for (const p of products) {
-          if (!p.description || !p.madeIn || !p.unitPrice) {
-            toast.error('Please complete all product information (description, made in, unit price) for customs.');
+          if (!p.description || !p.hsCode || !p.madeIn || !p.unitPrice) {
+            toast.error('Please complete all product information (description, HS code, made in, unit price) for customs.');
             return false;
           }
         }
+        if (!reasonForExport) { toast.error('Please select a reason for export for customs.'); return false; }
       }
     }
     return true;
@@ -298,6 +325,59 @@ export default function BookingClient() {
     }
   };
 
+  const handleSaveDraft = () => {
+    if (!user?.id) return;
+    const draft: BookingDraft = {
+      version: DRAFT_VERSION, savedAt: new Date().toISOString(),
+      shipper, recipient, saveShipperToBook, saveRecipientToBook, notifyRecipient,
+      packages, packagingType, weightUnit, dimUnit,
+      products, taxType, taxId, reasonForExport, invoiceCurrency,
+      pickupMethod, pickupLocation, pickupInstructions, readyHour, readyMin, closeHour, closeMin,
+      signatureType, saturdayDelivery, holdForPickup, references,
+    };
+    if (writeLocal(draftKey(user.id), draft)) {
+      setPendingDraft(null);
+      toast.success('Draft saved in this browser. It will be offered when you return to Rate & Ship.');
+    } else {
+      toast.error('This browser blocked saving the draft.');
+    }
+  };
+
+  const restoreDraft = (d: BookingDraft) => {
+    setShipper(d.shipper); setRecipient(d.recipient);
+    setSaveShipperToBook(d.saveShipperToBook); setSaveRecipientToBook(d.saveRecipientToBook); setNotifyRecipient(d.notifyRecipient);
+    setPackages(d.packages); setPackagingType(d.packagingType); setWeightUnit(d.weightUnit); setDimUnit(d.dimUnit);
+    setProducts(d.products); setTaxType(d.taxType); setTaxId(d.taxId); setReasonForExport(d.reasonForExport); setInvoiceCurrency(d.invoiceCurrency);
+    setPickupMethod(d.pickupMethod); setPickupLocation(d.pickupLocation); setPickupInstructions(d.pickupInstructions);
+    setReadyHour(d.readyHour); setReadyMin(d.readyMin); setCloseHour(d.closeHour); setCloseMin(d.closeMin);
+    setSignatureType(d.signatureType); setSaturdayDelivery(d.saturdayDelivery); setHoldForPickup(d.holdForPickup);
+    setReferences(d.references);
+    setPendingDraft(null);
+  };
+
+  const discardDraft = () => {
+    if (user?.id) removeLocal(draftKey(user.id));
+    setPendingDraft(null);
+  };
+
+  // Runs once the booking exists; a failure here never affects the shipment.
+  const saveToAddressBook = async () => {
+    const same = (a: any, b: Address) => ['name', 'street', 'postalCode', 'country'].every(k =>
+      String(a?.[k] || '').trim().toLowerCase() === String((b as any)[k] || '').trim().toLowerCase());
+    const chosen = [saveShipperToBook && shipper, saveRecipientToBook && recipient].filter(Boolean) as Address[];
+    for (const a of chosen) {
+      if ((user?.savedAddresses || []).some(saved => same(saved, a))) continue;
+      try {
+        await authApi.addAddress({
+          label: a.company || a.name, name: a.name, company: a.company, street: a.street, street2: a.street2,
+          city: a.city, province: a.province, postalCode: a.postalCode, country: a.country, phone: a.phone, email: a.email,
+        });
+      } catch {
+        toast.error(`Shipment booked, but the address for ${a.company || a.name} could not be saved to your address book.`);
+      }
+    }
+  };
+
   const handleBook = async () => {
     if (!selectedRate) { toast.error('Please select a shipping service.'); return; }
     setBookLoading(true);
@@ -317,7 +397,9 @@ export default function BookingClient() {
       }));
 
       const customsInvoice = packagingType !== 'Envelope' && isInternational ? {
-        taxType,
+        reasonForExport,
+        taxType: taxType || undefined,
+        taxId: taxType ? taxId.trim() || undefined : undefined,
         currency: invoiceCurrency,
         products: products.map(p => ({
           quantity: parseFloat(p.quantity) || 1,
@@ -325,7 +407,6 @@ export default function BookingClient() {
           hsCode: p.hsCode,
           madeIn: p.madeIn,
           cusma: p.cusma,
-          section232: p.section232,
           unitPrice: parseFloat(p.unitPrice) || 0,
           totalPrice: productTotal(p),
         })),
@@ -355,10 +436,19 @@ export default function BookingClient() {
           holdForPickup,
         },
         references: references.filter(r => r.name && r.value).map(r => ({ referenceName: r.name, referenceValue: r.value })),
+        notifyRecipient,
       });
 
       setCreatedId(bookData.shipmentId);
       setCreatedNumber(bookData.shipmentNumber);
+      if (user?.id) {
+        removeLocal(draftKey(user.id));
+        if (!savePickupPref) removeLocal(pickupPrefKey(user.id));
+        else if (pickupMethod === 'schedule_pickup') {
+          writeLocal(pickupPrefKey(user.id), { location: pickupLocation, instructions: pickupInstructions, readyHour, readyMin, closeHour, closeMin } satisfies PickupPreference);
+        }
+      }
+      void saveToAddressBook();
       // Fetch Stripe payment intent
       const { data: intentData } = await paymentApi.createStripeIntent(bookData.shipmentId);
       setClientSecret(intentData.clientSecret);
@@ -418,6 +508,15 @@ export default function BookingClient() {
         <div className="max-w-6xl mx-auto px-4 py-6">
 
           {/* ── STEP 0: SHIPMENT DETAILS ─────────────────────────────────── */}
+          {step === 0 && pendingDraft && (
+            <div className="mb-4 bg-white border border-gray-200 rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <p className="text-sm text-gray-600">You have a draft saved in this browser on {new Date(pendingDraft.savedAt).toLocaleString()}.</p>
+              <div className="flex gap-2">
+                <button onClick={() => restoreDraft(pendingDraft)} className="px-4 py-1.5 text-sm font-semibold rounded text-white bg-brand-navy hover:bg-brand-navy/90 transition-all">Restore Draft</button>
+                <button onClick={discardDraft} className="px-4 py-1.5 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-gray-400 transition-all bg-white">Discard</button>
+              </div>
+            </div>
+          )}
           {step === 0 && (
             <ShipmentDetailsStep
               router={router}
@@ -425,6 +524,9 @@ export default function BookingClient() {
               updateShipper={updateShipper} updateRecipient={updateRecipient}
               swapAddresses={swapAddresses}
               isInternational={isInternational}
+              saveShipperToBook={saveShipperToBook} setSaveShipperToBook={setSaveShipperToBook}
+              saveRecipientToBook={saveRecipientToBook} setSaveRecipientToBook={setSaveRecipientToBook}
+              notifyRecipient={notifyRecipient} setNotifyRecipient={setNotifyRecipient}
               packages={packages} setPackages={setPackages}
               packagingType={packagingType} setPackagingType={setPackagingType}
               dimUnit={dimUnit} setDimUnit={setDimUnit}
@@ -434,6 +536,8 @@ export default function BookingClient() {
               updateProduct={updateProduct} addProduct={addProduct} removeProduct={removeProduct}
               productTotal={productTotal} invoiceTotal={invoiceTotal}
               taxType={taxType} setTaxType={setTaxType}
+              taxId={taxId} setTaxId={setTaxId}
+              reasonForExport={reasonForExport} setReasonForExport={setReasonForExport}
               invoiceCurrency={invoiceCurrency} setInvoiceCurrency={setInvoiceCurrency}
               pickupMethod={pickupMethod} setPickupMethod={setPickupMethod}
               pickupDate={pickupDate} setPickupDate={setPickupDate}
@@ -443,11 +547,12 @@ export default function BookingClient() {
               readyMin={readyMin} setReadyMin={setReadyMin}
               closeHour={closeHour} setCloseHour={setCloseHour}
               closeMin={closeMin} setCloseMin={setCloseMin}
+              savePickupPref={savePickupPref} setSavePickupPref={setSavePickupPref}
               signatureType={signatureType} setSignatureType={setSignatureType}
               saturdayDelivery={saturdayDelivery} setSaturdayDelivery={setSaturdayDelivery}
               holdForPickup={holdForPickup} setHoldForPickup={setHoldForPickup}
               references={references} setReferences={setReferences}
-              validateStep0={validateStep0}
+              handleSaveDraft={handleSaveDraft}
               handleGetQuote={handleGetQuote}
               quoteLoading={quoteLoading}
             />

@@ -10,10 +10,12 @@ import { ProvinceSelect } from './ProvinceSelect';
 import { CityInput } from './CityInput';
 import { inp, lblRow, fieldRow, req } from './styles';
 
-export function AddressPanel({ title, color, address, onChange, showConfirmEmail, typeLabel }: {
+export function AddressPanel({ title, color, address, onChange, saveToBook, onSaveToBookChange, confirmEmail, onConfirmEmailChange, typeLabel }: {
   title: string; color: 'red' | 'blue';
   address: Address; onChange: (f: string, v: any) => void;
-  showConfirmEmail?: boolean;
+  saveToBook: boolean; onSaveToBookChange: (v: boolean) => void;
+  // Only the recipient panel offers the carrier's shipping confirmation e-mail
+  confirmEmail?: boolean; onConfirmEmailChange?: (v: boolean) => void;
   typeLabel?: string;
 }) {
   const dot = color === 'red' ? 'bg-brand-orange' : 'bg-brand-navy';
@@ -136,18 +138,14 @@ export function AddressPanel({ title, color, address, onChange, showConfirmEmail
           <label className={lblRow}>Email {req}</label>
           <input className={`${inp} w-full md:flex-1`} type="email" value={address.email || ''} onChange={e => onChange('email', e.target.value)} placeholder="email@example.com" />
         </div>
-        <div className={fieldRow}>
-          <label className={lblRow}>Instruction</label>
-          <input className={`${inp} w-full md:flex-1`} placeholder="Delivery instructions (optional)" />
-        </div>
         <div className="flex flex-col gap-1.5 pt-1">
           <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-            <input type="checkbox" className="accent-brand-navy" />
-            Save to Address Book
+            <input type="checkbox" checked={saveToBook} onChange={e => onSaveToBookChange(e.target.checked)} className="accent-brand-navy" />
+            Save to Address Book (when the shipment is booked)
           </label>
-          {showConfirmEmail && (
+          {onConfirmEmailChange && (
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-              <input type="checkbox" defaultChecked className="accent-brand-navy" />
+              <input type="checkbox" checked={!!confirmEmail} onChange={e => onConfirmEmailChange(e.target.checked)} className="accent-brand-navy" />
               Send Shipping Confirmation E-mail
             </label>
           )}

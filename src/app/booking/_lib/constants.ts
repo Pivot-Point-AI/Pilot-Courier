@@ -102,7 +102,13 @@ export const ALL_COUNTRIES = [
 
 export const PACKAGING_TYPES = ['My Packaging', 'Envelope', 'Pak', 'Pallet'];
 
-export const TAX_TYPES = ['None', 'GST', 'HST', 'PST', 'VAT'];
+// Customs invoice values accepted by netParcel (tax ID types as on netParcel's Rate & Ship form)
+export const TAX_TYPES = [
+  { value: '', label: 'None' }, { value: 'EIN', label: 'EIN' }, { value: 'GBVAT', label: 'GBVAT/HMRC' },
+  { value: 'IOSS', label: 'IOSS' }, { value: 'SSN', label: 'SSN' }, { value: 'VAT', label: 'VAT/GST' },
+  { value: 'VOEC', label: 'VOEC' },
+];
+export const EXPORT_REASONS = ['Sale', 'Sample', 'Repair', 'Gift', 'Return', 'Other'];
 
 export const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 export const MINS = ['00', '15', '30', '45'];

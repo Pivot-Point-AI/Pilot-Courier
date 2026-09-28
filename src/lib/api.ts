@@ -64,7 +64,7 @@ export const shipmentApi = {
     api.post(`/shipments/${id}/confirm-payment`, data),
   track: (trackingNumber: string) => api.get(`/shipments/track/${trackingNumber}`),
   cancel: (id: string, reason: string) => api.post(`/shipments/${id}/cancel`, { reason }),
-  getMyShipments: (params?: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string }) =>
+  getMyShipments: (params?: { page?: number; limit?: number; status?: string; excludeStatus?: string; sortBy?: string; search?: string; dateFrom?: string; dateTo?: string }) =>
     api.get('/shipments/my', { params }),
   downloadInvoice: (id: string) => api.get(`/shipments/${id}/invoice`),
   downloadLabel: (id: string) => api.get(`/shipments/${id}/label`),

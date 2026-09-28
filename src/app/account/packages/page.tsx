@@ -134,15 +134,15 @@ export default function PackagesPage() {
               <div className="border-t border-gray-100 mt-3 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Length ({form.dimensionUnit}) <span className="text-red-500">*</span></label>
-                  <input type="number" min="0.1" step="0.1" className={inp} value={form.length} onChange={e => f('length', parseFloat(e.target.value))} />
+                  <input type="number" min="0.01" step="0.01" className={inp} value={form.length} onChange={e => f('length', parseFloat(e.target.value))} />
                 </div>
                 <div>
                   <label className={lbl}>Height ({form.dimensionUnit}) <span className="text-red-500">*</span></label>
-                  <input type="number" min="0.1" step="0.1" className={inp} value={form.height} onChange={e => f('height', parseFloat(e.target.value))} />
+                  <input type="number" min="0.01" step="0.01" className={inp} value={form.height} onChange={e => f('height', parseFloat(e.target.value))} />
                 </div>
                 <div>
                   <label className={lbl}>Width ({form.dimensionUnit}) <span className="text-red-500">*</span></label>
-                  <input type="number" min="0.1" step="0.1" className={inp} value={form.width} onChange={e => f('width', parseFloat(e.target.value))} />
+                  <input type="number" min="0.01" step="0.01" className={inp} value={form.width} onChange={e => f('width', parseFloat(e.target.value))} />
                 </div>
                 <div>
                   <label className={lbl}>Weight ({form.weightUnit}) <span className="text-red-500">*</span></label>

@@ -3,6 +3,7 @@ import { Plus, Copy, Trash2 } from 'lucide-react';
 import { PACKAGING_TYPES, FREIGHT_CLASSES } from '../_lib/constants';
 import type { PackageRow } from '../_lib/types';
 import { newPkg } from '../_lib/types';
+import { volumetricWeight } from '@/lib/dim-weight';
 
 export function PackageDetailsSection({
   packagingType, setPackagingType,
@@ -67,7 +68,7 @@ export function PackageDetailsSection({
           <label className="text-xs font-semibold text-gray-500 block mb-1.5">Weight ({weightUnit})</label>
           <input type="number" value={packages[0]?.weight ?? ''}
             onChange={e => updatePkg(packages[0].id, 'weight', e.target.value)}
-            placeholder={weightUnit === 'lbs' ? 'Lbs' : 'Kg'} min="0.1" step="0.1" required
+            placeholder={weightUnit === 'lbs' ? 'Lbs' : 'Kg'} min="0.01" step="0.01" required
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors" />
         </div>
       )}
@@ -92,8 +93,7 @@ export function PackageDetailsSection({
         {/* Rows (desktop grid) */}
         <div className="hidden md:block space-y-2 min-w-[800px]">
           {packages.map((pkg, idx) => {
-            const divisor = dimensionUnit === 'cm' ? 5000 : 166;
-            const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+            const volWeight = volumetricWeight(pkg.length, pkg.width, pkg.height, dimensionUnit);
             return (
             <div key={pkg.id} className="grid gap-2 items-center bg-gray-50/70 rounded-xl px-2 py-2.5 border border-gray-100"
               style={{ gridTemplateColumns: hideDims ? '2rem 1fr 6rem 1fr 4.5rem' : `2rem 1fr 1fr 1fr 1fr 1fr${isPallet ? ' 5rem' : ''} 1fr 6rem 1fr 4.5rem` }}>
@@ -101,7 +101,7 @@ export function PackageDetailsSection({
               {(hideDims ? (['weight'] as const) : (['length','width','height','weight'] as const)).map(f => (
                 <input key={f} type="number" value={pkg[f]}
                   onChange={e => updatePkg(pkg.id, f, e.target.value)}
-                  placeholder={f[0].toUpperCase()} min="1" step="0.1"
+                  placeholder={f[0].toUpperCase()} min="0.01" step="0.01"
                   required={idx === 0}
                   className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
               ))}
@@ -153,8 +153,7 @@ export function PackageDetailsSection({
         {/* Cards (mobile) */}
         <div className="md:hidden space-y-3">
           {packages.map((pkg, idx) => {
-            const divisor = dimensionUnit === 'cm' ? 5000 : 166;
-            const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+            const volWeight = volumetricWeight(pkg.length, pkg.width, pkg.height, dimensionUnit);
             return (
             <div key={pkg.id} className="bg-gray-50/70 rounded-xl p-3 border border-gray-100 space-y-2">
               <div className="flex items-center justify-between">
@@ -184,7 +183,7 @@ export function PackageDetailsSection({
                     </label>
                     <input type="number" value={pkg[f]}
                       onChange={e => updatePkg(pkg.id, f, e.target.value)}
-                      min="1" step="0.1" required={f === 'weight' && idx === 0}
+                      min="0.01" step="0.01" required={f === 'weight' && idx === 0}
                       className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm w-full focus:outline-none focus:border-[#1B2B6B] focus:ring-2 focus:ring-[#1B2B6B]/10 bg-white transition-colors text-center" />
                   </div>
                 ))}

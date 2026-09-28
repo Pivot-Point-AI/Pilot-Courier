@@ -1,10 +1,10 @@
 'use client';
 import { Loader2, ArrowLeftRight, Plus, Copy, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, TAX_TYPES, EXPORT_REASONS, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
+import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
 import { AddressPanel } from './AddressPanel';
 
@@ -14,6 +14,9 @@ export function ShipmentDetailsStep(props: {
   updateShipper: (f: string, v: any) => void; updateRecipient: (f: string, v: any) => void;
   swapAddresses: () => void;
   isInternational: boolean;
+  saveShipperToBook: boolean; setSaveShipperToBook: (v: boolean) => void;
+  saveRecipientToBook: boolean; setSaveRecipientToBook: (v: boolean) => void;
+  notifyRecipient: boolean; setNotifyRecipient: (v: boolean) => void;
 
   packages: PkgRow[]; setPackages: React.Dispatch<React.SetStateAction<PkgRow[]>>;
   packagingType: string; setPackagingType: (v: string) => void;
@@ -27,6 +30,8 @@ export function ShipmentDetailsStep(props: {
   addProduct: () => void; removeProduct: (id: string) => void;
   productTotal: (row: ProductRow) => number; invoiceTotal: number;
   taxType: string; setTaxType: (v: string) => void;
+  taxId: string; setTaxId: (v: string) => void;
+  reasonForExport: string; setReasonForExport: (v: string) => void;
   invoiceCurrency: 'CAD' | 'USD'; setInvoiceCurrency: (v: 'CAD' | 'USD') => void;
 
   pickupMethod: 'schedule_pickup' | 'drop_off'; setPickupMethod: (v: 'schedule_pickup' | 'drop_off') => void;
@@ -37,26 +42,28 @@ export function ShipmentDetailsStep(props: {
   readyMin: string; setReadyMin: (v: string) => void;
   closeHour: string; setCloseHour: (v: string) => void;
   closeMin: string; setCloseMin: (v: string) => void;
+  savePickupPref: boolean; setSavePickupPref: (v: boolean) => void;
   signatureType: string; setSignatureType: (v: string) => void;
   saturdayDelivery: boolean; setSaturdayDelivery: (v: boolean) => void;
   holdForPickup: boolean; setHoldForPickup: (v: boolean) => void;
   references: { name: string; value: string }[]; setReferences: (v: { name: string; value: string }[]) => void;
 
-  validateStep0: () => boolean;
+  handleSaveDraft: () => void;
   handleGetQuote: () => void;
   quoteLoading: boolean;
 }) {
   const {
     router, shipper, recipient, updateShipper, updateRecipient, swapAddresses, isInternational,
+    saveShipperToBook, setSaveShipperToBook, saveRecipientToBook, setSaveRecipientToBook, notifyRecipient, setNotifyRecipient,
     packages, setPackages, packagingType, setPackagingType, dimUnit, setDimUnit, weightUnit, setWeightUnit,
     addPkg, dupPkg, removePkg, updatePkg,
     products, updateProduct, addProduct, removeProduct, productTotal, invoiceTotal,
-    taxType, setTaxType, invoiceCurrency, setInvoiceCurrency,
+    taxType, setTaxType, taxId, setTaxId, reasonForExport, setReasonForExport, invoiceCurrency, setInvoiceCurrency,
     pickupMethod, setPickupMethod, pickupDate, setPickupDate, pickupLocation, setPickupLocation,
     pickupInstructions, setPickupInstructions, readyHour, setReadyHour, readyMin, setReadyMin,
-    closeHour, setCloseHour, closeMin, setCloseMin, signatureType, setSignatureType,
+    closeHour, setCloseHour, closeMin, setCloseMin, savePickupPref, setSavePickupPref, signatureType, setSignatureType,
     saturdayDelivery, setSaturdayDelivery, holdForPickup, setHoldForPickup, references, setReferences,
-    validateStep0, handleGetQuote, quoteLoading,
+    handleSaveDraft, handleGetQuote, quoteLoading,
   } = props;
 
   return (
@@ -70,7 +77,8 @@ export function ShipmentDetailsStep(props: {
       {/* Address panels side by side */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="flex flex-col md:flex-row items-stretch gap-0 relative">
-          <AddressPanel title="Shipping From" color="red" address={shipper} onChange={updateShipper} typeLabel="Shipper Type" />
+          <AddressPanel title="Shipping From" color="red" address={shipper} onChange={updateShipper} typeLabel="Shipper Type"
+            saveToBook={saveShipperToBook} onSaveToBookChange={setSaveShipperToBook} />
           {/* Swap button */}
           <div className="flex items-center justify-center py-2 md:pt-12 md:px-2 flex-shrink-0">
             <button
@@ -81,7 +89,9 @@ export function ShipmentDetailsStep(props: {
               <ArrowLeftRight className="w-3.5 h-3.5 rotate-90 md:rotate-0" />
             </button>
           </div>
-          <AddressPanel title="Shipping To" color="blue" address={recipient} onChange={updateRecipient} showConfirmEmail typeLabel="Consignee Type" />
+          <AddressPanel title="Shipping To" color="blue" address={recipient} onChange={updateRecipient} typeLabel="Consignee Type"
+            saveToBook={saveRecipientToBook} onSaveToBookChange={setSaveRecipientToBook}
+            confirmEmail={notifyRecipient} onConfirmEmailChange={setNotifyRecipient} />
         </div>
       </div>
 
@@ -146,15 +156,14 @@ export function ShipmentDetailsStep(props: {
           {/* Package rows (desktop grid) */}
           <div className="hidden md:block space-y-2">
             {packages.map((pkg, idx) => {
-              const divisor = dimUnit === 'cm' ? 5000 : 166;
-              const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+              const volWeight = volumetricWeight(pkg.length, pkg.width, pkg.height, dimUnit);
               return (
               <div key={pkg.id} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center">
                 <span className="text-xs text-gray-400 font-mono w-6">{String(idx + 1).padStart(2, '0')}.</span>
-                <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} placeholder="L" min="1" step="0.1" className={`${inp} text-center`} />
-                <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} placeholder="W" min="1" step="0.1" className={`${inp} text-center`} />
-                <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} placeholder="H" min="1" step="0.1" className={`${inp} text-center`} />
-                <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} placeholder="1" min="1" step="0.1" className={`${inp} text-center`} required={idx === 0} />
+                <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} placeholder="L" min="0.01" step="0.01" className={`${inp} text-center`} />
+                <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} placeholder="W" min="0.01" step="0.01" className={`${inp} text-center`} />
+                <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} placeholder="H" min="0.01" step="0.01" className={`${inp} text-center`} />
+                <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} placeholder="1" min="0.01" step="0.01" className={`${inp} text-center`} required={idx === 0} />
                 <span className="text-sm text-gray-500 text-center">{volWeight > 0 ? volWeight.toFixed(2) : '—'}</span>
                 <input type="number" value={pkg.insuranceAmount} onChange={e => updatePkg(pkg.id, 'insuranceAmount', e.target.value)} placeholder="0.00" min="0" step="0.01" className={`${inp} text-center`} />
                 <select value={pkg.specialHandling ? 'yes' : 'no'} onChange={e => updatePkg(pkg.id, 'specialHandling', e.target.value === 'yes')} className={inp}>
@@ -186,8 +195,7 @@ export function ShipmentDetailsStep(props: {
           {/* Package cards (mobile) */}
           <div className="md:hidden space-y-3">
             {packages.map((pkg, idx) => {
-              const divisor = dimUnit === 'cm' ? 5000 : 166;
-              const volWeight = (Number(pkg.length) || 0) * (Number(pkg.width) || 0) * (Number(pkg.height) || 0) / divisor;
+              const volWeight = volumetricWeight(pkg.length, pkg.width, pkg.height, dimUnit);
               return (
               <div key={pkg.id} className="border border-gray-200 rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
@@ -209,21 +217,21 @@ export function ShipmentDetailsStep(props: {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">L ({dimUnit})</label>
-                    <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                    <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} min="0.01" step="0.01" className={`${inp} text-center`} />
                   </div>
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">W ({dimUnit})</label>
-                    <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                    <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} min="0.01" step="0.01" className={`${inp} text-center`} />
                   </div>
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">H ({dimUnit})</label>
-                    <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} />
+                    <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} min="0.01" step="0.01" className={`${inp} text-center`} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">Weight ({weightUnit})</label>
-                    <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} min="1" step="0.1" className={`${inp} text-center`} required={idx === 0} />
+                    <input type="number" value={pkg.weight} onChange={e => updatePkg(pkg.id, 'weight', e.target.value)} min="0.01" step="0.01" className={`${inp} text-center`} required={idx === 0} />
                   </div>
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">Vol. Weight ({weightUnit})</label>
@@ -274,14 +282,13 @@ export function ShipmentDetailsStep(props: {
 
           <div className="p-4 overflow-x-auto">
             {/* Table header (desktop) */}
-            <div className="hidden md:grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_auto_1fr_1fr_auto] gap-2 mb-2 px-2">
+            <div className="hidden md:grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_1fr_1fr_auto] gap-2 mb-2 px-2">
               <span className="text-xs text-gray-400 w-6" />
               <span className="text-xs text-gray-400">Quantity{req}</span>
               <span className="text-xs text-gray-400">Description{req}</span>
-              <span className="text-xs text-gray-400 text-brand-navy underline cursor-pointer">HS Code</span>
+              <span className="text-xs text-gray-400 text-brand-navy underline cursor-pointer">HS Code{req}</span>
               <span className="text-xs text-gray-400">Made In{req}</span>
               <span className="text-xs text-gray-400 text-center">CUSMA?</span>
-              <span className="text-xs text-gray-400 text-center">232?</span>
               <span className="text-xs text-gray-400">Unit Price${req}</span>
               <span className="text-xs text-gray-400">Total$</span>
               <span className="text-xs text-gray-400 w-10" />
@@ -289,7 +296,7 @@ export function ShipmentDetailsStep(props: {
 
             <div className="hidden md:block space-y-2">
               {products.map((p, idx) => (
-                <div key={p.id} className="grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_auto_1fr_1fr_auto] gap-2 items-center">
+                <div key={p.id} className="grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_1fr_1fr_auto] gap-2 items-center">
                   <span className="text-xs text-gray-400 font-mono w-6">{String(idx + 1).padStart(2, '0')}.</span>
                   <input type="number" value={p.quantity} onChange={e => updateProduct(p.id, 'quantity', e.target.value)} min="1" step="1" className={`${inp} text-center`} />
                   <input type="text" value={p.description} onChange={e => updateProduct(p.id, 'description', e.target.value)} placeholder="Description" className={inp} />
@@ -299,7 +306,6 @@ export function ShipmentDetailsStep(props: {
                     {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
                   <input type="checkbox" checked={p.cusma} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy justify-self-center" />
-                  <input type="checkbox" checked={p.section232} onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="accent-brand-navy justify-self-center" />
                   <input type="number" value={p.unitPrice} onChange={e => updateProduct(p.id, 'unitPrice', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
                   <span className="text-sm text-gray-600 text-center">{productTotal(p).toFixed(2)}</span>
                   <div className="flex items-center gap-1 w-10 justify-end">
@@ -343,7 +349,7 @@ export function ShipmentDetailsStep(props: {
                       <input type="number" value={p.quantity} onChange={e => updateProduct(p.id, 'quantity', e.target.value)} min="1" step="1" className={`${inp} text-center`} />
                     </div>
                     <div>
-                      <label className="text-[11px] text-gray-400 block mb-0.5">HS Code</label>
+                      <label className="text-[11px] text-gray-400 block mb-0.5">HS Code{req}</label>
                       <input type="text" value={p.hsCode} onChange={e => updateProduct(p.id, 'hsCode', e.target.value)} placeholder="HS Code" className={inp} />
                     </div>
                   </div>
@@ -358,14 +364,9 @@ export function ShipmentDetailsStep(props: {
                       {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                     </select>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-                      <input type="checkbox" checked={p.cusma} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
-                    </label>
-                    <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-                      <input type="checkbox" checked={p.section232} onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="accent-brand-navy" /> 232?
-                    </label>
-                  </div>
+                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+                    <input type="checkbox" checked={p.cusma} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
+                  </label>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[11px] text-gray-400 block mb-0.5">Unit Price${req}</label>
@@ -380,13 +381,25 @@ export function ShipmentDetailsStep(props: {
               ))}
             </div>
 
-            {/* Tax type + total */}
+            {/* Reason for export + tax ID + total */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-gray-600">Tax Type:{req}</label>
-                <select value={taxType} onChange={e => setTaxType(e.target.value)} className={`${inp} w-40`}>
-                  {TAX_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-600">Reason for Export:{req}</label>
+                  <select value={reasonForExport} onChange={e => setReasonForExport(e.target.value)} className={`${inp} w-32`}>
+                    <option value="">Select</option>
+                    {EXPORT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-gray-600">Tax Type:</label>
+                  <select value={taxType} onChange={e => setTaxType(e.target.value)} className={`${inp} w-36`}>
+                    {TAX_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                  {taxType && (
+                    <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} placeholder="Tax ID" className={`${inp} w-36`} />
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-gray-700">Total value:</span>
@@ -472,8 +485,8 @@ export function ShipmentDetailsStep(props: {
                     <input type="text" value={pickupInstructions} onChange={e => setPickupInstructions(e.target.value)} placeholder="Please bring Envelope" className={inp} />
                   </div>
                   <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-                    <input type="checkbox" className="accent-brand-navy" />
-                    Save Pickup Preference
+                    <input type="checkbox" checked={savePickupPref} onChange={e => setSavePickupPref(e.target.checked)} className="accent-brand-navy" />
+                    Save Pickup Preference (in this browser, when the shipment is booked)
                   </label>
                 </>
               )}
@@ -546,10 +559,7 @@ export function ShipmentDetailsStep(props: {
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <button
-            onClick={() => {
-              if (!validateStep0()) return;
-              toast.success('Shipment saved as draft.');
-            }}
+            onClick={handleSaveDraft}
             className="px-5 py-2 text-sm font-semibold border border-gray-300 rounded text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-all bg-white"
           >
             Save Shipment

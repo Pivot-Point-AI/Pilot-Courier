@@ -115,6 +115,7 @@ export default function HistoryTrackingPage() {
         search: search || undefined,
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
+        sortBy,
       };
 
       if (statusFilter) {
@@ -125,13 +126,7 @@ export default function HistoryTrackingPage() {
       }
 
       const { data } = await shipmentApi.getMyShipments(params);
-      let list = data.shipments || [];
-
-      // Client-side sort for fields not sorted server-side
-      if (sortBy === 'amount_desc') list = [...list].sort((a, b) => (b.payment?.amount || 0) - (a.payment?.amount || 0));
-      if (sortBy === 'amount_asc')  list = [...list].sort((a, b) => (a.payment?.amount || 0) - (b.payment?.amount || 0));
-
-      setShipments(list);
+      setShipments(data.shipments || []);
       setPagination(data.pagination);
       setSelected(new Set());
     } catch {
@@ -224,7 +219,7 @@ export default function HistoryTrackingPage() {
   };
 
   const hasLabel = (s: any) => ['label_generated','pickup_scheduled','in_transit','out_for_delivery','delivered'].includes(s.status);
-  const cancellable = (s: any) => ['pending_payment','paid','label_generated'].includes(s.status);
+  const cancellable = (s: any) => ['pending_payment','paid','label_generated','pickup_scheduled'].includes(s.status);
 
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-CA', { day: '2-digit', month: 'short', year: '2-digit' });
   const fmtWeight = (s: any) => {
