@@ -101,6 +101,7 @@ export const ALL_COUNTRIES = [
 ];
 
 export const PACKAGING_TYPES = ['My Packaging', 'Envelope', 'Pak', 'Pallet'];
+export const MAX_PACKAGES = 100;
 
 // Customs invoice values accepted by netParcel (tax ID types as on netParcel's Rate & Ship form)
 export const TAX_TYPES = [

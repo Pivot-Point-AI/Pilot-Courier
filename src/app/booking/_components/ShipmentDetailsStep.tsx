@@ -1,12 +1,23 @@
 'use client';
-import { Loader2, ArrowLeftRight, Plus, Copy, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, TAX_TYPES, EXPORT_REASONS, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, EXPORT_REASONS, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
 import { AddressPanel } from './AddressPanel';
+import { Dropdown, type DropdownOption } from './Dropdown';
+
+// Package Details header row
+const hdrLbl = 'text-xs font-medium text-gray-500 whitespace-nowrap';
+const UNIT_OPTIONS: DropdownOption<'cm' | 'in'>[] = [{ value: 'cm', label: 'cm / kg' }, { value: 'in', label: 'in / lbs' }];
+const PACKAGING_OPTIONS: DropdownOption<string>[] = PACKAGING_TYPES.map(t => ({ value: t, label: t }));
+const QTY_OPTIONS: DropdownOption<number>[] = Array.from({ length: MAX_PACKAGES }, (_, i) => ({ value: i + 1, label: String(i + 1) }));
+
+// Package table columns, shared by the header and every row: row no. | 8 shrinkable field columns | actions.
+// The actions column fits all four 22px icon buttons plus gaps, so the table never overflows its card.
+const pkgGrid = 'grid-cols-[1.5rem_repeat(8,minmax(0,1fr))_6.25rem] gap-2';
 
 export function ShipmentDetailsStep(props: {
   router: { push: (href: string) => void };
@@ -22,7 +33,7 @@ export function ShipmentDetailsStep(props: {
   packagingType: string; setPackagingType: (v: string) => void;
   dimUnit: 'in' | 'cm'; setDimUnit: (v: 'in' | 'cm') => void;
   weightUnit: 'lbs' | 'kg'; setWeightUnit: (v: 'lbs' | 'kg') => void;
-  addPkg: () => void; dupPkg: (pkg: PkgRow) => void; removePkg: (id: string) => void;
+  addPkg: () => void; sameAsAbove: (id: string) => void; allTheSame: (id: string) => void; removePkg: (id: string) => void;
   updatePkg: (id: string, field: keyof PkgRow, value: any) => void;
 
   products: ProductRow[];
@@ -56,7 +67,7 @@ export function ShipmentDetailsStep(props: {
     router, shipper, recipient, updateShipper, updateRecipient, swapAddresses, isInternational,
     saveShipperToBook, setSaveShipperToBook, saveRecipientToBook, setSaveRecipientToBook, notifyRecipient, setNotifyRecipient,
     packages, setPackages, packagingType, setPackagingType, dimUnit, setDimUnit, weightUnit, setWeightUnit,
-    addPkg, dupPkg, removePkg, updatePkg,
+    addPkg, sameAsAbove, allTheSame, removePkg, updatePkg,
     products, updateProduct, addProduct, removeProduct, productTotal, invoiceTotal,
     taxType, setTaxType, taxId, setTaxId, reasonForExport, setReasonForExport, invoiceCurrency, setInvoiceCurrency,
     pickupMethod, setPickupMethod, pickupDate, setPickupDate, pickupLocation, setPickupLocation,
@@ -96,28 +107,34 @@ export function ShipmentDetailsStep(props: {
       </div>
 
       {/* Package Details */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <span className="w-5 h-5 rounded-full bg-brand-orange text-white flex items-center justify-center text-xs">📦</span>
+      {/* No overflow-hidden here: the header dropdowns open past the card's edge */}
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/60 rounded-t-lg">
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-lg bg-brand-orange/10 text-brand-orange flex items-center justify-center flex-shrink-0">
+              <Package className="w-4 h-4" />
+            </span>
             <span className="font-semibold text-gray-700 text-sm">Package Details</span>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {packagingType !== 'Envelope' && (
+              <div className="flex items-center gap-2">
+                <span className={hdrLbl}>Select Unit</span>
+                <Dropdown label="Select unit" className="w-28" options={UNIT_OPTIONS} value={dimUnit} onChange={u => {
+                  setDimUnit(u); setWeightUnit(u === 'cm' ? 'kg' : 'lbs');
+                }} />
+              </div>
+            )}
             <div className="flex items-center gap-2">
-              <span className="text-xs">Packaging Type</span>
-              <select className={`${inp} py-1 text-xs w-36`} value={packagingType} onChange={e => setPackagingType(e.target.value)}>
-                {PACKAGING_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <span className={hdrLbl}>Packaging Type</span>
+              <Dropdown label="Packaging type" className="w-36" options={PACKAGING_OPTIONS} value={packagingType} onChange={setPackagingType} />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs">Quantity</span>
-              <select className={`${inp} py-1 text-xs w-16`} value={packages.length} onChange={e => {
-                const n = parseInt(e.target.value);
+              <span className={hdrLbl}>Quantity</span>
+              <Dropdown label="Quantity" className="w-20" options={QTY_OPTIONS} value={packages.length} onChange={n => {
                 if (n > packages.length) for (let i = packages.length; i < n; i++) addPkg();
                 else setPackages(p => p.slice(0, n));
-              }}>
-                {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
+              }} />
             </div>
           </div>
         </div>
@@ -128,20 +145,9 @@ export function ShipmentDetailsStep(props: {
           </div>
         ) : (
         <div className="p-4 overflow-x-auto">
-          {/* Units row */}
-          <div className="flex items-center gap-4 mb-3 text-xs text-gray-500">
-            <span className="font-medium">Units:</span>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" checked={dimUnit === 'cm'} onChange={() => { setDimUnit('cm'); setWeightUnit('kg'); }} className="accent-brand-navy" /> cm / kg
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input type="radio" checked={dimUnit === 'in'} onChange={() => { setDimUnit('in'); setWeightUnit('lbs'); }} className="accent-brand-navy" /> in / lbs
-            </label>
-          </div>
-
           {/* Table header (desktop) */}
-          <div className="hidden md:grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 mb-2 px-2">
-            <span className="text-xs text-gray-400 w-6" />
+          <div className={`hidden md:grid ${pkgGrid} mb-2`}>
+            <span className="text-xs text-gray-400" />
             <span className="text-xs text-gray-400">Dimensions L × W × H ({dimUnit})</span>
             <span className="text-xs text-gray-400" />
             <span className="text-xs text-gray-400" />
@@ -150,7 +156,7 @@ export function ShipmentDetailsStep(props: {
             <span className="text-xs text-gray-400">Insurance Val ($)</span>
             <span className="text-xs text-gray-400">Special Handling</span>
             <span className="text-xs text-gray-400">Description</span>
-            <span className="text-xs text-gray-400 w-20" />
+            <span className="text-xs text-gray-400" />
           </div>
 
           {/* Package rows (desktop grid) */}
@@ -158,8 +164,8 @@ export function ShipmentDetailsStep(props: {
             {packages.map((pkg, idx) => {
               const volWeight = volumetricWeight(pkg.length, pkg.width, pkg.height, dimUnit);
               return (
-              <div key={pkg.id} className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 items-center">
-                <span className="text-xs text-gray-400 font-mono w-6">{String(idx + 1).padStart(2, '0')}.</span>
+              <div key={pkg.id} className={`grid ${pkgGrid} items-center`}>
+                <span className="text-xs text-gray-400 font-mono">{String(idx + 1).padStart(2, '0')}.</span>
                 <input type="number" value={pkg.length} onChange={e => updatePkg(pkg.id, 'length', e.target.value)} placeholder="L" min="0.01" step="0.01" className={`${inp} text-center`} />
                 <input type="number" value={pkg.width} onChange={e => updatePkg(pkg.id, 'width', e.target.value)} placeholder="W" min="0.01" step="0.01" className={`${inp} text-center`} />
                 <input type="number" value={pkg.height} onChange={e => updatePkg(pkg.id, 'height', e.target.value)} placeholder="H" min="0.01" step="0.01" className={`${inp} text-center`} />
@@ -171,15 +177,15 @@ export function ShipmentDetailsStep(props: {
                   <option value="yes">Yes</option>
                 </select>
                 <input type="text" value={pkg.description} onChange={e => updatePkg(pkg.id, 'description', e.target.value)} placeholder="Description" className={inp} />
-                <div className="flex items-center gap-1 w-20">
+                <div className="flex items-center gap-1">
                   <button type="button" onClick={addPkg} title="Add row" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
                     <Plus className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button" onClick={() => dupPkg(pkg)} title="Duplicate" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                  <button type="button" onClick={() => sameAsAbove(pkg.id)} disabled={idx === 0} title="Same as Above" className="p-1 text-gray-400 hover:text-brand-navy disabled:opacity-40 disabled:hover:text-gray-400 disabled:cursor-not-allowed transition-colors">
                     <Copy className="w-3.5 h-3.5" />
                   </button>
-                  <button type="button" onClick={() => dupPkg(pkg)} title="Clone" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
-                    <Copy className="w-3.5 h-3.5 opacity-50" />
+                  <button type="button" onClick={() => allTheSame(pkg.id)} title="All the Same" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                    <CopyPlus className="w-3.5 h-3.5" />
                   </button>
                   {packages.length > 1 && (
                     <button type="button" onClick={() => removePkg(pkg.id)} title="Remove" className="p-1 text-gray-400 hover:text-red-500 transition-colors">
@@ -204,8 +210,11 @@ export function ShipmentDetailsStep(props: {
                     <button type="button" onClick={addPkg} title="Add row" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
                       <Plus className="w-3.5 h-3.5" />
                     </button>
-                    <button type="button" onClick={() => dupPkg(pkg)} title="Duplicate" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                    <button type="button" onClick={() => sameAsAbove(pkg.id)} disabled={idx === 0} title="Same as Above" className="p-1 text-gray-400 hover:text-brand-navy disabled:opacity-40 disabled:hover:text-gray-400 disabled:cursor-not-allowed transition-colors">
                       <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    <button type="button" onClick={() => allTheSame(pkg.id)} title="All the Same" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
+                      <CopyPlus className="w-3.5 h-3.5" />
                     </button>
                     {packages.length > 1 && (
                       <button type="button" onClick={() => removePkg(pkg.id)} title="Remove" className="p-1 text-gray-400 hover:text-red-500 transition-colors">

@@ -14,6 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, EMPTY } from './_lib/types';
+import { MAX_PACKAGES } from './_lib/constants';
 import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
 import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
@@ -33,8 +34,8 @@ export default function BookingClient() {
 
   // Packages
   const [packages, setPackages] = useState<PkgRow[]>([mkPkg()]);
-  const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs');
-  const [dimUnit, setDimUnit] = useState<'in' | 'cm'>('in');
+  const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('kg');
+  const [dimUnit, setDimUnit] = useState<'in' | 'cm'>('cm');
   const [packagingType, setPackagingType] = useState('My Packaging');
 
   // Product Information (customs invoice) — required for international shipments
@@ -209,8 +210,17 @@ export default function BookingClient() {
 
   const updatePkg = (id: string, field: keyof PkgRow, value: any) =>
     setPackages(p => p.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg));
-  const addPkg = () => setPackages(p => [...p, mkPkg()]);
-  const dupPkg = (pkg: PkgRow) => setPackages(p => [...p, { ...pkg, id: Math.random().toString(36).slice(2) }]);
+  const addPkg = () => setPackages(p => p.length < MAX_PACKAGES ? [...p, mkPkg()] : p);
+  // Row copy actions match NetParcel: "Same as Above" copies the previous row into this row (no-op on the
+  // first row); "All the Same" copies this row into every row. Each row keeps its own id.
+  const sameAsAbove = (id: string) => setPackages(p => {
+    const i = p.findIndex(pkg => pkg.id === id);
+    return i > 0 ? p.map((pkg, j) => j === i ? { ...p[i - 1], id } : pkg) : p;
+  });
+  const allTheSame = (id: string) => setPackages(p => {
+    const src = p.find(pkg => pkg.id === id);
+    return src ? p.map(pkg => ({ ...src, id: pkg.id })) : p;
+  });
   const removePkg = (id: string) => setPackages(p => p.length > 1 ? p.filter(pkg => pkg.id !== id) : p);
 
   const isInternational = !!shipper.country && !!recipient.country && shipper.country !== recipient.country;
@@ -531,7 +541,7 @@ export default function BookingClient() {
               packagingType={packagingType} setPackagingType={setPackagingType}
               dimUnit={dimUnit} setDimUnit={setDimUnit}
               weightUnit={weightUnit} setWeightUnit={setWeightUnit}
-              addPkg={addPkg} dupPkg={dupPkg} removePkg={removePkg} updatePkg={updatePkg}
+              addPkg={addPkg} sameAsAbove={sameAsAbove} allTheSame={allTheSame} removePkg={removePkg} updatePkg={updatePkg}
               products={products}
               updateProduct={updateProduct} addProduct={addProduct} removeProduct={removeProduct}
               productTotal={productTotal} invoiceTotal={invoiceTotal}
