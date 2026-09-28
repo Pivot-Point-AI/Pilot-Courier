@@ -113,7 +113,6 @@ export const TAX_TYPES = [
   { value: 'IOSS', label: 'IOSS' }, { value: 'SSN', label: 'SSN' }, { value: 'VAT', label: 'VAT/GST' },
   { value: 'VOEC', label: 'VOEC' },
 ];
-export const EXPORT_REASONS = ['Sale', 'Sample', 'Repair', 'Gift', 'Return', 'Other'];
 
 export const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 export const MINS = ['00', '15', '30', '45'];

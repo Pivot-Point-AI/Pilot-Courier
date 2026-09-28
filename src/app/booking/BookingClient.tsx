@@ -42,7 +42,6 @@ export default function BookingClient() {
   const [products, setProducts] = useState<ProductRow[]>([mkProduct()]);
   const [taxType, setTaxType] = useState('');
   const [taxId, setTaxId] = useState('');
-  const [reasonForExport, setReasonForExport] = useState('');
   const [invoiceCurrency, setInvoiceCurrency] = useState<'CAD' | 'USD'>('CAD');
 
   // Pickup & services
@@ -261,7 +260,6 @@ export default function BookingClient() {
             return false;
           }
         }
-        if (!reasonForExport) { toast.error('Please select a reason for export for customs.'); return false; }
       }
     }
     return true;
@@ -351,7 +349,7 @@ export default function BookingClient() {
       version: DRAFT_VERSION, savedAt: new Date().toISOString(),
       shipper, recipient, saveShipperToBook, saveRecipientToBook, notifyRecipient,
       packages, packagingType, weightUnit, dimUnit,
-      products, taxType, taxId, reasonForExport, invoiceCurrency,
+      products, taxType, taxId, invoiceCurrency,
       pickupMethod, pickupLocation, pickupInstructions, readyHour, readyMin, closeHour, closeMin,
       signatureType, saturdayDelivery, holdForPickup, references,
     };
@@ -367,7 +365,7 @@ export default function BookingClient() {
     setShipper(d.shipper); setRecipient(d.recipient);
     setSaveShipperToBook(d.saveShipperToBook); setSaveRecipientToBook(d.saveRecipientToBook); setNotifyRecipient(d.notifyRecipient);
     setPackages(d.packages); setPackagingType(d.packagingType); setWeightUnit(d.weightUnit); setDimUnit(d.dimUnit);
-    setProducts(d.products); setTaxType(d.taxType); setTaxId(d.taxId); setReasonForExport(d.reasonForExport); setInvoiceCurrency(d.invoiceCurrency);
+    setProducts(d.products); setTaxType(d.taxType); setTaxId(d.taxId); setInvoiceCurrency(d.invoiceCurrency);
     setPickupMethod(d.pickupMethod); setPickupLocation(d.pickupLocation); setPickupInstructions(d.pickupInstructions);
     setReadyHour(d.readyHour); setReadyMin(d.readyMin); setCloseHour(d.closeHour); setCloseMin(d.closeMin);
     setSignatureType(d.signatureType); setSaturdayDelivery(d.saturdayDelivery); setHoldForPickup(d.holdForPickup);
@@ -417,7 +415,6 @@ export default function BookingClient() {
       }));
 
       const customsInvoice = packagingType !== 'Envelope' && isInternational ? {
-        reasonForExport,
         taxType: taxType || undefined,
         taxId: taxType ? taxId.trim() || undefined : undefined,
         currency: invoiceCurrency,
@@ -557,7 +554,6 @@ export default function BookingClient() {
               productTotal={productTotal} invoiceTotal={invoiceTotal}
               taxType={taxType} setTaxType={setTaxType}
               taxId={taxId} setTaxId={setTaxId}
-              reasonForExport={reasonForExport} setReasonForExport={setReasonForExport}
               invoiceCurrency={invoiceCurrency} setInvoiceCurrency={setInvoiceCurrency}
               pickupMethod={pickupMethod} setPickupMethod={setPickupMethod}
               pickupDate={pickupDate} setPickupDate={setPickupDate}

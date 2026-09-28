@@ -2,7 +2,7 @@
 import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, EXPORT_REASONS, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
@@ -42,7 +42,6 @@ export function ShipmentDetailsStep(props: {
   productTotal: (row: ProductRow) => number; invoiceTotal: number;
   taxType: string; setTaxType: (v: string) => void;
   taxId: string; setTaxId: (v: string) => void;
-  reasonForExport: string; setReasonForExport: (v: string) => void;
   invoiceCurrency: 'CAD' | 'USD'; setInvoiceCurrency: (v: 'CAD' | 'USD') => void;
 
   pickupMethod: 'schedule_pickup' | 'drop_off'; setPickupMethod: (v: 'schedule_pickup' | 'drop_off') => void;
@@ -69,7 +68,7 @@ export function ShipmentDetailsStep(props: {
     packages, setPackages, packagingType, setPackagingType, dimUnit, setDimUnit, weightUnit, setWeightUnit,
     addPkg, sameAsAbove, allTheSame, removePkg, updatePkg,
     products, updateProduct, addProduct, removeProduct, productTotal, invoiceTotal,
-    taxType, setTaxType, taxId, setTaxId, reasonForExport, setReasonForExport, invoiceCurrency, setInvoiceCurrency,
+    taxType, setTaxType, taxId, setTaxId, invoiceCurrency, setInvoiceCurrency,
     pickupMethod, setPickupMethod, pickupDate, setPickupDate, pickupLocation, setPickupLocation,
     pickupInstructions, setPickupInstructions, readyHour, setReadyHour, readyMin, setReadyMin,
     closeHour, setCloseHour, closeMin, setCloseMin, savePickupPref, setSavePickupPref, signatureType, setSignatureType,
@@ -390,16 +389,9 @@ export function ShipmentDetailsStep(props: {
               ))}
             </div>
 
-            {/* Reason for export + tax ID + total */}
+            {/* Tax ID + total */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-medium text-gray-600">Reason for Export:{req}</label>
-                  <select value={reasonForExport} onChange={e => setReasonForExport(e.target.value)} className={`${inp} w-32`}>
-                    <option value="">Select</option>
-                    {EXPORT_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
                 <div className="flex items-center gap-2">
                   <label className="text-xs font-medium text-gray-600">Tax Type:</label>
                   <select value={taxType} onChange={e => setTaxType(e.target.value)} className={`${inp} w-36`}>
