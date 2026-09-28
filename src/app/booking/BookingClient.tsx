@@ -14,7 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, DEFAULT_SHIPPER, DEFAULT_RECIPIENT } from './_lib/types';
-import { MAX_PACKAGES } from './_lib/constants';
+import { MAX_PACKAGES, ENVELOPE_MAX_WEIGHT } from './_lib/constants';
 import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
 import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
@@ -267,13 +267,20 @@ export default function BookingClient() {
     return true;
   };
 
+  // Envelope has no package table: quote and book one envelope at netParcel's envelope limit,
+  // not the hidden default row (1 kg in metric would be rated as a parcel).
+  const quotedPackages = (): PkgRow[] => packagingType === 'Envelope'
+    ? [{ ...mkPkg(), weight: String(ENVELOPE_MAX_WEIGHT[dimUnit]), description: 'Documents' }]
+    : packages;
+
   const handleGetQuote = async () => {
     if (!validateStep0()) return;
     setQuoteLoading(true);
     setRates([]);
     setSelectedRate(null);
     try {
-      const first = packages[0];
+      const rows = quotedPackages();
+      const first = rows[0];
       const { data } = await shipmentApi.getRates({
         originPostal: shipper.postalCode,
         originCity: shipper.city,
@@ -309,12 +316,13 @@ export default function BookingClient() {
         description: first.description || 'Package',
         insuranceAmount: parseFloat(first.insuranceAmount) || 0,
         specialHandling: first.specialHandling,
-        packages: packages.map(p => ({
+        packages: rows.map(p => ({
           length: p.length, width: p.width, height: p.height, weight: p.weight,
           insuranceAmount: p.insuranceAmount, specialHandling: p.specialHandling, description: p.description, freightClass: p.freightClass,
         })),
         quoteType: 'detailed',
         pickupMethod,
+        pickupDate,
         pickupLocation,
         pickupInstructions,
         readyHour, readyMin, closeHour, closeMin,
@@ -392,7 +400,7 @@ export default function BookingClient() {
     if (!selectedRate) { toast.error('Please select a shipping service.'); return; }
     setBookLoading(true);
     try {
-      const pkgList = packages.map(p => ({
+      const pkgList = quotedPackages().map(p => ({
         weight: parseFloat(p.weight || '1'),
         weightUnit,
         length: parseFloat(p.length || '1'),
@@ -505,7 +513,7 @@ export default function BookingClient() {
     a.click();
   };
 
-  const totalWeight = packages.reduce((s, p) => s + (parseFloat(p.weight) || 0), 0);
+  const totalWeight = quotedPackages().reduce((s, p) => s + (parseFloat(p.weight) || 0), 0);
 
   return (
     <div className="min-h-screen bg-[#f5f6f8]">

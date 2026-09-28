@@ -103,6 +103,10 @@ export const ALL_COUNTRIES = [
 export const PACKAGING_TYPES = ['My Packaging', 'Envelope', 'Pak', 'Pallet'];
 export const MAX_PACKAGES = 100;
 
+// netParcel's envelope limit (kg for cm, lb for in). An Envelope is quoted and shipped at this weight;
+// the backend enforces the same rule.
+export const ENVELOPE_MAX_WEIGHT = { cm: 0.45, in: 1 } as const;
+
 // Customs invoice values accepted by netParcel (tax ID types as on netParcel's Rate & Ship form)
 export const TAX_TYPES = [
   { value: '', label: 'None' }, { value: 'EIN', label: 'EIN' }, { value: 'GBVAT', label: 'GBVAT/HMRC' },
