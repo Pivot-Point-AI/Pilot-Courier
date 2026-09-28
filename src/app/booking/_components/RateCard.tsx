@@ -1,17 +1,12 @@
 import { formatDeliveryDate } from '@/lib/rate-display';
+import CarrierLogo from '@/components/CarrierLogo';
 import type { Rate } from '@/lib/api';
 
 export function RateCard({ rate, selected, onSelect }: { rate: Rate; selected: boolean; onSelect: () => void }) {
-  const carrierColor: Record<string, string> = {
-    UPS: 'bg-yellow-600', PUROLATOR: 'bg-purple-700', DHL: 'bg-red-600', FEDEX: 'bg-purple-900', ICS: 'bg-blue-700',
-  };
-  const initials = rate.carrierName.slice(0, 3).toUpperCase();
-  const bg = carrierColor[rate.carrierName.toUpperCase()] || 'bg-gray-600';
-
   return (
     <label className={`flex flex-wrap sm:flex-nowrap items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all ${selected ? 'border-brand-orange bg-orange-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
       <input type="radio" checked={selected} onChange={onSelect} className="sr-only" />
-      <div className={`w-10 h-10 rounded-lg ${bg} text-white flex items-center justify-center font-bold text-xs flex-shrink-0`}>{initials}</div>
+      <CarrierLogo carrier={rate.carrierName} service={rate.serviceName} className="w-24 h-10" />
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-gray-800 text-sm">{rate.serviceName}</p>
         <p className="text-xs text-gray-400">{rate.transitDays} business day{rate.transitDays !== 1 ? 's' : ''}{rate.estimatedDelivery ? ` · Est. ${formatDeliveryDate(rate.estimatedDelivery)}` : ''}</p>

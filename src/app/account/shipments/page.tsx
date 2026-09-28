@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { shipmentApi } from '@/lib/api';
+import CarrierLogo from '@/components/CarrierLogo';
 import {
   Search, RefreshCw, Loader2, Download, RotateCcw,
   XCircle, Truck, Printer, ChevronLeft, ChevronRight,
@@ -377,12 +378,8 @@ export default function HistoryTrackingPage() {
           {/* Mobile cards */}
           <div className="md:hidden p-3 space-y-3 bg-gray-50">
             {shipments.map((s: any) => {
-              const carrierColor: Record<string, string> = {
-                UPS: 'bg-yellow-600', PUROLATOR: 'bg-purple-700', DHL: 'bg-red-600', FEDEX: 'bg-purple-900', ICS: 'bg-blue-700',
-              };
               const carrierName = s.selectedRate?.carrierName || '';
-              const carrierBg = carrierColor[carrierName.toUpperCase()] || 'bg-brand-navy';
-              const carrierInitials = (carrierName || '?').slice(0, 3).toUpperCase();
+              const serviceName = s.selectedRate?.serviceName || '';
               const statusStripe: Record<string, string> = {
                 pending_payment: 'bg-yellow-400', paid: 'bg-blue-400', label_generated: 'bg-indigo-400',
                 pickup_scheduled: 'bg-purple-400', in_transit: 'bg-cyan-400', out_for_delivery: 'bg-orange-400',
@@ -401,9 +398,7 @@ export default function HistoryTrackingPage() {
                     onChange={() => toggleSelect(s._id)}
                     className="accent-brand-navy w-4 h-4 flex-shrink-0"
                   />
-                  <div className={`w-10 h-10 rounded-xl ${carrierBg} text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm`}>
-                    {carrierInitials}
-                  </div>
+                  <CarrierLogo carrier={carrierName} service={serviceName} className="w-20 h-10" />
                   <div className="flex-1 min-w-0">
                     <p className="font-mono text-[13px] font-bold text-gray-800 tracking-tight">{s.shipmentNumber}</p>
                     <p className="text-[11px] text-gray-400">{fmtDate(s.createdAt)}</p>

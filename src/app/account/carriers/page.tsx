@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import CarrierLogo from '@/components/CarrierLogo';
 
 const NETPARCEL_CARRIERS = [
   'Asendia','Canada Post','Canpar','DayAndRoss','DHL','FedEx',
@@ -7,22 +8,6 @@ const NETPARCEL_CARRIERS = [
   'net Parcel','netParcel','netParcel Freight','Polaris',
   'Purolator','UPS','USPS','USPS GDE',
 ];
-
-const CARRIER_COLORS: Record<string, string> = {
-  UPS: 'bg-yellow-600', FEDEX: 'bg-purple-700', DHL: 'bg-red-600',
-  PUROLATOR: 'bg-purple-800', ICS: 'bg-blue-700', 'CANADA POST': 'bg-red-700',
-  CANPAR: 'bg-orange-600', LOOMIS: 'bg-orange-700', DAYANDROOS: 'bg-yellow-700',
-};
-
-function CarrierLogo({ name }: { name: string }) {
-  const key = name.toUpperCase().replace(/\s/g, '');
-  const color = CARRIER_COLORS[name.toUpperCase()] || CARRIER_COLORS[key] || 'bg-gray-500';
-  return (
-    <span className={`inline-flex items-center justify-center px-3 py-1 rounded text-white text-xs font-bold ${color}`}>
-      {name.slice(0, 8)}
-    </span>
-  );
-}
 
 function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
   return (
@@ -70,7 +55,7 @@ export default function CarriersPage() {
             {NETPARCEL_CARRIERS.map(carrier => (
               <div key={carrier} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-gray-50 transition-colors md:grid md:grid-cols-[1fr_auto_auto] md:gap-x-6">
                 <span className="text-sm text-gray-700">{carrier}</span>
-                <div className="flex justify-center md:w-32"><CarrierLogo name={carrier} /></div>
+                <div className="flex justify-center md:w-32"><CarrierLogo carrier={carrier} className="w-24 h-9" /></div>
                 <div className="flex justify-end md:w-16"><Toggle on={enabled[carrier]} onChange={() => toggle(carrier)} /></div>
               </div>
             ))}

@@ -5,56 +5,8 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { prepareRates, formatDeliveryDate } from '@/lib/rate-display';
 import type { Rate } from '@/lib/api';
+import CarrierLogo from '@/components/CarrierLogo';
 import { ArrowLeft, MapPin, Scale, Box, Sparkles, Clock } from 'lucide-react';
-
-// Carrier logo renderers
-function CarrierLogo({ name }: { name: string }) {
-  const upper = name.toUpperCase();
-
-  if (upper.includes('UPS')) return (
-    <div className="flex items-center justify-center w-14 h-10">
-      <div className="bg-[#351C15] rounded px-2 py-1 flex items-center justify-center w-12 h-9">
-        <span className="text-[#FFB500] font-black text-sm tracking-tight leading-none">UPS</span>
-      </div>
-    </div>
-  );
-
-  if (upper.includes('DHL')) return (
-    <div className="flex items-center justify-center w-14 h-10">
-      <div className="bg-[#D40511] rounded px-2 py-0.5 flex items-center justify-center w-12">
-        <span className="text-[#FFCC00] font-black text-sm tracking-wider leading-none">DHL</span>
-      </div>
-    </div>
-  );
-
-  if (upper.includes('FEDEX') || upper.includes('FED')) return (
-    <div className="flex items-center justify-center w-14 h-10">
-      <div className="flex items-center">
-        <span className="font-black text-sm text-[#4D148C] leading-none">Fed</span>
-        <span className="font-black text-sm text-[#FF6600] leading-none">Ex</span>
-      </div>
-    </div>
-  );
-
-  if (upper.includes('PUROLATOR')) return (
-    <div className="flex items-center justify-center w-14 h-10">
-      <div className="flex flex-col items-center leading-none">
-        <div className="flex gap-0.5 mb-0.5">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="w-1 h-2 bg-[#00529B]" style={{ opacity: 1 - i * 0.15 }} />
-          ))}
-        </div>
-        <span className="text-[#00529B] font-bold text-[9px] tracking-tight">PUROLATOR</span>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="flex items-center justify-center w-14 h-10">
-      <span className="text-gray-600 font-bold text-xs">{name.slice(0, 6)}</span>
-    </div>
-  );
-}
 
 export default function QuoteResultsPage() {
   const router = useRouter();
@@ -209,8 +161,8 @@ export default function QuoteResultsPage() {
 
                     {/* Carrier + service */}
                     <div className="flex items-center gap-4 sm:w-[280px] shrink-0">
-                      <div className="flex items-center justify-center w-16 h-14 rounded-xl bg-gray-50 border border-gray-100 shrink-0">
-                        <CarrierLogo name={rate.carrierName} />
+                      <div className="flex items-center justify-center w-24 h-14 shrink-0">
+                        <CarrierLogo carrier={rate.carrierName} service={rate.serviceName} className="w-full h-full" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap mb-1">
