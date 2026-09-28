@@ -335,6 +335,8 @@ export default function BookingClient() {
       } as any);
       setRates(prepareRates(data.rates || []));
       if (data.rates?.length) setSelectedRate(prepareRates(data.rates)[0]);
+      // e.g. services removed because they can't be combined with the chosen options
+      if (data.notice) toast(data.notice, { icon: 'ℹ️', duration: 6000 });
       setStep(1);
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to fetch rates. Please try again.');
