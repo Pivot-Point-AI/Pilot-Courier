@@ -4,18 +4,24 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Mail, Phone, MapPin, Send, Loader2, Clock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { formsApi } from '@/lib/api';
 
 export default function ContactClient() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', website: '' });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setLoading(false);
-    toast.success('Message sent! We\'ll get back to you within 24 hours.');
-    setForm({ name: '', email: '', subject: '', message: '' });
+    try {
+      await formsApi.contact(form);
+      toast.success('Message sent! We\'ll get back to you within 24 hours.');
+      setForm({ name: '', email: '', subject: '', message: '', website: '' });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Your message could not be sent. Please try again or email support@pilotcourier.com.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,7 +62,11 @@ export default function ContactClient() {
                 </div>
                 <div>
                   <label className="input-label">Message</label>
-                  <textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} rows={5} placeholder="Describe your inquiry..." className="input-field resize-none" required />
+                  <textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} rows={5} placeholder="Describe your inquiry..." className="input-field resize-none" maxLength={5000} required />
+                </div>
+                {/* Spam trap: hidden from people, filled in by bots */}
+                <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                  <label>Website<input type="text" tabIndex={-1} autoComplete="off" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} /></label>
                 </div>
                 <button type="submit" disabled={loading} className="btn-primary w-full py-3.5">
                   {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : <><Send className="w-4 h-4" /> Send Message</>}

@@ -1,6 +1,9 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
+import { formsApi } from '@/lib/api';
 
 const footerLinks = {
   company: [
@@ -41,6 +44,24 @@ const LinkedinIcon = () => (
 );
 
 export default function Footer() {
+  const [email, setEmail] = useState('');
+  const [website, setWebsite] = useState(''); // spam trap, hidden from people
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribing(true);
+    try {
+      await formsApi.subscribe({ email, website });
+      toast.success('You\'re subscribed. Thanks!');
+      setEmail('');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Could not subscribe. Please try again.');
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   return (
     <footer className="bg-white border-t border-gray-200 font-sans">
       <div className="max-w-7xl mx-auto px-6">
@@ -115,11 +136,14 @@ export default function Footer() {
           <div className="col-span-1 lg:col-span-1">
             <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">Stay Updated</h3>
             <p className="text-sm text-gray-500 leading-snug mb-3">Get shipping tips, updates, and promotions.</p>
-            <form className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-2" onSubmit={e => e.preventDefault()}>
-              <input type="email" placeholder="Enter your email"
+            <form className="relative flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-2" onSubmit={handleSubscribe}>
+              <input type="email" placeholder="Enter your email" value={email} onChange={e => setEmail(e.target.value)} required aria-label="Email address"
                 className="h-10 w-full px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
-              <button type="submit" className="h-10 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition whitespace-nowrap">
-                Subscribe
+              <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                <label>Website<input type="text" tabIndex={-1} autoComplete="off" value={website} onChange={e => setWebsite(e.target.value)} /></label>
+              </div>
+              <button type="submit" disabled={subscribing} className="h-10 px-4 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm transition whitespace-nowrap disabled:opacity-60">
+                {subscribing ? 'Subscribing…' : 'Subscribe'}
               </button>
             </form>
           </div>

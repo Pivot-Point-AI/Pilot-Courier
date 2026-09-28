@@ -27,6 +27,13 @@ api.interceptors.response.use(
   }
 );
 
+// ── Public forms ──────────────────────────────────────────────────────────────
+// `website` is a hidden spam trap: real visitors leave it empty.
+export const formsApi = {
+  contact: (data: { name: string; email: string; subject: string; message: string; website: string }) => api.post('/contact', data),
+  subscribe: (data: { email: string; website: string }) => api.post('/newsletter/subscribe', data),
+};
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authApi = {
   register: (data: { firstName: string; lastName: string; email: string; phone: string; password: string }) =>
