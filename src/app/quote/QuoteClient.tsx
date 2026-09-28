@@ -116,13 +116,16 @@ export default function QuoteClient() {
         toast.error('Please fill in all package dimensions and weight.'); return;
       }
     }
-    if (form.originPostal && !isPostalFormatValid(form.originCountry, form.originPostal)) {
+    if (!isPostalFormatValid(form.originCountry, form.originPostal)) {
       toast.error('Origin postal code is incomplete or invalid.'); return;
     }
-    if (form.destinationPostal && !isPostalFormatValid(form.destinationCountry, form.destinationPostal)) {
+    if (!isPostalFormatValid(form.destinationCountry, form.destinationPostal)) {
       toast.error('Destination postal code is incomplete or invalid.'); return;
     }
-    if (!form.originCity) {
+    if (!form.destinationCity.trim()) {
+      toast.error('Please enter the destination city.'); return;
+    }
+    if (!form.originCity.trim()) {
       toast.error('Please enter the origin city.'); return;
     }
     if (!form.originProvince) {
@@ -274,7 +277,7 @@ export default function QuoteClient() {
                     <div className="relative w-full md:flex-1">
                       <input type="text" value={form.destinationPostal}
                         onChange={e => handlePostalChange('destination', form.destinationCountry, e.target.value)}
-                        placeholder="e.g. V6B 1A1 (optional)"
+                        placeholder="Destination postal code"
                         className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50/60 focus:outline-none focus:border-[#1B2B6B] focus:bg-white focus:ring-2 focus:ring-[#1B2B6B]/10 transition-colors" />
                       {postalLookingUp === 'destination' && <Loader2 className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 animate-spin" />}
                     </div>

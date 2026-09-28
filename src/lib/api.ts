@@ -66,6 +66,7 @@ export const shipmentApi = {
   cancel: (id: string, reason: string) => api.post(`/shipments/${id}/cancel`, { reason }),
   getMyShipments: (params?: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string }) =>
     api.get('/shipments/my', { params }),
+  downloadInvoice: (id: string) => api.get(`/shipments/${id}/invoice`),
   downloadLabel: (id: string) => api.get(`/shipments/${id}/label`),
 };
 

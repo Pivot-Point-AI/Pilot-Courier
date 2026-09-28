@@ -1,4 +1,5 @@
 'use client';
+import { isPostalFormatValid } from '@/lib/postal';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
@@ -203,7 +204,10 @@ export default function BookingClient() {
 
   const validateStep0 = () => {
     if (packagingType === 'Pallet' && packages.some(p => !p.freightClass)) { toast.error('Please select a freight class for each pallet.'); return false; }
-    const reqFields = ['street', 'city', 'postalCode', 'country', 'name', 'phone'];
+    for (const [label, address] of [['Shipping From', shipper], ['Shipping To', recipient]] as const) {
+      if (!isPostalFormatValid(address.country, address.postalCode)) { toast.error(`${label}: postal code is missing or invalid for the selected country.`); return false; }
+    }
+    const reqFields = ['street', 'city', 'country', 'name', 'phone'];
     for (const f of reqFields) {
       if (!(shipper as any)[f]) { toast.error(`Shipping From: ${f.replace(/([A-Z])/g, ' $1').toLowerCase()} is required`); return false; }
       if (!(recipient as any)[f]) { toast.error(`Shipping To: ${f.replace(/([A-Z])/g, ' $1').toLowerCase()} is required`); return false; }

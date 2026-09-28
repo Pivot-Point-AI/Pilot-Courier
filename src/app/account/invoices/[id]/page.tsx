@@ -38,12 +38,12 @@ export default function InvoiceDetailPage() {
   const handleDownload = async () => {
     if (!shipment) return;
     try {
-      const { data } = await shipmentApi.downloadLabel(shipment._id);
+      const { data } = await shipmentApi.downloadInvoice(shipment._id);
       const a = document.createElement('a');
-      a.href = data.label;
+      a.href = data.invoice;
       a.download = `invoice-${invoiceNum(shipment)}.pdf`;
       a.click();
-    } catch { toast.error('Label not available.'); }
+    } catch { toast.error('Invoice not available.'); }
   };
 
   if (loading) return (
