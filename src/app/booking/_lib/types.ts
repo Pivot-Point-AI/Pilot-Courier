@@ -39,3 +39,7 @@ export const EMPTY: Address = {
   city: '', province: '', postalCode: '', country: '',
   phone: '', email: '', isResidential: false, addressType: 'consumer',
 };
+
+// New-shipment defaults: ship from a business, to a residential consumer
+export const DEFAULT_SHIPPER: Address = { ...EMPTY, addressType: 'business' };
+export const DEFAULT_RECIPIENT: Address = { ...EMPTY, addressType: 'consumer', isResidential: true };

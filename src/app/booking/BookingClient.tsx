@@ -13,7 +13,7 @@ import { useAuthStore } from '@/lib/store';
 import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
-import { type PkgRow, type ProductRow, mkPkg, mkProduct, EMPTY } from './_lib/types';
+import { type PkgRow, type ProductRow, mkPkg, mkProduct, DEFAULT_SHIPPER, DEFAULT_RECIPIENT } from './_lib/types';
 import { MAX_PACKAGES } from './_lib/constants';
 import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
@@ -29,8 +29,8 @@ export default function BookingClient() {
   const [step, setStep] = useState(0); // 0=details, 1=quote, 2=review, 3=label
 
   // Addresses
-  const [shipper, setShipper] = useState<Address>({ ...EMPTY });
-  const [recipient, setRecipient] = useState<Address>({ ...EMPTY });
+  const [shipper, setShipper] = useState<Address>({ ...DEFAULT_SHIPPER });
+  const [recipient, setRecipient] = useState<Address>({ ...DEFAULT_RECIPIENT });
 
   // Packages
   const [packages, setPackages] = useState<PkgRow[]>([mkPkg()]);
@@ -112,8 +112,8 @@ export default function BookingClient() {
         city: f.originCity || '',
         province: f.originProvince || '',
         country: f.originCountry || prev.country || 'CA',
-        isResidential: f.originResidential || false,
-        addressType: f.shipperType === 'business' ? 'business' : 'consumer',
+        isResidential: f.originResidential ?? prev.isResidential,
+        addressType: f.shipperType || prev.addressType,
         name: f.originName || prev.name,
         company: f.originCompany || prev.company,
         street: f.originStreet || prev.street,
@@ -127,8 +127,8 @@ export default function BookingClient() {
         city: f.destinationCity || '',
         province: f.destinationProvince || '',
         country: f.destinationCountry || 'CA',
-        isResidential: f.destinationResidential || false,
-        addressType: f.consigneeType === 'business' ? 'business' : 'consumer',
+        isResidential: f.destinationResidential ?? prev.isResidential,
+        addressType: f.consigneeType || prev.addressType,
         name: f.destinationName || prev.name,
         company: f.destinationCompany || prev.company,
         street: f.destinationStreet || prev.street,

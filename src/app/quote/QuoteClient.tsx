@@ -4,12 +4,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import { shipmentApi } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import { Loader2, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { isPostalLookupReady, isPostalFormatValid } from '@/lib/postal';
 
 import { fetchProvinces, lookupPostal } from './_lib/geo';
 import { type PackageRow, newPkg } from './_lib/types';
+import { MAX_PACKAGES } from '../booking/_lib/constants';
 import { CountrySelect } from './_components/CountrySelect';
 import { ProvinceSelect } from './_components/ProvinceSelect';
 import { CityInput } from './_components/CityInput';
@@ -19,6 +21,12 @@ import { PackageDetailsSection } from './_components/PackageDetailsSection';
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function QuoteClient() {
   const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+  // Mounted guard (as in Navbar): auth comes from localStorage, so the server render — and the first client
+  // render — must be the signed-out form to avoid a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const guest = !mounted || !isAuthenticated;
   const [loading, setLoading] = useState(false);
   const [packagingType, setPackagingType] = useState('My Packaging');
   const [form, setForm] = useState({
@@ -101,8 +109,17 @@ export default function QuoteClient() {
 
   const updatePkg = (id: string, field: keyof PackageRow, value: any) =>
     setPackages(p => p.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg));
-  const addPkg = () => setPackages(p => [...p, newPkg()]);
-  const dupPkg = (pkg: PackageRow) => setPackages(p => [...p, { ...pkg, id: Math.random().toString(36).slice(2) }]);
+  const addPkg = () => setPackages(p => p.length < MAX_PACKAGES ? [...p, newPkg()] : p);
+  // Row copy actions match NetParcel: "Same as Above" copies the previous row into this row (no-op on the
+  // first row); "All the Same" copies this row into every row. Each row keeps its own id.
+  const sameAsAbove = (id: string) => setPackages(p => {
+    const i = p.findIndex(pkg => pkg.id === id);
+    return i > 0 ? p.map((pkg, j) => j === i ? { ...p[i - 1], id } : pkg) : p;
+  });
+  const allTheSame = (id: string) => setPackages(p => {
+    const src = p.find(pkg => pkg.id === id);
+    return src ? p.map(pkg => ({ ...src, id: pkg.id })) : p;
+  });
   const removePkg = (id: string) => setPackages(p => p.length > 1 ? p.filter(pkg => pkg.id !== id) : p);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -303,10 +320,11 @@ export default function QuoteClient() {
 
           {/* ── Package Details ── */}
           <PackageDetailsSection
+            guest={guest}
             packagingType={packagingType} setPackagingType={setPackagingType}
             packages={packages} setPackages={setPackages}
             weightUnit={form.weightUnit} dimensionUnit={form.dimensionUnit} setForm={setForm}
-            updatePkg={updatePkg} addPkg={addPkg} dupPkg={dupPkg} removePkg={removePkg}
+            updatePkg={updatePkg} addPkg={addPkg} sameAsAbove={sameAsAbove} allTheSame={allTheSame} removePkg={removePkg}
           />
 
           {/* ── Submit ── */}
