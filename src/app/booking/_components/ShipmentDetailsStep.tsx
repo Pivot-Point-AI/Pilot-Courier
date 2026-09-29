@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package, ShoppingCart, ShieldAlert, X } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES, isSection232Restricted, METAL_PERCENT_OPTIONS } from '../_lib/constants';
+import { PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES, isSection232Restricted, METAL_PERCENT_OPTIONS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
@@ -50,7 +50,6 @@ export function ShipmentDetailsStep(props: {
   addProduct: () => void; removeProduct: (id: string) => void;
   productTotal: (row: ProductRow) => number; invoiceTotal: number;
   taxType: string; setTaxType: (v: string) => void;
-  taxId: string; setTaxId: (v: string) => void;
   invoiceCurrency: 'CAD' | 'USD' | 'EUR'; setInvoiceCurrency: (v: 'CAD' | 'USD' | 'EUR') => void;
 
   pickupMethod: 'schedule_pickup' | 'drop_off'; setPickupMethod: (v: 'schedule_pickup' | 'drop_off') => void;
@@ -77,7 +76,7 @@ export function ShipmentDetailsStep(props: {
     packages, setPackages, packagingType, setPackagingType, dimUnit, setDimUnit, weightUnit, setWeightUnit,
     addPkg, sameAsAbove, allTheSame, removePkg, updatePkg,
     products, updateProduct, addProduct, removeProduct, productTotal, invoiceTotal,
-    taxType, setTaxType, taxId, setTaxId, invoiceCurrency, setInvoiceCurrency,
+    taxType, setTaxType, invoiceCurrency, setInvoiceCurrency,
     pickupMethod, setPickupMethod, pickupDate, setPickupDate, pickupLocation, setPickupLocation,
     pickupInstructions, setPickupInstructions, readyHour, setReadyHour, readyMin, setReadyMin,
     closeHour, setCloseHour, closeMin, setCloseMin, savePickupPref, setSavePickupPref, signatureType, setSignatureType,
@@ -370,10 +369,7 @@ export function ShipmentDetailsStep(props: {
                   <input type="number" value={p.quantity} onChange={e => updateProduct(p.id, 'quantity', e.target.value)} min="1" step="1" className={`${inp} text-center`} />
                   <input type="text" value={p.description} onChange={e => updateProduct(p.id, 'description', e.target.value)} placeholder="Description" className={inp} />
                   <input type="text" value={p.hsCode} onChange={e => updateProduct(p.id, 'hsCode', e.target.value)} placeholder="HS Code" className={inp} />
-                  <select value={p.madeIn} onChange={e => updateProductMadeIn(p, e.target.value)} className={inp}>
-                    <option value="">Select</option>
-                    {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                  </select>
+                  <CountrySelect value={p.madeIn} onChange={code => updateProductMadeIn(p, code)} placeholder="Select" />
                   <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)}
                     title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}
                     onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
@@ -444,10 +440,7 @@ export function ShipmentDetailsStep(props: {
                   </div>
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">Made In{req}</label>
-                    <select value={p.madeIn} onChange={e => updateProductMadeIn(p, e.target.value)} className={`${inp} w-full`}>
-                      <option value="">Select</option>
-                      {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
-                    </select>
+                    <CountrySelect value={p.madeIn} onChange={code => updateProductMadeIn(p, code)} />
                   </div>
                   <div className="flex items-center gap-4">
                     <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${CUSMA_COUNTRIES.includes(p.madeIn) ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'}`}
@@ -493,10 +486,8 @@ export function ShipmentDetailsStep(props: {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-2">
                   <label className="text-xs font-medium text-gray-600">Tax Type:</label>
+                  {/* netParcel's own Rate & Ship form has no Tax ID box for any Tax Type — just the dropdown */}
                   <Dropdown label="Tax type" className="w-36" options={TAX_TYPE_OPTIONS} value={taxType} onChange={setTaxType} />
-                  {taxType && (
-                    <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} placeholder="Tax ID" className={`${inp} w-36`} />
-                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-gray-50/80 border border-gray-100 rounded-lg px-3 py-1.5">

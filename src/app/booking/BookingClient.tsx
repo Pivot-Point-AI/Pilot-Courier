@@ -41,7 +41,6 @@ export default function BookingClient() {
   // Product Information (customs invoice) — required for international shipments
   const [products, setProducts] = useState<ProductRow[]>([mkProduct()]);
   const [taxType, setTaxType] = useState('');
-  const [taxId, setTaxId] = useState('');
   const [invoiceCurrency, setInvoiceCurrency] = useState<'CAD' | 'USD' | 'EUR'>('CAD');
 
   // Pickup & services
@@ -353,7 +352,7 @@ export default function BookingClient() {
       version: DRAFT_VERSION, savedAt: new Date().toISOString(),
       shipper, recipient, saveShipperToBook, saveRecipientToBook, notifyRecipient,
       packages, packagingType, weightUnit, dimUnit,
-      products, taxType, taxId, invoiceCurrency,
+      products, taxType, invoiceCurrency,
       pickupMethod, pickupLocation, pickupInstructions, readyHour, readyMin, closeHour, closeMin,
       signatureType, saturdayDelivery, holdForPickup, references,
     };
@@ -369,7 +368,7 @@ export default function BookingClient() {
     setShipper(d.shipper); setRecipient(d.recipient);
     setSaveShipperToBook(d.saveShipperToBook); setSaveRecipientToBook(d.saveRecipientToBook); setNotifyRecipient(d.notifyRecipient);
     setPackages(d.packages); setPackagingType(d.packagingType); setWeightUnit(d.weightUnit); setDimUnit(d.dimUnit);
-    setProducts(d.products); setTaxType(d.taxType); setTaxId(d.taxId); setInvoiceCurrency(d.invoiceCurrency);
+    setProducts(d.products); setTaxType(d.taxType); setInvoiceCurrency(d.invoiceCurrency);
     setPickupMethod(d.pickupMethod); setPickupLocation(d.pickupLocation); setPickupInstructions(d.pickupInstructions);
     setReadyHour(d.readyHour); setReadyMin(d.readyMin); setCloseHour(d.closeHour); setCloseMin(d.closeMin);
     setSignatureType(d.signatureType); setSaturdayDelivery(d.saturdayDelivery); setHoldForPickup(d.holdForPickup);
@@ -420,7 +419,6 @@ export default function BookingClient() {
 
       const customsInvoice = packagingType !== 'Envelope' && isInternational ? {
         taxType: taxType || undefined,
-        taxId: taxType ? taxId.trim() || undefined : undefined,
         currency: invoiceCurrency,
         products: products.map(p => ({
           quantity: parseFloat(p.quantity) || 1,
@@ -559,7 +557,6 @@ export default function BookingClient() {
               updateProduct={updateProduct} addProduct={addProduct} removeProduct={removeProduct}
               productTotal={productTotal} invoiceTotal={invoiceTotal}
               taxType={taxType} setTaxType={setTaxType}
-              taxId={taxId} setTaxId={setTaxId}
               invoiceCurrency={invoiceCurrency} setInvoiceCurrency={setInvoiceCurrency}
               pickupMethod={pickupMethod} setPickupMethod={setPickupMethod}
               pickupDate={pickupDate} setPickupDate={setPickupDate}
