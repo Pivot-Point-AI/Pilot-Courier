@@ -2,7 +2,7 @@
 import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
@@ -313,7 +313,9 @@ export function ShipmentDetailsStep(props: {
                     <option value="">Select</option>
                     {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
-                  <input type="checkbox" checked={p.cusma} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy justify-self-center" />
+                  <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)}
+                    title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}
+                    onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
                   <input type="number" value={p.unitPrice} onChange={e => updateProduct(p.id, 'unitPrice', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
                   <span className="text-sm text-gray-600 text-center">{productTotal(p).toFixed(2)}</span>
                   <div className="flex items-center gap-1 w-10 justify-end">
@@ -372,8 +374,9 @@ export function ShipmentDetailsStep(props: {
                       {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                     </select>
                   </div>
-                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-                    <input type="checkbox" checked={p.cusma} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
+                  <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${CUSMA_COUNTRIES.includes(p.madeIn) ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'}`}
+                    title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}>
+                    <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <div>

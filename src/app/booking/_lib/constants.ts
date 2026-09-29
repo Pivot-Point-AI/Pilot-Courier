@@ -107,6 +107,11 @@ export const MAX_PACKAGES = 100;
 // the backend enforces the same rule.
 export const ENVELOPE_MAX_WEIGHT = { cm: 0.45, in: 1 } as const;
 
+// CUSMA (Canada-United States-Mexico Agreement) preferential tariff treatment only applies to goods
+// originating in one of these three countries; netParcel's own form greys the CUSMA checkbox out for
+// any other Made In value, and the product's Made In field uses this same country's code.
+export const CUSMA_COUNTRIES = ['US', 'CA', 'MX'];
+
 // Customs invoice values accepted by netParcel (tax ID types as on netParcel's Rate & Ship form)
 export const TAX_TYPES = [
   { value: '', label: 'None' }, { value: 'EIN', label: 'EIN' }, { value: 'GBVAT', label: 'GBVAT/HMRC' },

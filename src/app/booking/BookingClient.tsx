@@ -14,7 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, DEFAULT_SHIPPER, DEFAULT_RECIPIENT } from './_lib/types';
-import { MAX_PACKAGES, ENVELOPE_MAX_WEIGHT } from './_lib/constants';
+import { MAX_PACKAGES, ENVELOPE_MAX_WEIGHT, CUSMA_COUNTRIES } from './_lib/constants';
 import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
 import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
@@ -225,7 +225,11 @@ export default function BookingClient() {
   const isInternational = !!shipper.country && !!recipient.country && shipper.country !== recipient.country;
 
   const updateProduct = (id: string, field: keyof ProductRow, value: any) =>
-    setProducts(p => p.map(row => row.id === id ? { ...row, [field]: value } : row));
+    setProducts(p => p.map(row => row.id === id ? {
+      ...row, [field]: value,
+      // CUSMA only applies to goods Made In US/CA/MX; changing to any other origin clears a stale claim
+      ...(field === 'madeIn' && !CUSMA_COUNTRIES.includes(value) ? { cusma: false } : {}),
+    } : row));
   const addProduct = () => setProducts(p => [...p, mkProduct(shipper.country)]);
   const removeProduct = (id: string) => setProducts(p => p.length > 1 ? p.filter(row => row.id !== id) : p);
   const productTotal = (row: ProductRow) => (parseFloat(row.quantity) || 0) * (parseFloat(row.unitPrice) || 0);
