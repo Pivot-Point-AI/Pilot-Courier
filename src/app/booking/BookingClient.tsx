@@ -14,7 +14,7 @@ import { Elements } from '@stripe/react-stripe-js';
 
 import { getStripePromise } from './_lib/stripe';
 import { type PkgRow, type ProductRow, mkPkg, mkProduct, DEFAULT_SHIPPER, DEFAULT_RECIPIENT } from './_lib/types';
-import { MAX_PACKAGES, ENVELOPE_MAX_WEIGHT, CUSMA_COUNTRIES } from './_lib/constants';
+import { MAX_PACKAGES, ENVELOPE_MAX_WEIGHT, CUSMA_COUNTRIES, isSection232Restricted } from './_lib/constants';
 import { type BookingDraft, type PickupPreference, DRAFT_VERSION, draftKey, pickupPrefKey, readLocal, writeLocal, removeLocal } from './_lib/local-draft';
 import { StepBar } from './_components/StepBar';
 import { ShipmentModeTabs } from './_components/ShipmentModeTabs';
@@ -428,6 +428,8 @@ export default function BookingClient() {
           hsCode: p.hsCode,
           madeIn: p.madeIn,
           cusma: p.cusma,
+          // Always send true when the HS code requires it, even if the checkbox's own state hasn't been touched
+          section232: p.section232 || (recipient.country === 'US' && isSection232Restricted(p.hsCode)),
           unitPrice: parseFloat(p.unitPrice) || 0,
           totalPrice: productTotal(p),
         })),

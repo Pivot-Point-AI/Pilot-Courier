@@ -2,7 +2,7 @@
 import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package, ShoppingCart } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES, isSection232Restricted } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
@@ -19,9 +19,9 @@ const QTY_OPTIONS: DropdownOption<number>[] = Array.from({ length: MAX_PACKAGES 
 // The actions column fits all four 22px icon buttons plus gaps, so the table never overflows its card.
 const pkgGrid = 'grid-cols-[1.5rem_repeat(8,minmax(0,1fr))_6.25rem] gap-2';
 
-// Product table columns, shared by the header and every row: row no. | 6 field columns | CUSMA checkbox | actions.
+// Product table columns, shared by the header and every row: row no. | 6 field columns | CUSMA + 232 checkboxes | actions.
 // Fixed-width no./checkbox/actions tracks keep the header and rows aligned instead of each auto-sizing independently.
-const productGrid = 'grid-cols-[1.5rem_1fr_1.4fr_1fr_1fr_4rem_1fr_1fr_2.5rem] gap-2';
+const productGrid = 'grid-cols-[1.5rem_1fr_1.4fr_1fr_1fr_4rem_4rem_1fr_1fr_2.5rem] gap-2';
 
 export function ShipmentDetailsStep(props: {
   router: { push: (href: string) => void };
@@ -303,6 +303,7 @@ export function ShipmentDetailsStep(props: {
               <span className="text-xs font-medium text-brand-navy underline cursor-pointer">HS Code{req}</span>
               <span className="text-xs font-medium text-gray-500">Made In{req}</span>
               <span className="text-xs font-medium text-gray-500 text-center">CUSMA?</span>
+              <span className="text-xs font-medium text-gray-500 text-center" title="Required for steel/aluminum and derivative HS codes shipping to the US">232?</span>
               <span className="text-xs font-medium text-gray-500 text-center">Unit Price${req}</span>
               <span className="text-xs font-medium text-gray-500 text-center">Total$</span>
               <span />
@@ -322,6 +323,14 @@ export function ShipmentDetailsStep(props: {
                   <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)}
                     title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}
                     onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
+                  {(() => {
+                    const required = recipient.country === 'US' && isSection232Restricted(p.hsCode);
+                    return (
+                      <input type="checkbox" checked={p.section232 || required} disabled={required}
+                        title={required ? 'Required: this HS code is subject to Section 232 tariffs shipping to the US' : 'Declare if this product is subject to Section 232 tariffs'}
+                        onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-70 disabled:cursor-not-allowed" />
+                    );
+                  })()}
                   <input type="number" value={p.unitPrice} onChange={e => updateProduct(p.id, 'unitPrice', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
                   <span className="text-sm text-gray-600 text-center">{productTotal(p).toFixed(2)}</span>
                   <div className="flex items-center gap-1 justify-end">
@@ -380,10 +389,21 @@ export function ShipmentDetailsStep(props: {
                       {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                     </select>
                   </div>
-                  <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${CUSMA_COUNTRIES.includes(p.madeIn) ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'}`}
-                    title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}>
-                    <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
-                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${CUSMA_COUNTRIES.includes(p.madeIn) ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'}`}
+                      title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}>
+                      <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
+                    </label>
+                    {(() => {
+                      const required = recipient.country === 'US' && isSection232Restricted(p.hsCode);
+                      return (
+                        <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${required ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                          title={required ? 'Required: this HS code is subject to Section 232 tariffs shipping to the US' : 'Declare if this product is subject to Section 232 tariffs'}>
+                          <input type="checkbox" checked={p.section232 || required} disabled={required} onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="accent-brand-navy" /> 232?
+                        </label>
+                      );
+                    })()}
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <label className="text-[11px] text-gray-400 block mb-0.5">Unit Price${req}</label>

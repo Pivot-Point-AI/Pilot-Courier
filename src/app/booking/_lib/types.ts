@@ -25,13 +25,14 @@ export interface ProductRow {
   hsCode: string;
   madeIn: string;
   cusma: boolean;
+  section232: boolean;
   unitPrice: string;
 }
 
 export const mkProduct = (madeIn = ''): ProductRow => ({
   id: Math.random().toString(36).slice(2),
   quantity: '1', description: '', hsCode: '', madeIn,
-  cusma: false, unitPrice: '0.00',
+  cusma: false, section232: false, unitPrice: '0.00',
 });
 
 export const EMPTY: Address = {
