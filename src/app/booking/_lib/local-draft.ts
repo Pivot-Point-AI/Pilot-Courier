@@ -16,7 +16,7 @@ export interface BookingDraft {
   shipper: Address; recipient: Address;
   saveShipperToBook: boolean; saveRecipientToBook: boolean; notifyRecipient: boolean;
   packages: PkgRow[]; packagingType: string; weightUnit: 'lbs' | 'kg'; dimUnit: 'in' | 'cm';
-  products: ProductRow[]; taxType: string; taxId: string; invoiceCurrency: 'CAD' | 'USD';
+  products: ProductRow[]; taxType: string; taxId: string; invoiceCurrency: 'CAD' | 'USD' | 'EUR';
   pickupMethod: 'schedule_pickup' | 'drop_off'; pickupLocation: string; pickupInstructions: string;
   readyHour: string; readyMin: string; closeHour: string; closeMin: string;
   signatureType: string; saturdayDelivery: boolean; holdForPickup: boolean;

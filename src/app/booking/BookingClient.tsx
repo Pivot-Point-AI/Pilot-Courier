@@ -42,7 +42,7 @@ export default function BookingClient() {
   const [products, setProducts] = useState<ProductRow[]>([mkProduct()]);
   const [taxType, setTaxType] = useState('');
   const [taxId, setTaxId] = useState('');
-  const [invoiceCurrency, setInvoiceCurrency] = useState<'CAD' | 'USD'>('CAD');
+  const [invoiceCurrency, setInvoiceCurrency] = useState<'CAD' | 'USD' | 'EUR'>('CAD');
 
   // Pickup & services
   const [pickupMethod, setPickupMethod] = useState<'schedule_pickup' | 'drop_off'>('schedule_pickup');

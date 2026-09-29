@@ -26,13 +26,17 @@ export interface ProductRow {
   madeIn: string;
   cusma: boolean;
   section232: boolean;
+  // netParcel's Section 232 modal: which country the steel/aluminum was smelted or poured in, and what
+  // percentage of the product's value it makes up. Empty/'0' until the modal is saved for this row.
+  countryOfSmelt: string;
+  metalPercent: string;
   unitPrice: string;
 }
 
 export const mkProduct = (madeIn = ''): ProductRow => ({
   id: Math.random().toString(36).slice(2),
   quantity: '1', description: '', hsCode: '', madeIn,
-  cusma: false, section232: false, unitPrice: '0.00',
+  cusma: false, section232: false, countryOfSmelt: '', metalPercent: '0', unitPrice: '0.00',
 });
 
 export const EMPTY: Address = {

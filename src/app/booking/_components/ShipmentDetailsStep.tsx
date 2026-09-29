@@ -1,12 +1,14 @@
 'use client';
-import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package, ShoppingCart } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package, ShoppingCart, ShieldAlert, X } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
-import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES, isSection232Restricted } from '../_lib/constants';
+import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES, isSection232Restricted, METAL_PERCENT_OPTIONS } from '../_lib/constants';
 import type { PkgRow, ProductRow } from '../_lib/types';
 import { volumetricWeight } from '@/lib/dim-weight';
 import { inp, lbl, req } from './styles';
 import { AddressPanel } from './AddressPanel';
+import { CountrySelect } from './CountrySelect';
 import { Dropdown, type DropdownOption } from './Dropdown';
 
 // Package Details header row
@@ -14,6 +16,9 @@ const hdrLbl = 'text-xs font-medium text-gray-500 whitespace-nowrap';
 const UNIT_OPTIONS: DropdownOption<'cm' | 'in'>[] = [{ value: 'cm', label: 'cm / kg' }, { value: 'in', label: 'in / lbs' }];
 const PACKAGING_OPTIONS: DropdownOption<string>[] = PACKAGING_TYPES.map(t => ({ value: t, label: t }));
 const QTY_OPTIONS: DropdownOption<number>[] = Array.from({ length: MAX_PACKAGES }, (_, i) => ({ value: i + 1, label: String(i + 1) }));
+const TAX_TYPE_OPTIONS: DropdownOption<string>[] = TAX_TYPES.map(t => ({ value: t.value, label: t.label }));
+const METAL_PERCENT_DROPDOWN_OPTIONS: DropdownOption<string>[] = METAL_PERCENT_OPTIONS.map(v => ({ value: v, label: `${v}%` }));
+const CURRENCY_OPTIONS: DropdownOption<'CAD' | 'USD' | 'EUR'>[] = [{ value: 'CAD', label: 'CAD' }, { value: 'EUR', label: 'EUR' }, { value: 'USD', label: 'USD' }];
 
 // Package table columns, shared by the header and every row: row no. | 8 shrinkable field columns | actions.
 // The actions column fits all four 22px icon buttons plus gaps, so the table never overflows its card.
@@ -46,7 +51,7 @@ export function ShipmentDetailsStep(props: {
   productTotal: (row: ProductRow) => number; invoiceTotal: number;
   taxType: string; setTaxType: (v: string) => void;
   taxId: string; setTaxId: (v: string) => void;
-  invoiceCurrency: 'CAD' | 'USD'; setInvoiceCurrency: (v: 'CAD' | 'USD') => void;
+  invoiceCurrency: 'CAD' | 'USD' | 'EUR'; setInvoiceCurrency: (v: 'CAD' | 'USD' | 'EUR') => void;
 
   pickupMethod: 'schedule_pickup' | 'drop_off'; setPickupMethod: (v: 'schedule_pickup' | 'drop_off') => void;
   pickupDate: string; setPickupDate: (v: string) => void;
@@ -79,6 +84,55 @@ export function ShipmentDetailsStep(props: {
     saturdayDelivery, setSaturdayDelivery, holdForPickup, setHoldForPickup, references, setReferences,
     handleSaveDraft, handleGetQuote, quoteLoading,
   } = props;
+
+  // netParcel's Section 232 modal (Country of Smelt or Pour + % of Metal in product), opened whenever a
+  // product's checkbox is checked — either by the customer, or automatically once the destination is the
+  // US and the HS Code matches a restricted chapter/heading. Draft values are only committed on Save,
+  // matching netParcel's own modal (Cancel just closes it, leaving the checkbox checked either way).
+  const [s232ModalId, setS232ModalId] = useState<string | null>(null);
+  const [s232Draft, setS232Draft] = useState({ smelt: '', percent: '0' });
+  const [s232Error, setS232Error] = useState(false);
+  const s232AutoShown = useRef<Set<string>>(new Set());
+
+  const isS232Required = (p: ProductRow) => recipient.country === 'US' && isSection232Restricted(p.hsCode);
+
+  const openS232Modal = (p: ProductRow) => {
+    setS232ModalId(p.id);
+    setS232Draft({ smelt: p.countryOfSmelt || p.madeIn || '', percent: p.metalPercent || '0' });
+    setS232Error(false);
+  };
+  const saveS232Modal = () => {
+    if (!s232Draft.smelt) { setS232Error(true); return; }
+    if (s232ModalId) {
+      updateProduct(s232ModalId, 'countryOfSmelt', s232Draft.smelt);
+      updateProduct(s232ModalId, 'metalPercent', s232Draft.percent);
+    }
+    setS232ModalId(null);
+  };
+  // HS Code comes before Made In in the row, so the modal can already be open (auto-triggered by the HS
+  // Code) with nothing to suggest yet. If the customer then picks Made In while it's still open and blank,
+  // fill in that suggestion rather than leaving it stuck on whatever was true the moment the modal opened.
+  const updateProductMadeIn = (p: ProductRow, madeIn: string) => {
+    updateProduct(p.id, 'madeIn', madeIn);
+    if (s232ModalId === p.id && !s232Draft.smelt) setS232Draft(d => ({ ...d, smelt: madeIn }));
+  };
+
+  // Auto-open the modal the moment a row newly becomes required (destination changes to the US, or the
+  // HS Code is edited into a restricted chapter/heading) — netParcel does this on the HS Code field's
+  // own change handler; a row is only auto-opened once per time it becomes required.
+  useEffect(() => {
+    for (const p of products) {
+      if (isS232Required(p)) {
+        if (!s232AutoShown.current.has(p.id)) {
+          s232AutoShown.current.add(p.id);
+          openS232Modal(p);
+        }
+      } else {
+        s232AutoShown.current.delete(p.id);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, recipient.country]);
 
   return (
     <div className="space-y-4">
@@ -316,7 +370,7 @@ export function ShipmentDetailsStep(props: {
                   <input type="number" value={p.quantity} onChange={e => updateProduct(p.id, 'quantity', e.target.value)} min="1" step="1" className={`${inp} text-center`} />
                   <input type="text" value={p.description} onChange={e => updateProduct(p.id, 'description', e.target.value)} placeholder="Description" className={inp} />
                   <input type="text" value={p.hsCode} onChange={e => updateProduct(p.id, 'hsCode', e.target.value)} placeholder="HS Code" className={inp} />
-                  <select value={p.madeIn} onChange={e => updateProduct(p.id, 'madeIn', e.target.value)} className={inp}>
+                  <select value={p.madeIn} onChange={e => updateProductMadeIn(p, e.target.value)} className={inp}>
                     <option value="">Select</option>
                     {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                   </select>
@@ -324,11 +378,17 @@ export function ShipmentDetailsStep(props: {
                     title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}
                     onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
                   {(() => {
-                    const required = recipient.country === 'US' && isSection232Restricted(p.hsCode);
+                    const required = isS232Required(p);
                     return (
-                      <input type="checkbox" checked={p.section232 || required} disabled={required}
+                      <input type="checkbox" checked={p.section232 || required}
                         title={required ? 'Required: this HS code is subject to Section 232 tariffs shipping to the US' : 'Declare if this product is subject to Section 232 tariffs'}
-                        onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-70 disabled:cursor-not-allowed" />
+                        onChange={() => {
+                          if (required) { openS232Modal(p); return; } // netParcel keeps it checked and reopens the modal instead of allowing uncheck
+                          const checked = !p.section232;
+                          updateProduct(p.id, 'section232', checked);
+                          if (checked) { s232AutoShown.current.add(p.id); openS232Modal(p); }
+                          else { updateProduct(p.id, 'countryOfSmelt', ''); updateProduct(p.id, 'metalPercent', '0'); }
+                        }} className="w-4 h-4 accent-brand-navy justify-self-center cursor-pointer" />
                     );
                   })()}
                   <input type="number" value={p.unitPrice} onChange={e => updateProduct(p.id, 'unitPrice', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
@@ -384,7 +444,7 @@ export function ShipmentDetailsStep(props: {
                   </div>
                   <div>
                     <label className="text-[11px] text-gray-400 block mb-0.5">Made In{req}</label>
-                    <select value={p.madeIn} onChange={e => updateProduct(p.id, 'madeIn', e.target.value)} className={`${inp} w-full`}>
+                    <select value={p.madeIn} onChange={e => updateProductMadeIn(p, e.target.value)} className={`${inp} w-full`}>
                       <option value="">Select</option>
                       {ALL_COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                     </select>
@@ -395,11 +455,18 @@ export function ShipmentDetailsStep(props: {
                       <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)} onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy" /> CUSMA?
                     </label>
                     {(() => {
-                      const required = recipient.country === 'US' && isSection232Restricted(p.hsCode);
+                      const required = isS232Required(p);
                       return (
-                        <label className={`flex items-center gap-2 text-xs text-gray-500 select-none ${required ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                        <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none"
                           title={required ? 'Required: this HS code is subject to Section 232 tariffs shipping to the US' : 'Declare if this product is subject to Section 232 tariffs'}>
-                          <input type="checkbox" checked={p.section232 || required} disabled={required} onChange={e => updateProduct(p.id, 'section232', e.target.checked)} className="accent-brand-navy" /> 232?
+                          <input type="checkbox" checked={p.section232 || required}
+                            onChange={() => {
+                              if (required) { openS232Modal(p); return; }
+                              const checked = !p.section232;
+                              updateProduct(p.id, 'section232', checked);
+                              if (checked) { s232AutoShown.current.add(p.id); openS232Modal(p); }
+                              else { updateProduct(p.id, 'countryOfSmelt', ''); updateProduct(p.id, 'metalPercent', '0'); }
+                            }} className="accent-brand-navy" /> 232?
                         </label>
                       );
                     })()}
@@ -417,15 +484,16 @@ export function ShipmentDetailsStep(props: {
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Tax ID + total */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100">
+          {/* Tax ID + total — kept outside the overflow-x-auto table wrapper above so its
+              dropdowns aren't clipped by that container's forced vertical overflow */}
+          <div className="px-4 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex items-center gap-2">
                   <label className="text-xs font-medium text-gray-600">Tax Type:</label>
-                  <select value={taxType} onChange={e => setTaxType(e.target.value)} className={`${inp} w-36`}>
-                    {TAX_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                  </select>
+                  <Dropdown label="Tax type" className="w-36" options={TAX_TYPE_OPTIONS} value={taxType} onChange={setTaxType} />
                   {taxType && (
                     <input type="text" value={taxId} onChange={e => setTaxId(e.target.value)} placeholder="Tax ID" className={`${inp} w-36`} />
                   )}
@@ -434,11 +502,46 @@ export function ShipmentDetailsStep(props: {
               <div className="flex items-center gap-2 bg-gray-50/80 border border-gray-100 rounded-lg px-3 py-1.5">
                 <span className="text-sm font-semibold text-gray-700">Total value:</span>
                 <span className="text-sm font-semibold text-brand-navy">{invoiceTotal.toFixed(2)}</span>
-                <select value={invoiceCurrency} onChange={e => setInvoiceCurrency(e.target.value as 'CAD' | 'USD')} className={`${inp} w-20`}>
-                  <option value="CAD">CAD</option>
-                  <option value="USD">USD</option>
-                </select>
+                <Dropdown label="Currency" className="w-20" options={CURRENCY_OPTIONS} value={invoiceCurrency} onChange={setInvoiceCurrency} />
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section 232 modal — matches netParcel's own "Additional Information Required" dialog */}
+      {s232ModalId && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onMouseDown={e => { if (e.target === e.currentTarget) setS232ModalId(null); }}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="flex items-start gap-3 px-5 py-4 border-b border-gray-100">
+              <span className="w-9 h-9 rounded-lg bg-brand-orange/10 text-brand-orange flex items-center justify-center flex-shrink-0">
+                <ShieldAlert className="w-[18px] h-[18px]" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold text-gray-800">Additional Information Required</h3>
+                <p className="text-xs text-gray-500 mt-0.5">This product's HS code is subject to Section 232 tariffs. Please provide the following details.</p>
+              </div>
+              <button type="button" onClick={() => setS232ModalId(null)} className="text-gray-300 hover:text-gray-500 transition-colors flex-shrink-0" title="Cancel">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="px-5 py-4 space-y-4">
+              <div>
+                <label className="text-xs font-medium text-gray-600 block mb-1.5">Country of Smelt or Pour</label>
+                <CountrySelect value={s232Draft.smelt} onChange={code => { setS232Draft(d => ({ ...d, smelt: code })); setS232Error(false); }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 block mb-1.5">% of Metal in product</label>
+                <Dropdown label="% of Metal in product" value={s232Draft.percent} options={METAL_PERCENT_DROPDOWN_OPTIONS}
+                  onChange={v => setS232Draft(d => ({ ...d, percent: v }))} />
+              </div>
+              {s232Error && <p className="text-xs text-red-600 -mt-1">Please select both fields.</p>}
+            </div>
+
+            <div className="flex gap-2 px-5 py-4 bg-gray-50/60 border-t border-gray-100">
+              <button type="button" onClick={saveS232Modal} className="px-4 py-2 bg-brand-navy text-white text-sm font-medium rounded-md hover:bg-brand-navy/90 transition-colors">Save</button>
+              <button type="button" onClick={() => setS232ModalId(null)} className="px-4 py-2 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-md hover:bg-gray-100 transition-colors">Cancel</button>
             </div>
           </div>
         </div>

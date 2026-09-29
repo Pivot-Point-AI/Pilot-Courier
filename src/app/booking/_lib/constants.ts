@@ -185,6 +185,9 @@ export function isSection232Restricted(hsCode: string): boolean {
   return !!cleaned && SECTION_232_HTS_PREFIXES.some(prefix => cleaned.startsWith(prefix));
 }
 
+// The "% of Metal in product" dropdown in netParcel's Section 232 modal steps by 5, 0 to 100.
+export const METAL_PERCENT_OPTIONS = Array.from({ length: 21 }, (_, i) => String(i * 5));
+
 // Customs invoice values accepted by netParcel (tax ID types as on netParcel's Rate & Ship form)
 export const TAX_TYPES = [
   { value: '', label: 'None' }, { value: 'EIN', label: 'EIN' }, { value: 'GBVAT', label: 'GBVAT/HMRC' },
