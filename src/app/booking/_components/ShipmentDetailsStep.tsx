@@ -1,5 +1,5 @@
 'use client';
-import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package } from 'lucide-react';
+import { Loader2, ArrowLeftRight, Plus, Copy, CopyPlus, Trash2, Package, ShoppingCart } from 'lucide-react';
 import type { Address } from '@/lib/api';
 import { FREIGHT_CLASSES } from '../../quote/_lib/constants';
 import { ALL_COUNTRIES, PACKAGING_TYPES, MAX_PACKAGES, TAX_TYPES, HOURS, MINS, PICKUP_LOCS, CUSMA_COUNTRIES } from '../_lib/constants';
@@ -18,6 +18,10 @@ const QTY_OPTIONS: DropdownOption<number>[] = Array.from({ length: MAX_PACKAGES 
 // Package table columns, shared by the header and every row: row no. | 8 shrinkable field columns | actions.
 // The actions column fits all four 22px icon buttons plus gaps, so the table never overflows its card.
 const pkgGrid = 'grid-cols-[1.5rem_repeat(8,minmax(0,1fr))_6.25rem] gap-2';
+
+// Product table columns, shared by the header and every row: row no. | 6 field columns | CUSMA checkbox | actions.
+// Fixed-width no./checkbox/actions tracks keep the header and rows aligned instead of each auto-sizing independently.
+const productGrid = 'grid-cols-[1.5rem_1fr_1.4fr_1fr_1fr_4rem_1fr_1fr_2.5rem] gap-2';
 
 export function ShipmentDetailsStep(props: {
   router: { push: (href: string) => void };
@@ -282,30 +286,32 @@ export function ShipmentDetailsStep(props: {
 
       {/* Product Information (customs invoice) — only needed when shipping between different countries */}
       {packagingType !== 'Envelope' && isInternational && (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
-            <span className="text-brand-orange font-bold text-sm">🛒</span>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-100 bg-gray-50/60 rounded-t-lg">
+            <span className="w-8 h-8 rounded-lg bg-brand-orange/10 text-brand-orange flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="w-4 h-4" />
+            </span>
             <span className="font-semibold text-gray-700 text-sm">Product Information</span>
           </div>
 
           <div className="p-4 overflow-x-auto">
             {/* Table header (desktop) */}
-            <div className="hidden md:grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_1fr_1fr_auto] gap-2 mb-2 px-2">
-              <span className="text-xs text-gray-400 w-6" />
-              <span className="text-xs text-gray-400">Quantity{req}</span>
-              <span className="text-xs text-gray-400">Description{req}</span>
-              <span className="text-xs text-gray-400 text-brand-navy underline cursor-pointer">HS Code{req}</span>
-              <span className="text-xs text-gray-400">Made In{req}</span>
-              <span className="text-xs text-gray-400 text-center">CUSMA?</span>
-              <span className="text-xs text-gray-400">Unit Price${req}</span>
-              <span className="text-xs text-gray-400">Total$</span>
-              <span className="text-xs text-gray-400 w-10" />
+            <div className={`hidden md:grid ${productGrid} mb-2 px-1`}>
+              <span />
+              <span className="text-xs font-medium text-gray-500 text-center">Quantity{req}</span>
+              <span className="text-xs font-medium text-gray-500">Description{req}</span>
+              <span className="text-xs font-medium text-brand-navy underline cursor-pointer">HS Code{req}</span>
+              <span className="text-xs font-medium text-gray-500">Made In{req}</span>
+              <span className="text-xs font-medium text-gray-500 text-center">CUSMA?</span>
+              <span className="text-xs font-medium text-gray-500 text-center">Unit Price${req}</span>
+              <span className="text-xs font-medium text-gray-500 text-center">Total$</span>
+              <span />
             </div>
 
             <div className="hidden md:block space-y-2">
               {products.map((p, idx) => (
-                <div key={p.id} className="grid grid-cols-[auto_1fr_1.4fr_1fr_1fr_auto_1fr_1fr_auto] gap-2 items-center">
-                  <span className="text-xs text-gray-400 font-mono w-6">{String(idx + 1).padStart(2, '0')}.</span>
+                <div key={p.id} className={`grid ${productGrid} items-center rounded-md px-1 py-1 hover:bg-gray-50/80 transition-colors`}>
+                  <span className="text-xs text-gray-400 font-mono">{String(idx + 1).padStart(2, '0')}.</span>
                   <input type="number" value={p.quantity} onChange={e => updateProduct(p.id, 'quantity', e.target.value)} min="1" step="1" className={`${inp} text-center`} />
                   <input type="text" value={p.description} onChange={e => updateProduct(p.id, 'description', e.target.value)} placeholder="Description" className={inp} />
                   <input type="text" value={p.hsCode} onChange={e => updateProduct(p.id, 'hsCode', e.target.value)} placeholder="HS Code" className={inp} />
@@ -315,10 +321,10 @@ export function ShipmentDetailsStep(props: {
                   </select>
                   <input type="checkbox" checked={p.cusma} disabled={!CUSMA_COUNTRIES.includes(p.madeIn)}
                     title={CUSMA_COUNTRIES.includes(p.madeIn) ? undefined : 'CUSMA only applies to goods Made In the US, Canada or Mexico'}
-                    onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
+                    onChange={e => updateProduct(p.id, 'cusma', e.target.checked)} className="w-4 h-4 accent-brand-navy justify-self-center disabled:opacity-40 disabled:cursor-not-allowed" />
                   <input type="number" value={p.unitPrice} onChange={e => updateProduct(p.id, 'unitPrice', e.target.value)} min="0" step="0.01" className={`${inp} text-center`} />
                   <span className="text-sm text-gray-600 text-center">{productTotal(p).toFixed(2)}</span>
-                  <div className="flex items-center gap-1 w-10 justify-end">
+                  <div className="flex items-center gap-1 justify-end">
                     {idx === products.length - 1 && (
                       <button type="button" onClick={addProduct} title="Add row" className="p-1 text-gray-400 hover:text-brand-navy transition-colors">
                         <Plus className="w-3.5 h-3.5" />
@@ -405,9 +411,9 @@ export function ShipmentDetailsStep(props: {
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-gray-50/80 border border-gray-100 rounded-lg px-3 py-1.5">
                 <span className="text-sm font-semibold text-gray-700">Total value:</span>
-                <span className="text-sm font-semibold text-gray-900">{invoiceTotal.toFixed(2)}</span>
+                <span className="text-sm font-semibold text-brand-navy">{invoiceTotal.toFixed(2)}</span>
                 <select value={invoiceCurrency} onChange={e => setInvoiceCurrency(e.target.value as 'CAD' | 'USD')} className={`${inp} w-20`}>
                   <option value="CAD">CAD</option>
                   <option value="USD">USD</option>
