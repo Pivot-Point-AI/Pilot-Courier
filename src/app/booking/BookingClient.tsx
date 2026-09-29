@@ -214,12 +214,12 @@ export default function BookingClient() {
     const i = p.findIndex(pkg => pkg.id === id);
     return i > 0 ? p.map((pkg, j) => j === i ? { ...p[i - 1], id } : pkg) : p;
   });
+  
   const allTheSame = (id: string) => setPackages(p => {
     const src = p.find(pkg => pkg.id === id);
     return src ? p.map(pkg => ({ ...src, id: pkg.id })) : p;
   });
   const removePkg = (id: string) => setPackages(p => p.length > 1 ? p.filter(pkg => pkg.id !== id) : p);
-
   const isInternational = !!shipper.country && !!recipient.country && shipper.country !== recipient.country;
 
   const updateProduct = (id: string, field: keyof ProductRow, value: any) =>
