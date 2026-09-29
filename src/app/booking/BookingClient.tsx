@@ -206,6 +206,7 @@ export default function BookingClient() {
   const updateShipper = (f: string, v: any) => setShipper(p => ({ ...p, [f]: v }));
   const updateRecipient = (f: string, v: any) => setRecipient(p => ({ ...p, [f]: v }));
 
+  
   const updatePkg = (id: string, field: keyof PkgRow, value: any) =>
     setPackages(p => p.map(pkg => pkg.id === id ? { ...pkg, [field]: value } : pkg));
   const addPkg = () => setPackages(p => p.length < MAX_PACKAGES ? [...p, mkPkg()] : p);
